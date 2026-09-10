@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor de Ejercicio</title>
+  <meta name="description" content="Una aplicación web completa y elegante para registrar entrenamientos de fuerza, calistenia y mancuernas. Gestiona series, repeticiones, descansos automáticos e historial de progreso." />
+  <meta property="og:title" content="Monitor de Ejercicio" />
+  <meta property="og:description" content="Una aplicación web completa y elegante para registrar entrenamientos de fuerza, calistenia y mancuernas. Gestiona series, repeticiones, descansos automáticos e historial de progreso." />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0f172a">
+  <script>
+    // Clean up any stale service workers and caches immediately
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        for (var i = 0; i < regs.length; i++) {
+          regs[i].unregister();
+        }
+      }).catch(function(e) { console.warn('SW cleanup:', e); });
+    }
+
+    // Global error listener to display any early script failure
+    function showFatalError(msg) {
+      var fallback = document.getElementById('loading-fallback');
+      if (fallback) {
+        fallback.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;max-width:400px;font-family:system-ui,sans-serif;">' +
+          '<div style="font-size:32px;margin-bottom:12px;">⚠️</div>' +
+          '<h2 style="font-size:18px;font-weight:bold;margin-bottom:8px;color:#38bdf8;">Error al iniciar la aplicación</h2>' +
+          '<p style="font-size:13px;color:#cbd5e1;margin-bottom:16px;">' + (msg || 'Error de carga de scripts') + '</p>' +
+          '<button onclick="try{localStorage.clear();sessionStorage.clear();}catch(e){}location.reload()" style="background:#0284c7;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">Reiniciar y Limpiar Caché</button>' +
+          '</div>';
+      }
+    }
+
+    window.addEventListener('error', function(e) {
+      showFatalError(e.message || 'Error inesperado');
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      showFatalError(e.reason && e.reason.message ? e.reason.message : 'Error en promesa asíncrona');
+    });
+
+    // Safety timeout: if after 7 seconds the fallback is still displayed, offer reload button
+    setTimeout(function() {
+      var fallback = document.getElementById('loading-fallback');
+      if (fallback && fallback.parentElement) {
+        var subText = fallback.querySelector('p');
+        if (subText) {
+          subText.innerHTML = 'La carga está demorando más de lo esperado.<br><a href="javascript:location.reload()" style="display:inline-block;margin-top:12px;background:#0284c7;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:13px;">Recargar Aplicación</a>';
+        }
+      }
+    }, 7000);
+  </script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+  <div id="root">
+    <!-- Initial fallback visible while React bundles parse and mount -->
+    <div id="loading-fallback" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:#0f172a;color:#f8fafc;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:24px;">
+      <div style="width:54px;height:54px;border:3px solid #334155;border-top-color:#38bdf8;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;"></div>
+      <h1 style="font-size:20px;font-weight:bold;margin:0 0 8px 0;color:#38bdf8;">Monitor de Ejercicio</h1>
+      <p style="font-size:14px;color:#94a3b8;margin:0 0 24px 0;">Cargando tu sesión de entrenamiento...</p>
+      <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
+  </div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

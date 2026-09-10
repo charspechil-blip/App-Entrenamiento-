@@ -1,0 +1,8 @@
+{
+  "name": "Monitor de Ejercicio",
+  "description": "Una aplicación web completa y elegante para registrar entrenamientos de fuerza, calistenia y mancuernas. Gestiona series, repeticiones, descansos automáticos e historial de progreso.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
