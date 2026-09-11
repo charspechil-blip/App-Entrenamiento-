@@ -4,7 +4,6 @@ import { ExerciseCard } from './ExerciseCard';
 import { getExerciseColor } from '../colors';
 import { GoalSetter } from './GoalSetter';
 import { UserProfile as UserProfileComponent } from './UserProfile';
-import { RestSettings as RestSettingsComponent } from './RestSettings';
 import { FloatingRestTimer } from './FloatingRestTimer';
 
 
@@ -276,8 +275,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-8 animate-fade-in">
         <UserProfileComponent profile={userProfile} onSave={handleProfileSaveFromComponent} />
-        
-        <RestSettingsComponent settings={restSettings} onSave={onSaveRestSettings} />
 
         <GoalSetter 
             exercises={exercisesForDisplay} 
@@ -285,6 +282,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onSetGoals={onSetGoals} 
             trainingType={trainingType}
             onSetTrainingType={onSetTrainingType}
+            restSettings={restSettings}
+            onSaveRestSettings={onSaveRestSettings}
         />
 
         <div>
