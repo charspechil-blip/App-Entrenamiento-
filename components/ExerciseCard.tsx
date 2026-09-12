@@ -64,7 +64,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   // Initialize series list from existing session log or defaults based on goal
   const [series, setSeries] = useState<LocalSeriesRow[]>(() => {
     if (currentLog?.clusters && currentLog.clusters.length > 0) {
-      return currentLog.clusters.map((c, idx) => ({
+      return currentLog.clusters.map((c) => ({
         id: generateUUID(),
         weight: c.weight !== undefined ? String(c.weight) : '',
         reps: c.reps !== undefined ? String(c.reps) : '',
@@ -98,28 +98,32 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     return initialRows;
   });
 
+  const seriesRef = useRef<LocalSeriesRow[]>(series);
+  seriesRef.current = series;
+  const notesRef = useRef<string>(notes);
+  notesRef.current = notes;
+
   // Sync state if currentLog gets updated externally
   useEffect(() => {
     if (currentLog?.clusters && currentLog.clusters.length > 0) {
-      setSeries(prev => {
-        // If series already match currentLog clusters, keep local IDs
-        const isCurrentMatching = prev.length === currentLog.clusters.length &&
-          prev.every((s, i) => s.isCompleted && 
-            parseFloat(s.weight || '0') === currentLog.clusters[i].weight && 
-            parseInt(s.reps || '0', 10) === currentLog.clusters[i].reps
-          );
+      const prev = seriesRef.current;
+      const isCurrentMatching = prev.length === currentLog.clusters.length &&
+        prev.every((s, i) => s.isCompleted && 
+          parseFloat(s.weight || '0') === currentLog.clusters[i].weight && 
+          parseInt(s.reps || '0', 10) === currentLog.clusters[i].reps
+        );
 
-        if (isCurrentMatching) return prev;
+      if (isCurrentMatching) return;
 
-        // Otherwise sync completed from currentLog
-        return currentLog.clusters.map(c => ({
-          id: generateUUID(),
-          weight: c.weight !== undefined ? String(c.weight) : '',
-          reps: c.reps !== undefined ? String(c.reps) : '',
-          time: c.time || 0,
-          isCompleted: true
-        }));
-      });
+      const updated = currentLog.clusters.map(c => ({
+        id: generateUUID(),
+        weight: c.weight !== undefined ? String(c.weight) : '',
+        reps: c.reps !== undefined ? String(c.reps) : '',
+        time: c.time || 0,
+        isCompleted: true
+      }));
+      seriesRef.current = updated;
+      setSeries(updated);
     }
   }, [currentLog]);
 
@@ -217,151 +221,151 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
   // Handle text input changes
   const handleInputChange = (id: string, field: 'weight' | 'reps', value: string) => {
-    setSeries(prev => {
-      const updated = prev.map(s => (s.id === id ? { ...s, [field]: value } : s));
-      
-      // If the changed series was already completed, update the session log immediately
-      const changed = updated.find(s => s.id === id);
-      if (changed?.isCompleted) {
-        const completedClusters: Cluster[] = updated
-          .filter(s => s.isCompleted)
-          .map(s => ({
-            weight: parseFloat(s.weight) || 0,
-            reps: parseInt(s.reps, 10) || 0,
-            ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
-          }));
-        onUpdateLog(exerciseName, completedClusters, notes);
-      }
+    const updated = seriesRef.current.map(s => (s.id === id ? { ...s, [field]: value } : s));
+    seriesRef.current = updated;
+    setSeries(updated);
 
-      return updated;
-    });
+    // If the changed series was already completed, update the session log immediately
+    const changed = updated.find(s => s.id === id);
+    if (changed?.isCompleted) {
+      const completedClusters: Cluster[] = updated
+        .filter(s => s.isCompleted)
+        .map(s => ({
+          weight: parseFloat(s.weight) || 0,
+          reps: parseInt(s.reps, 10) || 0,
+          ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
+        }));
+      onUpdateLog(exerciseName, completedClusters, notesRef.current);
+    }
   };
 
   // Toggle checklist checkmark [✓]
   const handleToggleCheck = (id: string, index: number) => {
-    setSeries(prev => {
-      let isNewlyCompleted = false;
+    let isNewlyCompleted = false;
 
-      const updated = prev.map((s, idx) => {
-        if (s.id !== id) return s;
-        const willBeCompleted = !s.isCompleted;
-        if (willBeCompleted) isNewlyCompleted = true;
+    const updated = seriesRef.current.map((s, idx) => {
+      if (s.id !== id) return s;
+      const willBeCompleted = !s.isCompleted;
+      if (willBeCompleted) isNewlyCompleted = true;
 
-        let effWeight = s.weight;
-        let effReps = s.reps;
+      let effWeight = s.weight;
+      let effReps = s.reps;
 
-        // If newly completing and values are empty, auto-fill with defaults
-        if (willBeCompleted) {
-          if (!effReps || effReps.trim() === '' || effReps === '0') {
-            const fallbackReps = goal?.clusterGoals?.[idx]?.reps || 
-                                 goal?.reps || 
-                                 previousLog?.clusters?.[idx]?.reps || 
-                                 (isTimeBased ? (goal?.totalTime || 30) : 10);
-            effReps = String(fallbackReps);
-          }
-          if (!isTimeBased && (!effWeight || effWeight.trim() === '')) {
-            const fallbackWeight = goal?.clusterGoals?.[idx]?.weight ?? 
-                                   goal?.weight ?? 
-                                   previousLog?.clusters?.[idx]?.weight ?? 
-                                   0;
-            effWeight = String(fallbackWeight);
-          }
+      // If newly completing and values are empty, auto-fill with defaults
+      if (willBeCompleted) {
+        if (!effReps || effReps.trim() === '' || effReps === '0') {
+          const fallbackReps = goal?.clusterGoals?.[idx]?.reps || 
+                               goal?.reps || 
+                               previousLog?.clusters?.[idx]?.reps || 
+                               (isTimeBased ? (goal?.totalTime || 30) : 10);
+          effReps = String(fallbackReps);
         }
-
-        return {
-          ...s,
-          weight: effWeight,
-          reps: effReps,
-          isCompleted: willBeCompleted
-        };
-      });
-
-      // Commit completed series to session logs
-      const completedClusters: Cluster[] = updated
-        .filter(s => s.isCompleted)
-        .map(s => ({
-          weight: parseFloat(s.weight) || 0,
-          reps: parseInt(s.reps, 10) || 0,
-          ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
-        }));
-
-      onUpdateLog(exerciseName, completedClusters, notes);
-
-      if (isNewlyCompleted) {
-        playRestCompleteChime();
-
-        // Check if there are more series to do in this exercise
-        const hasUncheckedSeries = updated.some(s => !s.isCompleted);
-        const restDuration = restBetweenSets || 40;
-
-        if (autoRest && restDuration > 0) {
-          if (hasUncheckedSeries) {
-            intraSetRestEndTimeRef.current = Date.now() + restDuration * 1000;
-            setIntraSetRestTimeLeft(restDuration);
-            setIsIntraSetResting(true);
-          } else if (onTriggerInterExerciseRest) {
-            onTriggerInterExerciseRest();
-          }
+        if (!isTimeBased && (!effWeight || effWeight.trim() === '')) {
+          const fallbackWeight = goal?.clusterGoals?.[idx]?.weight ?? 
+                                 goal?.weight ?? 
+                                 previousLog?.clusters?.[idx]?.weight ?? 
+                                 0;
+          effWeight = String(fallbackWeight);
         }
       }
 
-      return updated;
+      return {
+        ...s,
+        weight: effWeight,
+        reps: effReps,
+        isCompleted: willBeCompleted
+      };
     });
+
+    seriesRef.current = updated;
+    setSeries(updated);
+
+    // Commit completed series to session logs outside of setState updater
+    const completedClusters: Cluster[] = updated
+      .filter(s => s.isCompleted)
+      .map(s => ({
+        weight: parseFloat(s.weight) || 0,
+        reps: parseInt(s.reps, 10) || 0,
+        ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
+      }));
+
+    onUpdateLog(exerciseName, completedClusters, notesRef.current);
+
+    if (isNewlyCompleted) {
+      playRestCompleteChime();
+
+      // Check if there are more series to do in this exercise
+      const hasUncheckedSeries = updated.some(s => !s.isCompleted);
+      const restDuration = restBetweenSets || 40;
+
+      if (autoRest && restDuration > 0) {
+        if (hasUncheckedSeries) {
+          intraSetRestEndTimeRef.current = Date.now() + restDuration * 1000;
+          setIntraSetRestTimeLeft(restDuration);
+          setIsIntraSetResting(true);
+        } else if (onTriggerInterExerciseRest) {
+          onTriggerInterExerciseRest();
+        }
+      }
+    }
   };
 
   // Add a new series row
   const handleAddSeries = () => {
-    setSeries(prev => {
-      const lastRow = prev.length > 0 ? prev[prev.length - 1] : null;
-      const nextIndex = prev.length;
-      
-      const clusterGoal = goal?.clusterGoals?.[nextIndex];
-      const prevCluster = previousLog?.clusters?.[nextIndex];
+    const current = seriesRef.current;
+    const lastRow = current.length > 0 ? current[current.length - 1] : null;
+    const nextIndex = current.length;
+    
+    const clusterGoal = goal?.clusterGoals?.[nextIndex];
+    const prevCluster = previousLog?.clusters?.[nextIndex];
 
-      const defaultWeight = lastRow?.weight || 
-                            (clusterGoal ? String(clusterGoal.weight) : '') || 
-                            (prevCluster?.weight ? String(prevCluster.weight) : '') || 
-                            (goal?.weight ? String(goal.weight) : '');
+    const defaultWeight = lastRow?.weight || 
+                          (clusterGoal ? String(clusterGoal.weight) : '') || 
+                          (prevCluster?.weight ? String(prevCluster.weight) : '') || 
+                          (goal?.weight ? String(goal.weight) : '');
 
-      const defaultReps = lastRow?.reps || 
-                          (clusterGoal ? String(clusterGoal.reps) : '') || 
-                          (prevCluster?.reps ? String(prevCluster.reps) : '') || 
-                          (goal?.reps ? String(goal.reps) : '');
+    const defaultReps = lastRow?.reps || 
+                        (clusterGoal ? String(clusterGoal.reps) : '') || 
+                        (prevCluster?.reps ? String(prevCluster.reps) : '') || 
+                        (goal?.reps ? String(goal.reps) : '');
 
-      return [
-        ...prev,
-        {
-          id: generateUUID(),
-          weight: defaultWeight,
-          reps: defaultReps,
-          time: isTimeBased ? (goal?.totalTime || 30) : 0,
-          isCompleted: false
-        }
-      ];
-    });
+    const updated: LocalSeriesRow[] = [
+      ...current,
+      {
+        id: generateUUID(),
+        weight: defaultWeight,
+        reps: defaultReps,
+        time: isTimeBased ? (goal?.totalTime || 30) : 0,
+        isCompleted: false
+      }
+    ];
+
+    seriesRef.current = updated;
+    setSeries(updated);
   };
 
   // Remove a series row
   const handleRemoveSeries = (id: string) => {
-    if (series.length <= 1) return;
-    setSeries(prev => {
-      const updated = prev.filter(s => s.id !== id);
-      const completedClusters: Cluster[] = updated
-        .filter(s => s.isCompleted)
-        .map(s => ({
-          weight: parseFloat(s.weight) || 0,
-          reps: parseInt(s.reps, 10) || 0,
-          ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
-        }));
-      onUpdateLog(exerciseName, completedClusters, notes);
-      return updated;
-    });
+    if (seriesRef.current.length <= 1) return;
+    const updated = seriesRef.current.filter(s => s.id !== id);
+    seriesRef.current = updated;
+    setSeries(updated);
+
+    const completedClusters: Cluster[] = updated
+      .filter(s => s.isCompleted)
+      .map(s => ({
+        weight: parseFloat(s.weight) || 0,
+        reps: parseInt(s.reps, 10) || 0,
+        ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
+      }));
+    onUpdateLog(exerciseName, completedClusters, notesRef.current);
   };
 
   // Handle notes change
   const handleNotesChange = (newNotes: string) => {
+    notesRef.current = newNotes;
     setNotes(newNotes);
-    const completedClusters: Cluster[] = series
+    const completedClusters: Cluster[] = seriesRef.current
       .filter(s => s.isCompleted)
       .map(s => ({
         weight: parseFloat(s.weight) || 0,

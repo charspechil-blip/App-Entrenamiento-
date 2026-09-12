@@ -18,6 +18,46 @@ function getGeminiClient(): GoogleGenAI | null {
   });
 }
 
+async function callGeminiResilient(
+  ai: GoogleGenAI,
+  params: {
+    contents: any;
+    config?: any;
+    primaryModel?: string;
+  }
+) {
+  const primary = params.primaryModel || 'gemini-3.8-flash';
+  const fallbackModel = 'gemini-3.1-flash-lite';
+
+  try {
+    return await ai.models.generateContent({
+      model: primary,
+      contents: params.contents,
+      config: params.config,
+    });
+  } catch (err: any) {
+    const isTransient = 
+      err?.status === 'UNAVAILABLE' ||
+      err?.status === 503 ||
+      err?.code === 503 ||
+      (err?.message && (err.message.includes('503') || err.message.includes('high demand') || err.message.includes('RESOURCE_EXHAUSTED')));
+
+    if (isTransient) {
+      console.warn(`Primary Gemini model (${primary}) unavailable, retrying with fallback model (${fallbackModel})...`);
+      try {
+        return await ai.models.generateContent({
+          model: fallbackModel,
+          contents: params.contents,
+          config: params.config,
+        });
+      } catch (fallbackErr: any) {
+        throw fallbackErr;
+      }
+    }
+    throw err;
+  }
+}
+
 function generateFallbackSummary(userProfile: any, sessionLogs: any[]): string {
   const name = userProfile?.name || 'Atleta';
   let totalVolume = 0;
@@ -89,8 +129,7 @@ Proporciona un resumen breve y alentador (2-3 frases). Destaca un logro específ
 `;
 
       try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+        const response = await callGeminiResilient(ai, {
           contents: prompt,
         });
 
@@ -127,8 +166,7 @@ Proporciona un resumen breve y alentador (2-3 frases). Destaca un logro específ
           }
         };
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+        const response = await callGeminiResilient(ai, {
           contents: `Texto del usuario: "${text}"`,
           config: {
             systemInstruction: "Interpreta el texto del usuario para extraer los tiempos de descanso. El usuario puede usar 'minutos' o 'segundos'. Convierte todo a segundos. Si un valor no se especifica, usa 60 para series y 180 para ejercicios. Devuelve un objeto JSON.",
@@ -194,8 +232,7 @@ Para cada meta que identifiques:
 4. Si el usuario da una meta general (ej. "3 series de 10 para todo"), aplícala a CADA ejercicio de la lista oficial.
 5. El campo 'exerciseName' en tu respuesta JSON DEBE ser uno de los valores exactos de la lista oficial proporcionada.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+        const response = await callGeminiResilient(ai, {
           contents: `Descripción de metas del usuario: "${text}".`,
           config: {
             systemInstruction,

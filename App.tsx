@@ -15,6 +15,8 @@ import { safeStorage } from './utils/storage';
 const useDebouncedSave = (key: string, value: any, profileId: string | null, enabled: boolean) => {
     useEffect(() => {
         if (!enabled || !profileId) return;
+        // Do not store null or undefined as literal strings in storage
+        if (value === null || value === undefined) return;
         const handler = setTimeout(() => {
             try {
                 safeStorage.setItem(`${key}_${profileId}`, JSON.stringify(value));
@@ -87,10 +89,14 @@ const App: React.FC = () => {
             const routineStr = safeStorage.getItem(`userRoutine_${initialActiveProfile.id}`);
             if (routineStr) {
                 const parsed = JSON.parse(routineStr);
-                return {
-                    ...parsed,
-                    exercises: Array.isArray(parsed.exercises) ? parsed.exercises : []
-                };
+                if (parsed && typeof parsed === 'object' && parsed.type) {
+                    return {
+                        type: parsed.type || 'Calistenia',
+                        focus: parsed.focus || 'Mixto',
+                        exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
+                        equipment: Array.isArray(parsed.equipment) ? parsed.equipment : initialActiveProfile.availableEquipment
+                    };
+                }
             }
         } catch {}
         return null;
@@ -194,13 +200,21 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                 if (!isReconfiguring) {
                     const routineStr = safeStorage.getItem(`userRoutine_${activeProfile.id}`);
                     if (routineStr) {
-                        const parsed = JSON.parse(routineStr);
-                        setUserRoutine({
-                            type: parsed.type || 'Calistenia',
-                            focus: parsed.focus || 'Mixto',
-                            exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
-                            equipment: Array.isArray(parsed.equipment) ? parsed.equipment : activeProfile.availableEquipment
-                        });
+                        try {
+                            const parsed = JSON.parse(routineStr);
+                            if (parsed && typeof parsed === 'object' && parsed.type) {
+                                setUserRoutine({
+                                    type: parsed.type || 'Calistenia',
+                                    focus: parsed.focus || 'Mixto',
+                                    exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
+                                    equipment: Array.isArray(parsed.equipment) ? parsed.equipment : activeProfile.availableEquipment
+                                });
+                            } else {
+                                setUserRoutine(null);
+                            }
+                        } catch {
+                            setUserRoutine(null);
+                        }
                     } else {
                         setUserRoutine(null);
                     }
@@ -459,7 +473,9 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
     const handleUpdateExerciseLog = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => {
         setSessionStartTime(prev => prev || new Date());
-        const sessionCutoff = sessionStartTime || new Date();
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const sessionCutoff = sessionStartTime || startOfToday;
 
         setLogs(prev => {
             const existingIdx = prev.findIndex(l => 
