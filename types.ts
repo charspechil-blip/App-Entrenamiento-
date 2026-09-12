@@ -36,6 +36,7 @@ export interface ExerciseLog {
   clusters: Cluster[];
   heartRate?: number;
   perceivedExertion?: number;
+  notes?: string;
 }
 
 export interface ExerciseGoal {

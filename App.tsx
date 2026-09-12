@@ -456,6 +456,44 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         };
         setLogs(prev => [...prev, newLog].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
     }, []);
+
+    const handleUpdateExerciseLog = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => {
+        setSessionStartTime(prev => prev || new Date());
+        const sessionCutoff = sessionStartTime || new Date();
+
+        setLogs(prev => {
+            const existingIdx = prev.findIndex(l => 
+                l.exerciseName === exerciseName && new Date(l.timestamp) >= sessionCutoff
+            );
+
+            if (clusters.length === 0) {
+                if (existingIdx !== -1) {
+                    return prev.filter((_, idx) => idx !== existingIdx);
+                }
+                return prev;
+            }
+
+            if (existingIdx !== -1) {
+                const updated = [...prev];
+                updated[existingIdx] = {
+                    ...updated[existingIdx],
+                    clusters,
+                    notes: notes !== undefined ? notes : updated[existingIdx].notes,
+                    timestamp: new Date().toISOString()
+                };
+                return updated;
+            } else {
+                const newLog: ExerciseLog = {
+                    id: generateUUID(),
+                    exerciseName,
+                    timestamp: new Date().toISOString(),
+                    clusters,
+                    notes
+                };
+                return [newLog, ...prev];
+            }
+        });
+    }, [sessionStartTime]);
     
     const handleAddLogs = useCallback((logsToAdd: ExerciseLog[]) => {
         setLogs(prev => 
@@ -581,11 +619,14 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                     ) : (
                       <Dashboard
                         logs={sessionLogs}
+                        allLogs={logs}
+                        sessionStartTime={sessionStartTime}
                         goals={goals}
                         userProfile={activeProfile}
                         userRoutine={userRoutine}
                         restSettings={restSettings}
                         onLog={handleLogExercise}
+                        onUpdateExerciseLog={handleUpdateExerciseLog}
                         onSetGoals={setGoals}
                         onSaveProfile={handleSaveProfile}
                         onSaveRestSettings={setRestSettings}
