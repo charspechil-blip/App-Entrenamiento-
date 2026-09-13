@@ -243,7 +243,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         if (profile) {
             setActiveProfile(profile);
             safeStorage.setItem('activeProfileId', profileId);
-            setSessionStartTime(new Date());
+            setSessionStartTime(null);
             return profile;
         }
         return null;
@@ -253,6 +253,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         const profile = handleLogin(profileId);
         if (!profile) return;
         setShowHistory(false);
+        setSessionStartTime(null);
         
         let loadedRoutine: UserRoutine | null = null;
         try {
@@ -326,7 +327,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         setGoals(routine.goals || {});
         setRestSettings(routine.restSettings);
         setTrainingType(routine.trainingType);
-        setSessionStartTime(new Date());
+        setSessionStartTime(null);
         setIsReconfiguring(false);
         setNeedsInitialSetup(false);
     };
@@ -435,12 +436,16 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         
         safeStorage.setItem('activeProfileId', updatedProfile.id);
         setActiveProfile(updatedProfile);
-        setSessionStartTime(new Date());
+        setSessionStartTime(null);
         
         setNeedsInitialSetup(false);
         setIsReconfiguring(false);
         setShowHistory(false);
     }, [isReconfiguring, activeProfile]);
+
+    const handleStartWorkoutSession = useCallback(() => {
+        setSessionStartTime(new Date());
+    }, []);
 
     const handleGoToSettings = useCallback(() => {
         setIsReconfiguring(true);
@@ -637,6 +642,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                         logs={sessionLogs}
                         allLogs={logs}
                         sessionStartTime={sessionStartTime}
+                        onStartSession={handleStartWorkoutSession}
                         goals={goals}
                         userProfile={activeProfile}
                         userRoutine={userRoutine}

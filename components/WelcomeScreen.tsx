@@ -71,30 +71,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ profiles, savedRou
                                                 ¿Qué quieres hacer hoy?
                                             </h3>
 
-                                            {/* 🏋️ Comenzar entrenamiento */}
-                                            <button
-                                                type="button"
-                                                id={`btn-select-profile-${profile.id}`}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    onSelectProfile(profile.id);
-                                                }}
-                                                className="w-full group bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 active:scale-[0.99] text-white p-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-cyan-900/30 border border-cyan-400/20 text-left flex items-center gap-3.5 cursor-pointer"
-                                            >
-                                                <div className="w-11 h-11 rounded-lg bg-black/20 flex items-center justify-center text-2xl flex-shrink-0">
-                                                    🏋️
-                                                </div>
-                                                <div className="flex-grow min-w-0">
-                                                    <div className="font-bold text-white text-base leading-tight">
-                                                        Comenzar entrenamiento
-                                                    </div>
-                                                    <div className="text-cyan-100/90 text-xs mt-0.5 font-normal">
-                                                        Entrena y registra tu sesión
-                                                    </div>
-                                                </div>
-                                            </button>
-
                                             {/* ⚙️ Crear nueva rutina */}
                                             <button
                                                 type="button"

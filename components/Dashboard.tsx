@@ -11,6 +11,7 @@ interface DashboardProps {
   logs: ExerciseLog[];
   allLogs?: ExerciseLog[];
   sessionStartTime?: Date | null;
+  onStartSession?: () => void;
   goals: Goals;
   userProfile: UserProfile | null;
   userRoutine: UserRoutine | null;
@@ -31,6 +32,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   logs, 
   allLogs = [],
   sessionStartTime,
+  onStartSession,
   goals, 
   userProfile, 
   userRoutine,
@@ -202,7 +204,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return pastLogs[0];
   }, [allLogs, sessionStartTime]);
 
+  const handleStartWorkout = useCallback(() => {
+    if (onStartSession) {
+      onStartSession();
+    }
+  }, [onStartSession]);
+
   const handleExerciseLogUpdate = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => {
+    if (!sessionStartTime && onStartSession) {
+      onStartSession();
+    }
     if (onUpdateExerciseLog) {
       onUpdateExerciseLog(exerciseName, clusters, notes);
     } else {
@@ -212,7 +223,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         notes
       });
     }
-  }, [onUpdateExerciseLog, onLog]);
+  }, [onUpdateExerciseLog, onLog, sessionStartTime, onStartSession]);
 
   const handleTriggerInterExerciseRest = useCallback(() => {
     const durationSec = Number(restSettings?.restBetweenExercises) || 0;
@@ -289,19 +300,70 @@ export const Dashboard: React.FC<DashboardProps> = ({
         onSaveRestSettings={onSaveRestSettings}
       />
 
+      {/* Botón Comenzar Entrenamiento ubicado debajo de la tarjeta "Metas de entreno" */}
+      <div id="section-start-training" className="animate-fade-in">
+        {!sessionStartTime ? (
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl backdrop-blur-sm text-center">
+            <div className="max-w-md mx-auto space-y-2.5">
+              <button
+                type="button"
+                id="btn-comenzar-entrenamiento"
+                onClick={handleStartWorkout}
+                disabled={exercisesForDisplay.length === 0}
+                className={`w-full py-4 px-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 shadow-lg ${
+                  exercisesForDisplay.length > 0
+                    ? 'bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 shadow-cyan-500/25 active:scale-[0.99] cursor-pointer'
+                    : 'bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed opacity-60'
+                }`}
+              >
+                <div className="w-9 h-9 rounded-lg bg-black/15 flex items-center justify-center text-xl flex-shrink-0">
+                  🏋️
+                </div>
+                <span>Comenzar entrenamiento</span>
+              </button>
+              {exercisesForDisplay.length === 0 ? (
+                <p className="text-xs text-amber-400 font-medium">
+                  Agrega al menos un ejercicio a tu rutina para habilitar el entrenamiento.
+                </p>
+              ) : (
+                <p className="text-xs text-slate-400">
+                  Toca para iniciar el contador de tiempo real de tu sesión.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-3.5 px-5 flex items-center justify-between shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
+              <div>
+                <span className="text-sm font-bold text-emerald-300">Entrenamiento en Curso</span>
+                <span className="text-xs text-slate-400 ml-2 hidden sm:inline">Cronómetro activo</span>
+              </div>
+            </div>
+            <div className="font-mono text-sm font-bold text-cyan-400 bg-slate-950/70 px-3 py-1 rounded-lg border border-slate-800 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{formatElapsedDuration(elapsedSeconds)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div>
         {/* Workout Live Header Bar (Hevy-Style) */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 mb-6 shadow-xl backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className={`w-2.5 h-2.5 rounded-full ${sessionStartTime ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
                 <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
-                  Entreno Activo: <span className="text-cyan-400">{userRoutine?.type} - {userRoutine?.focus}</span>
+                  {sessionStartTime ? 'Entreno Activo:' : 'Rutina Preparada:'} <span className="text-cyan-400">{userRoutine?.type} - {userRoutine?.focus}</span>
                 </h2>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Marca cada serie con <span className="text-emerald-400 font-bold">✓</span> al completarla. Guarda al terminar abajo o arriba.
+                {sessionStartTime 
+                  ? 'Marca cada serie con ✓ al completarla. Guarda al terminar abajo o arriba.' 
+                  : 'Pulsa "Comenzar entrenamiento" arriba para iniciar el contador de tiempo de tu sesión.'}
               </p>
             </div>
 
