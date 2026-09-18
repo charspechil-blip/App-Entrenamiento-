@@ -18,7 +18,7 @@ interface DashboardProps {
   restSettings: RestSettings;
   trainingType: TrainingType;
   onLog: (logData: Omit<ExerciseLog, 'id' | 'timestamp'>) => void;
-  onUpdateExerciseLog?: (exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => void;
+  onUpdateExerciseLog?: (exerciseName: ExerciseName, clusters: Cluster[], notes?: string, heartRate?: number) => void;
   onSetGoals: (goals: Goals) => void;
   onSaveProfile: (profile: UserProfile) => void;
   onSaveRestSettings: (settings: RestSettings) => void;
@@ -193,16 +193,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return userRoutine?.exercises || [];
   }, [userRoutine]);
 
-  // Look up previous session log for this exercise
+  // Look up previous session log for this exercise strictly within the current routine
   const getPreviousSessionLog = useCallback((exerciseName: ExerciseName): ExerciseLog | null => {
     const cutoffTime = sessionStartTime ? new Date(sessionStartTime).getTime() : new Date().setHours(0, 0, 0, 0);
-    const pastLogs = (allLogs || []).filter(l => 
-      l.exerciseName === exerciseName && new Date(l.timestamp).getTime() < cutoffTime
-    );
+    const currentRoutineId = userRoutine?.id;
+    const currentRoutineName = userRoutine?.name?.trim().toLowerCase();
+
+    const pastLogs = (allLogs || []).filter(l => {
+      if (l.exerciseName !== exerciseName) return false;
+      if (new Date(l.timestamp).getTime() >= cutoffTime) return false;
+
+      // Routine isolation:
+      // If current routine has an id, check if log has matching routineId
+      if (currentRoutineId && l.routineId) {
+        return l.routineId === currentRoutineId;
+      }
+      // If current routine has a name, check if log has matching routineName
+      if (currentRoutineName && l.routineName) {
+        return l.routineName.trim().toLowerCase() === currentRoutineName;
+      }
+      // If log belongs to an explicitly different routine, do NOT match
+      if (l.routineName && currentRoutineName && l.routineName.trim().toLowerCase() !== currentRoutineName) {
+        return false;
+      }
+      if (l.routineId && currentRoutineId && l.routineId !== currentRoutineId) {
+        return false;
+      }
+      // If current routine is a specific saved/named routine, do not include legacy unclassified logs
+      if (currentRoutineId || currentRoutineName) {
+        return false;
+      }
+
+      return true;
+    });
+
     if (pastLogs.length === 0) return null;
     pastLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     return pastLogs[0];
-  }, [allLogs, sessionStartTime]);
+  }, [allLogs, sessionStartTime, userRoutine]);
 
   const handleStartWorkout = useCallback(() => {
     if (onStartSession) {
@@ -210,17 +238,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [onStartSession]);
 
-  const handleExerciseLogUpdate = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => {
+  const handleExerciseLogUpdate = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string, heartRate?: number) => {
     if (!sessionStartTime && onStartSession) {
       onStartSession();
     }
     if (onUpdateExerciseLog) {
-      onUpdateExerciseLog(exerciseName, clusters, notes);
+      onUpdateExerciseLog(exerciseName, clusters, notes, heartRate);
     } else {
       onLog({
         exerciseName,
         clusters,
-        notes
+        notes,
+        heartRate
       });
     }
   }, [onUpdateExerciseLog, onLog, sessionStartTime, onStartSession]);
@@ -254,10 +283,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return exercisesForDisplay.map((exercise) => {
       const prevLog = getPreviousSessionLog(exercise);
       const currLog = logs.find(l => l.exerciseName === exercise) || null;
+      const routineKey = userRoutine?.id || userRoutine?.name || 'routine';
 
       return (
         <ExerciseCard
-          key={exercise}
+          key={`${routineKey}_${exercise}`}
           exerciseName={exercise}
           previousLog={prevLog}
           currentLog={currLog}
@@ -283,7 +313,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     restSettings, 
     trainingType, 
     handleTriggerInterExerciseRest, 
-    interExerciseRestActive
+    interExerciseRestActive,
+    userRoutine
   ]);
 
   return (
@@ -357,7 +388,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${sessionStartTime ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
                 <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
-                  {sessionStartTime ? 'Entreno Activo:' : 'Rutina Preparada:'} <span className="text-cyan-400">{userRoutine?.type} - {userRoutine?.focus}</span>
+                  {sessionStartTime ? 'Entreno Activo:' : 'Rutina Preparada:'} <span className="text-cyan-400">{userRoutine?.name || `${userRoutine?.type} - ${userRoutine?.focus}`}</span>
                 </h2>
               </div>
               <p className="text-xs text-slate-400 mt-1">

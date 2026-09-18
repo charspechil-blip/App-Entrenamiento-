@@ -27,7 +27,7 @@ export const ExerciseHistoryDetail: React.FC<ExerciseHistoryDetailProps> = ({ ex
         let maxWeight = 0;
         let maxVolume = 0;
 
-        const sessionsMap: Record<string, { totalVolume: number, maxWeight: number, clusters: {weight: number, reps: number, time?: number}[], RPEs: number[] }> = {};
+        const sessionsMap: Record<string, { totalVolume: number, maxWeight: number, clusters: {weight: number, reps: number, time?: number, rir?: number}[], RPEs: number[], heartRate?: number }> = {};
 
         filteredLogs.forEach(log => {
             const dateKey = formatDate(log.timestamp);
@@ -39,6 +39,10 @@ export const ExerciseHistoryDetail: React.FC<ExerciseHistoryDetailProps> = ({ ex
                 sessionsMap[dateKey].RPEs.push(log.perceivedExertion);
             }
 
+            if (log.heartRate) {
+                sessionsMap[dateKey].heartRate = log.heartRate;
+            }
+
             const clusters = Array.isArray(log?.clusters) ? log.clusters : [];
             clusters.forEach(cluster => {
                 const w = Number(cluster?.weight) || 0;
@@ -46,7 +50,7 @@ export const ExerciseHistoryDetail: React.FC<ExerciseHistoryDetailProps> = ({ ex
                 const volume = w * r;
                 sessionsMap[dateKey].totalVolume += volume;
                 sessionsMap[dateKey].maxWeight = Math.max(sessionsMap[dateKey].maxWeight, w);
-                sessionsMap[dateKey].clusters.push({ weight: w, reps: r, time: cluster?.time });
+                sessionsMap[dateKey].clusters.push({ weight: w, reps: r, time: cluster?.time, rir: cluster?.rir });
 
                 maxWeight = Math.max(maxWeight, w);
             });
@@ -146,7 +150,7 @@ export const ExerciseHistoryDetail: React.FC<ExerciseHistoryDetailProps> = ({ ex
                                             {cluster.time ? (
                                                 `Tiempo: ${cluster.time}s`
                                             ) : (
-                                                ` ${cluster.weight} kg x ${cluster.reps} reps`
+                                                ` ${cluster.weight} kg x ${cluster.reps} reps${cluster.rir !== undefined ? ` • RIR ${cluster.rir}` : ''}`
                                             )}
                                         </p>
                                     ))}
@@ -155,6 +159,12 @@ export const ExerciseHistoryDetail: React.FC<ExerciseHistoryDetailProps> = ({ ex
                                     <span>Volumen: <span className="font-semibold text-white">{session.totalVolume.toLocaleString()} kg</span></span>
                                     <span className="mx-2 hidden sm:inline">|</span>
                                     <span>Peso Máx: <span className="font-semibold text-white">{session.maxWeight.toLocaleString()} kg</span></span>
+                                    {session.heartRate && (
+                                        <>
+                                            <span className="mx-2 hidden sm:inline">|</span>
+                                            <span>FC: <span className="font-semibold text-rose-400">{session.heartRate} BPM</span></span>
+                                        </>
+                                    )}
                                     {avgRPE && (
                                         <>
                                             <span className="mx-2 hidden sm:inline">|</span>

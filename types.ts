@@ -17,6 +17,8 @@ export type RoutineFocus = 'Core' | 'Tren Superior' | 'Tren Inferior' | 'Mixto';
 export type TrainingType = 'Normal' | 'Clúster' | 'Drop';
 
 export interface UserRoutine {
+  id?: string;
+  name?: string;
   type: RoutineType;
   focus: RoutineFocus;
   exercises: ExerciseName[];
@@ -27,6 +29,7 @@ export interface Cluster {
   weight: number;
   reps: number;
   time?: number;
+  rir?: number;
 }
 
 export interface ExerciseLog {
@@ -37,6 +40,8 @@ export interface ExerciseLog {
   heartRate?: number;
   perceivedExertion?: number;
   notes?: string;
+  routineId?: string;
+  routineName?: string;
 }
 
 export interface ExerciseGoal {

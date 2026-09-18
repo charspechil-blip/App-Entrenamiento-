@@ -224,9 +224,9 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
   }
 
   return (
-    <form onSubmit={handleSaveGoal} id="form-metas-del-entreno" className="bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-xl shadow-xl p-5 sm:p-7 animate-fade-in space-y-6">
+    <form onSubmit={handleSaveGoal} id="form-metas-del-entreno" className="bg-slate-800/70 backdrop-blur-sm border border-slate-700 rounded-xl shadow-xl p-4 sm:p-6 animate-fade-in space-y-4 sm:space-y-5">
       {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-4 border-b border-slate-700/80">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-700/80">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-200 uppercase tracking-wide">
             METAS DEL ENTRENO
@@ -251,56 +251,59 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
         </div>
       </div>
 
-      {/* MODALIDAD (antes tipo de entrenamiento) */}
-      <div id="section-modalidad">
-        <label htmlFor="modality-select" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-          MODALIDAD
-        </label>
-        <div className="relative">
-          <select
-            id="modality-select"
-            value={trainingType}
-            onChange={(e) => handleTrainingTypeChange(e.target.value as TrainingType)}
-            className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2.5 px-3.5 text-white font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all cursor-pointer text-sm"
-          >
-            <option value="Normal">NORMAL</option>
-            <option value="Clúster">CLUSTER</option>
-            <option value="Drop">DROP SET</option>
-          </select>
+      {/* MODALIDAD Y EJERCICIO en una sola línea */}
+      <div className="grid grid-cols-12 gap-2.5 sm:gap-4">
+        {/* MODALIDAD */}
+        <div id="section-modalidad" className="col-span-5">
+          <label htmlFor="modality-select" className="block text-[11px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 truncate">
+            MODALIDAD
+          </label>
+          <div className="relative">
+            <select
+              id="modality-select"
+              value={trainingType}
+              onChange={(e) => handleTrainingTypeChange(e.target.value as TrainingType)}
+              className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2.5 sm:px-3.5 text-white font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all cursor-pointer text-xs sm:text-sm truncate"
+            >
+              <option value="Normal">NORMAL</option>
+              <option value="Clúster">CLUSTER</option>
+              <option value="Drop">DROP SET</option>
+            </select>
+          </div>
+        </div>
+
+        {/* EJERCICIO */}
+        <div id="section-ejercicio" className="col-span-7">
+          <label htmlFor="exercise-select" className="block text-[11px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 truncate">
+            EJERCICIO
+          </label>
+          <div className="relative">
+            <select
+              id="exercise-select"
+              value={selectedExercise}
+              onChange={(e) => setSelectedExercise(e.target.value as ExerciseName)}
+              className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2.5 sm:px-3.5 text-white font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all cursor-pointer text-xs sm:text-sm truncate"
+            >
+              <option value="">-- Seleccionar --</option>
+              {exercises.map(ex => (
+                <option key={ex} value={ex}>
+                  {ex} {currentGoals[ex] ? '✓' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* EJERCICIO */}
-      <div id="section-ejercicio">
-        <label htmlFor="exercise-select" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-          EJERCICIO
-        </label>
-        <div className="relative">
-          <select
-            id="exercise-select"
-            value={selectedExercise}
-            onChange={(e) => setSelectedExercise(e.target.value as ExerciseName)}
-            className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2.5 px-3.5 text-white font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all cursor-pointer text-sm"
-          >
-            <option value="">-- Selecciona un ejercicio --</option>
-            {exercises.map(ex => (
-              <option key={ex} value={ex}>
-                {ex} {currentGoals[ex] ? '✓ (Con meta guardada)' : ''}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* DESCANSOS */}
-      <div id="section-descansos" className="pt-4 border-t border-slate-700/70">
-        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+      {/* DESCANSOS en una sola línea */}
+      <div id="section-descansos" className="pt-3.5 border-t border-slate-700/70">
+        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
           <span>⏱️</span> DESCANSOS
         </h3>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
           <div>
-            <label htmlFor="restBetweenSets" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label htmlFor="restBetweenSets" className="block text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 truncate">
               ENTRE SERIE
             </label>
             <div className="relative">
@@ -312,17 +315,17 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                 onChange={handleRestChange}
                 onFocus={(e) => e.target.select()}
                 min="0"
-                className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2.5 px-3.5 pr-14 text-white font-bold text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                placeholder="20"
+                className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2.5 pr-10 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-center sm:text-left"
+                placeholder="60"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">
                 seg
               </span>
             </div>
           </div>
 
           <div>
-            <label htmlFor="restBetweenExercises" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label htmlFor="restBetweenExercises" className="block text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 truncate">
               ENTRE EJERCICIO
             </label>
             <div className="relative">
@@ -334,10 +337,10 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                 onChange={handleRestChange}
                 onFocus={(e) => e.target.select()}
                 min="0"
-                className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2.5 px-3.5 pr-14 text-white font-bold text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                placeholder="20"
+                className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2.5 pr-10 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-center sm:text-left"
+                placeholder="180"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">
                 seg
               </span>
             </div>
@@ -345,42 +348,44 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
         </div>
 
         {/* Modo de descanso */}
-        <div className="mt-3.5 flex flex-wrap items-center gap-4 text-xs bg-slate-700/30 p-2.5 rounded-lg border border-slate-700/60">
-          <span className="text-slate-400 font-semibold">Modo de descanso:</span>
-          <label className="inline-flex items-center gap-1.5 cursor-pointer text-slate-200">
-            <input
-              type="radio"
-              name="mode"
-              value="auto"
-              checked={restFormData.mode === 'auto'}
-              onChange={handleRestChange}
-              className="text-cyan-500 focus:ring-cyan-500 bg-slate-700 cursor-pointer"
-            />
-            <span>Descansos automáticos</span>
-          </label>
-          <label className="inline-flex items-center gap-1.5 cursor-pointer text-slate-200">
-            <input
-              type="radio"
-              name="mode"
-              value="manual"
-              checked={restFormData.mode === 'manual'}
-              onChange={handleRestChange}
-              className="text-cyan-500 focus:ring-cyan-500 bg-slate-700 cursor-pointer"
-            />
-            <span>Descansos manual</span>
-          </label>
+        <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs bg-slate-700/30 py-2 px-3 rounded-lg border border-slate-700/60">
+          <span className="text-slate-400 font-semibold flex-shrink-0">Modo de descanso:</span>
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center gap-1.5 cursor-pointer text-slate-200">
+              <input
+                type="radio"
+                name="mode"
+                value="auto"
+                checked={restFormData.mode === 'auto'}
+                onChange={handleRestChange}
+                className="text-cyan-500 focus:ring-cyan-500 bg-slate-700 cursor-pointer"
+              />
+              <span className="whitespace-nowrap">Descansos automáticos</span>
+            </label>
+            <label className="inline-flex items-center gap-1.5 cursor-pointer text-slate-200">
+              <input
+                type="radio"
+                name="mode"
+                value="manual"
+                checked={restFormData.mode === 'manual'}
+                onChange={handleRestChange}
+                className="text-cyan-500 focus:ring-cyan-500 bg-slate-700 cursor-pointer"
+              />
+              <span className="whitespace-nowrap">Descansos manual</span>
+            </label>
+          </div>
         </div>
       </div>
 
       {/* Criterios y casillas según modalidad y ejercicio (Observaciones A y B) */}
       {selectedExercise ? (
-        <div className="pt-4 border-t border-slate-700/70 space-y-4 animate-fade-in">
+        <div className="pt-3.5 border-t border-slate-700/70 space-y-3 animate-fade-in">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider truncate">
               OBJETIVOS PARA: <span className="text-cyan-400">{selectedExercise}</span>
             </h4>
             {currentGoals[selectedExercise] && (
-              <span className="text-[11px] text-emerald-400 font-medium px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-800/40">
+              <span className="text-[11px] text-emerald-400 font-medium px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-800/40 flex-shrink-0">
                 ● Meta activa
               </span>
             )}
@@ -388,8 +393,8 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
 
           {/* Observación A: Casilla check para activar o no el lastre */}
           {isBodyweight && !isTimeBased && (
-            <div className="bg-slate-700/40 border border-slate-600/70 rounded-lg p-3">
-              <label htmlFor="isWeighted" className="flex items-start gap-3 cursor-pointer select-none">
+            <div className="bg-slate-700/40 border border-slate-600/70 rounded-lg p-2.5">
+              <label htmlFor="isWeighted" className="flex items-start gap-2.5 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   id="isWeighted"
@@ -399,8 +404,8 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                   className="mt-0.5 h-4 w-4 rounded bg-slate-700 border-slate-500 text-cyan-500 focus:ring-cyan-500 cursor-pointer"
                 />
                 <div>
-                  <span className="text-sm font-semibold text-slate-200">Activar Lastre (peso adicional)</span>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <span className="text-xs font-semibold text-slate-200">Activar Lastre (peso adicional)</span>
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
                     Marca esta opción si realizarás el ejercicio con cinturón de lastre, chaleco o mancuerna extra.
                   </p>
                 </div>
@@ -408,25 +413,29 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
             </div>
           )}
 
-          {/* Observación B: Diferencia en las casillas según modalidad elegida como está actualmente */}
+          {/* Observación B: Diferencia en las casillas según modalidad elegida */}
           {isTimeBased ? (
-            <div>
-              <label htmlFor="totalTime" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Tiempo Total (segundos)
+            <div className="max-w-[200px]">
+              <label htmlFor="totalTime" className="block text-[11px] sm:text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                Tiempo Total (seg)
               </label>
-              <input
-                type="number"
-                name="totalTime"
-                id="totalTime"
-                value={goalData.totalTime || ''}
-                onChange={handleInputChange}
-                className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2.5 px-3.5 text-white font-medium focus:ring-2 focus:ring-cyan-500"
-                min="1"
-                placeholder="60"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  name="totalTime"
+                  id="totalTime"
+                  value={goalData.totalTime || ''}
+                  onChange={handleInputChange}
+                  onFocus={(e) => e.target.select()}
+                  className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2.5 pr-10 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 text-center"
+                  min="1"
+                  placeholder="60"
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">seg</span>
+              </div>
             </div>
           ) : trainingType === 'Clúster' ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h5 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                   Configuración de Clústeres
@@ -441,19 +450,20 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
               </div>
               <div className="space-y-2">
                 {(goalData.clusterGoals || [{ weight: 0, reps: 0 }]).map((cluster, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-slate-700/30 p-2.5 rounded-lg border border-slate-700">
-                    <span className="text-slate-400 font-bold text-xs w-20 flex-shrink-0">
-                      Clúster {index + 1}
+                  <div key={index} className="flex items-center gap-2 bg-slate-700/30 p-2 rounded-lg border border-slate-700">
+                    <span className="text-slate-400 font-bold text-xs w-16 sm:w-20 flex-shrink-0">
+                      C{index + 1}
                     </span>
                     <div className="flex-1 relative">
                       <input
                         type="number"
-                        placeholder={isBodyweight && !goalData.isWeighted ? '0 (Corporal)' : 'Kg'}
+                        placeholder={isBodyweight && !goalData.isWeighted ? '0' : 'Kg'}
                         value={cluster.weight || ''}
                         onChange={(e) => handleClusterChange(index, 'weight', e.target.value)}
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 pr-8 text-white text-sm"
+                        onFocus={(e) => e.target.select()}
+                        className="w-full bg-slate-700 border border-slate-600 rounded-md py-1.5 px-2 pr-7 text-white text-xs sm:text-sm font-semibold text-center"
                       />
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">kg</span>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[11px] pointer-events-none">kg</span>
                     </div>
                     <div className="flex-1 relative">
                       <input
@@ -461,29 +471,30 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                         placeholder="Reps"
                         value={cluster.reps || ''}
                         onChange={(e) => handleClusterChange(index, 'reps', e.target.value)}
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 pr-10 text-white text-sm"
+                        onFocus={(e) => e.target.select()}
+                        className="w-full bg-slate-700 border border-slate-600 rounded-md py-1.5 px-2 pr-8 text-white text-xs sm:text-sm font-semibold text-center"
                       />
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">reps</span>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[11px] pointer-events-none">reps</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeCluster(index)}
                       disabled={(goalData.clusterGoals || []).length <= 1}
-                      className="p-2 text-slate-400 hover:text-rose-400 disabled:opacity-30 disabled:hover:text-slate-400 cursor-pointer transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-rose-400 disabled:opacity-30 disabled:hover:text-slate-400 cursor-pointer transition-colors"
                       title="Eliminar este clúster"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            /* Modalidad Normal o Drop Set */
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            /* Modalidad Normal o Drop Set: PESO, REPETICIONES, SERIES en una sola línea */
+            <div className={`grid ${(!isEffectivelyRepBased || goalData.isWeighted) ? 'grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
               {(!isEffectivelyRepBased || goalData.isWeighted) && (
                 <div>
-                  <label htmlFor="weight" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label htmlFor="weight" className="block text-[11px] sm:text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1 truncate">
                     {goalData.isWeighted ? 'Lastre (Kg)' : 'Peso (Kg)'}
                   </label>
                   <div className="relative">
@@ -494,16 +505,17 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                       step="0.5"
                       value={goalData.weight || ''}
                       onChange={handleInputChange}
-                      className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-3 pr-8 text-white font-medium focus:ring-2 focus:ring-cyan-500"
+                      onFocus={(e) => e.target.select()}
+                      className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2 pr-7 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 text-center"
                       min="0"
                       placeholder="0"
                     />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold">kg</span>
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold pointer-events-none">kg</span>
                   </div>
                 </div>
               )}
               <div>
-                <label htmlFor="reps" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label htmlFor="reps" className="block text-[11px] sm:text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1 truncate">
                   Repeticiones
                 </label>
                 <input
@@ -512,13 +524,14 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                   id="reps"
                   value={goalData.reps || ''}
                   onChange={handleInputChange}
-                  className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-3 text-white font-medium focus:ring-2 focus:ring-cyan-500"
+                  onFocus={(e) => e.target.select()}
+                  className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 text-center"
                   min="1"
                   placeholder="10"
                 />
               </div>
               <div>
-                <label htmlFor="series" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label htmlFor="series" className="block text-[11px] sm:text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1 truncate">
                   Series
                 </label>
                 <input
@@ -527,7 +540,8 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
                   id="series"
                   value={goalData.series || ''}
                   onChange={handleInputChange}
-                  className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-3 text-white font-medium focus:ring-2 focus:ring-cyan-500"
+                  onFocus={(e) => e.target.select()}
+                  className="w-full bg-slate-700/90 border border-slate-600 rounded-lg py-2 px-2 text-white font-bold text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 text-center"
                   min="1"
                   placeholder="3"
                 />
@@ -541,31 +555,32 @@ export const GoalSetter: React.FC<GoalSetterProps> = ({
         </div>
       )}
 
-      {/* Botones de acción */}
-      <div className="flex flex-col sm:flex-row justify-center items-center pt-5 border-t border-slate-700/70 gap-3">
+      {/* Botones de acción en una sola fila */}
+      <div className="flex flex-row justify-center items-center pt-3.5 border-t border-slate-700/70 gap-2.5">
         <button 
           type="button" 
           onClick={() => setIsCollapsed(true)} 
-          className="w-full sm:flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-lg transition-all text-center cursor-pointer"
+          className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-2.5 px-3 rounded-lg transition-all text-center cursor-pointer text-xs sm:text-sm"
         >
           Cerrar
         </button>
 
         <button 
           type="submit" 
-          className="w-full sm:flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-[0.99] text-white font-bold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-cyan-500/30 text-center cursor-pointer"
+          className="flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-[0.99] text-white font-bold py-2.5 px-3 rounded-lg transition-all shadow-md hover:shadow-cyan-500/30 text-center cursor-pointer text-xs sm:text-sm"
         >
-          {isSaved ? 'Metas Guardadas' : 'Guardar Metas del Entreno'}
+          {isSaved ? 'Metas Guardadas' : 'Guardar Metas'}
         </button>
 
         {selectedExercise && currentGoals[selectedExercise] && (
           <button 
             type="button" 
             onClick={handleRemoveGoal} 
-            className="w-full sm:w-auto bg-rose-900/50 hover:bg-rose-800 text-rose-200 font-semibold py-3 px-5 rounded-lg transition-all text-center cursor-pointer flex items-center justify-center gap-1.5"
+            className="bg-rose-900/50 hover:bg-rose-800 text-rose-200 font-semibold py-2.5 px-3 rounded-lg transition-all text-center cursor-pointer flex items-center justify-center gap-1 text-xs sm:text-sm flex-shrink-0"
+            title="Borrar Meta"
           >
-            <Trash2 className="w-4 h-4" />
-            <span>Borrar Meta</span>
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Borrar</span>
           </button>
         )}
       </div>

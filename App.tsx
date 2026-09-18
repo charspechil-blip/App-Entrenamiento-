@@ -47,72 +47,19 @@ const getInitialSavedRoutines = (): SavedRoutine[] => {
     }
 };
 
-const getInitialActiveProfile = (_profiles: UserProfile[]): UserProfile | null => {
-    // La pantalla inicial siempre debe ser la pantalla de selección de perfil (WelcomeScreen)
-    return null;
-};
-
 const App: React.FC = () => {
     const initialProfiles = useMemo(() => getInitialProfiles(), []);
     const initialSavedRoutines = useMemo(() => getInitialSavedRoutines(), []);
-    const initialActiveProfile = useMemo(() => getInitialActiveProfile(initialProfiles), [initialProfiles]);
 
     const [allProfiles, setAllProfiles] = useState<UserProfile[]>(initialProfiles);
-    const [activeProfile, setActiveProfile] = useState<UserProfile | null>(initialActiveProfile);
+    // La pantalla inicial siempre debe ser la pantalla de selección de perfil (WelcomeScreen)
+    const [activeProfile, setActiveProfile] = useState<UserProfile | null>(null);
     const [savedRoutines, setSavedRoutines] = useState<SavedRoutine[]>(initialSavedRoutines);
 
-    const [logs, setLogs] = useState<ExerciseLog[]>(() => {
-        if (!initialActiveProfile) return [];
-        try {
-            const logsStr = safeStorage.getItem(`exerciseLogs_${initialActiveProfile.id}`);
-            const loadedLogs: ExerciseLog[] = logsStr ? JSON.parse(logsStr) : [];
-            loadedLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-            return loadedLogs;
-        } catch {
-            return [];
-        }
-    });
-
-    const [goals, setGoals] = useState<Goals>(() => {
-        if (!initialActiveProfile) return {};
-        try {
-            const goalsStr = safeStorage.getItem(`exerciseGoals_${initialActiveProfile.id}`);
-            return goalsStr ? JSON.parse(goalsStr) : {};
-        } catch {
-            return {};
-        }
-    });
-
-    const [userRoutine, setUserRoutine] = useState<UserRoutine | null>(() => {
-        if (!initialActiveProfile) return null;
-        try {
-            const routineStr = safeStorage.getItem(`userRoutine_${initialActiveProfile.id}`);
-            if (routineStr) {
-                const parsed = JSON.parse(routineStr);
-                if (parsed && typeof parsed === 'object' && parsed.type) {
-                    return {
-                        type: parsed.type || 'Calistenia',
-                        focus: parsed.focus || 'Mixto',
-                        exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
-                        equipment: Array.isArray(parsed.equipment) ? parsed.equipment : initialActiveProfile.availableEquipment
-                    };
-                }
-            }
-        } catch {}
-        return null;
-    });
-
-    const [restSettings, setRestSettings] = useState<RestSettings>(() => {
-        if (!initialActiveProfile) {
-            return { restBetweenSets: 60, restBetweenExercises: 180, mode: 'auto' };
-        }
-        try {
-            const restStr = safeStorage.getItem(`restSettings_${initialActiveProfile.id}`);
-            return restStr ? JSON.parse(restStr) : { restBetweenSets: 60, restBetweenExercises: 180, mode: 'auto' };
-        } catch {
-            return { restBetweenSets: 60, restBetweenExercises: 180, mode: 'auto' };
-        }
-    });
+    const [logs, setLogs] = useState<ExerciseLog[]>([]);
+    const [goals, setGoals] = useState<Goals>({});
+    const [userRoutine, setUserRoutine] = useState<UserRoutine | null>(null);
+    const [restSettings, setRestSettings] = useState<RestSettings>({ restBetweenSets: 60, restBetweenExercises: 180, mode: 'auto' });
 
     const [trainingType, setTrainingType] = useState<TrainingType>('Normal');
 
@@ -262,6 +209,8 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                 const parsed = JSON.parse(routineStr);
                 if (parsed && typeof parsed === 'object') {
                     loadedRoutine = {
+                        id: parsed.id,
+                        name: parsed.name,
                         type: parsed.type || 'Calistenia',
                         focus: parsed.focus || 'Mixto',
                         exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
@@ -323,7 +272,13 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
     const handleStartSavedRoutine = (profileId: string, routine: SavedRoutine) => {
         handleLogin(profileId);
-        setUserRoutine({ type: 'Personalizado', focus: 'Mixto', exercises: Array.isArray(routine.exercises) ? routine.exercises : [] });
+        setUserRoutine({ 
+            id: routine.id,
+            name: routine.name,
+            type: 'Personalizado', 
+            focus: 'Mixto', 
+            exercises: Array.isArray(routine.exercises) ? routine.exercises : [] 
+        });
         setGoals(routine.goals || {});
         setRestSettings(routine.restSettings);
         setTrainingType(routine.trainingType);
@@ -413,7 +368,15 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         
         const rawPredefined = PREDEFINED_EXERCISES[routine]?.[focus] || [];
         const finalExercises = Array.isArray(exercises) && exercises.length > 0 ? exercises : rawPredefined;
-        const newRoutine: UserRoutine = { type: routine, focus, exercises: finalExercises, equipment };
+        const routineName = `${routine} - ${focus}`;
+        const newRoutine: UserRoutine = { 
+            id: generateUUID(),
+            name: routineName,
+            type: routine, 
+            focus, 
+            exercises: finalExercises, 
+            equipment 
+        };
 
         setUserRoutine(newRoutine);
 
@@ -468,19 +431,23 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
     const handleLogExercise = useCallback((logData: Omit<ExerciseLog, 'id' | 'timestamp'>) => {
         setSessionStartTime(prev => prev || new Date());
+        const currentRoutineId = userRoutine?.id;
+        const currentRoutineName = userRoutine?.name || (userRoutine ? `${userRoutine.type} - ${userRoutine.focus}` : undefined);
         const newLog: ExerciseLog = {
             id: generateUUID(),
             timestamp: new Date().toISOString(),
+            routineId: currentRoutineId,
+            routineName: currentRoutineName,
             ...logData
         };
         setLogs(prev => [...prev, newLog].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
-    }, []);
+    }, [userRoutine]);
 
-    const handleUpdateExerciseLog = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string) => {
+    const handleUpdateExerciseLog = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string, heartRate?: number) => {
         setSessionStartTime(prev => prev || new Date());
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-        const sessionCutoff = sessionStartTime || startOfToday;
+        const sessionCutoff = sessionStartTime || new Date();
+        const currentRoutineId = userRoutine?.id;
+        const currentRoutineName = userRoutine?.name || (userRoutine ? `${userRoutine.type} - ${userRoutine.focus}` : undefined);
 
         setLogs(prev => {
             const existingIdx = prev.findIndex(l => 
@@ -500,7 +467,10 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                     ...updated[existingIdx],
                     clusters,
                     notes: notes !== undefined ? notes : updated[existingIdx].notes,
-                    timestamp: new Date().toISOString()
+                    heartRate: heartRate !== undefined ? heartRate : updated[existingIdx].heartRate,
+                    timestamp: new Date().toISOString(),
+                    routineId: currentRoutineId || updated[existingIdx].routineId,
+                    routineName: currentRoutineName || updated[existingIdx].routineName
                 };
                 return updated;
             } else {
@@ -509,12 +479,15 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                     exerciseName,
                     timestamp: new Date().toISOString(),
                     clusters,
-                    notes
+                    notes,
+                    heartRate,
+                    routineId: currentRoutineId,
+                    routineName: currentRoutineName
                 };
                 return [newLog, ...prev];
             }
         });
-    }, [sessionStartTime]);
+    }, [sessionStartTime, userRoutine]);
     
     const handleAddLogs = useCallback((logsToAdd: ExerciseLog[]) => {
         setLogs(prev => 
@@ -524,8 +497,9 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
     const handleSaveRoutine = useCallback((name: string) => {
         if (!activeProfile || !userRoutine) return;
+        const routineId = generateUUID();
         const newSavedRoutine: SavedRoutine = {
-            id: generateUUID(),
+            id: routineId,
             profileId: activeProfile.id,
             name,
             exercises: Array.isArray(userRoutine.exercises) ? userRoutine.exercises : [],
@@ -534,6 +508,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             trainingType,
         };
         setSavedRoutines(prev => [...prev, newSavedRoutine]);
+        setUserRoutine(prev => prev ? { ...prev, id: routineId, name } : prev);
     }, [activeProfile, userRoutine, goals, restSettings, trainingType]);
     
     const handleDeleteRoutine = useCallback((routineId: string) => {
@@ -565,7 +540,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
         setShowHistory(true);
         setIsReconfiguring(false);
         setNeedsInitialSetup(false);
-    }, [activeProfile, isReconfiguring, handleAddLogs]);
+    }, [isReconfiguring, handleAddLogs]);
 
 
     const handleSaveProfile = useCallback((profileData: UserProfile) => {
@@ -574,13 +549,23 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
     }, []);
 
     const sessionLogs = useMemo(() => {
-        if (sessionStartTime) {
-            return logs.filter(log => new Date(log.timestamp) >= sessionStartTime);
+        if (!sessionStartTime) {
+            return [];
         }
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        return logs.filter(log => new Date(log.timestamp) >= todayStart);
-    }, [logs, sessionStartTime]);
+        const currentRoutineId = userRoutine?.id;
+        const currentRoutineName = userRoutine?.name?.trim().toLowerCase();
+
+        return logs.filter(log => {
+            if (new Date(log.timestamp) < sessionStartTime) return false;
+            if (currentRoutineId && log.routineId) {
+                return log.routineId === currentRoutineId;
+            }
+            if (currentRoutineName && log.routineName) {
+                return log.routineName.trim().toLowerCase() === currentRoutineName;
+            }
+            return true;
+        });
+    }, [logs, sessionStartTime, userRoutine]);
 
     if (!activeProfile && !needsInitialSetup) {
         return (
