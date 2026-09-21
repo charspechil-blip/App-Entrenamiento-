@@ -10,11 +10,20 @@ interface HistoryScreenProps {
   goals: Goals;
   userProfile: UserProfile | null;
   userRoutine: UserRoutine | null;
+  lastFinishedSessionMetrics?: { sessionId: string; durationSeconds: number; interExerciseRestSeconds: number } | null;
   onDelete: (logIdsToDelete: string[]) => void;
   onAddLogs: (logs: ExerciseLog[]) => void;
 }
 
-export const HistoryScreen: React.FC<HistoryScreenProps> = ({ logs, goals, userProfile, userRoutine, onDelete, onAddLogs }) => {
+export const HistoryScreen: React.FC<HistoryScreenProps> = ({ 
+  logs, 
+  goals, 
+  userProfile, 
+  userRoutine, 
+  lastFinishedSessionMetrics,
+  onDelete, 
+  onAddLogs 
+}) => {
   const [isManualLogModalOpen, setManualLogModalOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<ExerciseName | null>(null);
 
@@ -34,6 +43,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ logs, goals, userP
         logs={logs} 
         goals={goals} 
         userProfile={userProfile} 
+        lastFinishedSessionMetrics={lastFinishedSessionMetrics}
         onDelete={onDelete} 
         onOpenManualLog={() => setManualLogModalOpen(true)}
         onSelectExercise={(ex) => setSelectedExercise(ex)}

@@ -109,10 +109,19 @@ export const EXERCISE_EQUIPMENT_MAP: Record<string, string[]> = {
   'Paseo del granjero': ['Mancuernas', 'Pesas rusas / Kettlebells', 'Barra olímpica / Discos'],
 };
 
+import { getDynamicEquipmentForExercise } from '../services/exerciseCatalog';
+
 /**
  * Retorna las etiquetas de equipamiento compatibles para un ejercicio.
  */
 export const getEquipmentForExercise = (exerciseName: string): string[] => {
+  // 1. Revisar catálogo dinámico y ejercicios personalizados guardados
+  const dynamicEq = getDynamicEquipmentForExercise(exerciseName);
+  if (dynamicEq && dynamicEq.length > 0) {
+    return dynamicEq;
+  }
+
+  // 2. Revisar mapa predefinido
   if (EXERCISE_EQUIPMENT_MAP[exerciseName]) {
     return EXERCISE_EQUIPMENT_MAP[exerciseName];
   }

@@ -70,6 +70,8 @@ const App: React.FC = () => {
     
     const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [currentSessionId, setCurrentSessionId] = useState<string>(() => `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
+    const [lastFinishedSessionMetrics, setLastFinishedSessionMetrics] = useState<{ sessionId: string; durationSeconds: number; interExerciseRestSeconds: number } | null>(null);
     
     // Keep profiles and saved routines persisted
     useEffect(() => {
@@ -87,6 +89,24 @@ const App: React.FC = () => {
             console.error('Failed to save savedRoutines:', e);
         }
     }, [savedRoutines]);
+
+    useEffect(() => {
+        if (!activeProfile) return;
+        try {
+            safeStorage.setItem(`exerciseGoals_${activeProfile.id}`, JSON.stringify(goals));
+        } catch (e) {
+            console.error('Failed to save exerciseGoals:', e);
+        }
+    }, [goals, activeProfile]);
+
+    useEffect(() => {
+        if (!activeProfile) return;
+        try {
+            safeStorage.setItem(`restSettings_${activeProfile.id}`, JSON.stringify(restSettings));
+        } catch (e) {
+            console.error('Failed to save restSettings:', e);
+        }
+    }, [restSettings, activeProfile]);
 
 const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
     if (!Array.isArray(rawLogs)) return [];
@@ -114,7 +134,12 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             clusters,
             heartRate: log?.heartRate ? Number(log.heartRate) : undefined,
             perceivedExertion: log?.perceivedExertion ? Number(log.perceivedExertion) : undefined,
-            notes: log?.notes
+            notes: log?.notes,
+            routineId: log?.routineId,
+            routineName: log?.routineName,
+            sessionId: log?.sessionId,
+            sessionDurationSeconds: typeof log?.sessionDurationSeconds === 'number' ? log.sessionDurationSeconds : undefined,
+            interExerciseRestSeconds: typeof log?.interExerciseRestSeconds === 'number' ? log.interExerciseRestSeconds : undefined,
         };
     });
 };
@@ -247,6 +272,17 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             setRestSettings({ restBetweenSets: 60, restBetweenExercises: 180, mode: 'auto' });
         }
 
+        try {
+            const lastSessionStr = safeStorage.getItem(`lastSession_${profileId}`);
+            if (lastSessionStr) {
+                setLastFinishedSessionMetrics(JSON.parse(lastSessionStr));
+            } else {
+                setLastFinishedSessionMetrics(null);
+            }
+        } catch {
+            setLastFinishedSessionMetrics(null);
+        }
+
         // Si el usuario aún no tiene una rutina con ejercicios configurada,
         // lo llevamos de inmediato al Paso 2 para configurar su rutina de forma guiada
         if (!loadedRoutine || !Array.isArray(loadedRoutine.exercises) || loadedRoutine.exercises.length === 0) {
@@ -323,17 +359,28 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
     }, []);
     
     const handleDeleteProfile = useCallback((profileId: string) => {
-        if(window.confirm("¿Estás seguro de que quieres eliminar este perfil y todos sus datos? Esta acción no se puede deshacer.")) {
-            const newProfiles = allProfiles.filter(p => p.id !== profileId);
-            setAllProfiles(newProfiles);
-            setSavedRoutines(prev => prev.filter(r => r.profileId !== profileId));
-            safeStorage.removeItem(`exerciseLogs_${profileId}`);
-            safeStorage.removeItem(`exerciseGoals_${profileId}`);
-            safeStorage.removeItem(`userRoutine_${profileId}`);
-            safeStorage.removeItem(`restSettings_${profileId}`);
-            if (activeProfile?.id === profileId) {
-                handleLogout();
+        const newProfiles = allProfiles.filter(p => p.id !== profileId);
+        setAllProfiles(newProfiles);
+        setSavedRoutines(prev => {
+            const updated = prev.filter(r => r.profileId !== profileId);
+            try {
+                safeStorage.setItem('savedRoutines', JSON.stringify(updated));
+            } catch (e) {
+                console.error('Failed to update savedRoutines on profile delete:', e);
             }
+            return updated;
+        });
+        safeStorage.removeItem(`exerciseLogs_${profileId}`);
+        safeStorage.removeItem(`exerciseGoals_${profileId}`);
+        safeStorage.removeItem(`userRoutine_${profileId}`);
+        safeStorage.removeItem(`restSettings_${profileId}`);
+        try {
+            safeStorage.setItem('userProfiles', JSON.stringify(newProfiles));
+        } catch (e) {
+            console.error('Failed to save userProfiles:', e);
+        }
+        if (activeProfile?.id === profileId) {
+            handleLogout();
         }
     }, [activeProfile, handleLogout, allProfiles]);
 
@@ -408,7 +455,45 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
     const handleStartWorkoutSession = useCallback(() => {
         setSessionStartTime(new Date());
+        setCurrentSessionId(`session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
     }, []);
+
+    const handleFinishWorkoutSession = useCallback((durationSeconds: number, interExerciseRestSeconds: number) => {
+        const finishedSessionId = currentSessionId;
+        const cutoff = sessionStartTime ? new Date(sessionStartTime).getTime() : Date.now() - 3600000;
+
+        // Stamp all logs of this session with duration and rest
+        setLogs(prev => prev.map(l => {
+            const isThisSession = l.sessionId === finishedSessionId || (new Date(l.timestamp).getTime() >= cutoff);
+            if (isThisSession) {
+                return {
+                    ...l,
+                    sessionId: finishedSessionId,
+                    sessionDurationSeconds: durationSeconds,
+                    interExerciseRestSeconds: interExerciseRestSeconds,
+                };
+            }
+            return l;
+        }));
+
+        const finishedData = {
+            sessionId: finishedSessionId,
+            durationSeconds,
+            interExerciseRestSeconds,
+            timestamp: new Date().toISOString()
+        };
+        setLastFinishedSessionMetrics(finishedData);
+        if (activeProfile) {
+            try {
+                safeStorage.setItem(`lastSession_${activeProfile.id}`, JSON.stringify(finishedData));
+            } catch (e) {}
+        }
+
+        // Reset active session state
+        setSessionStartTime(null);
+        setCurrentSessionId(`session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
+        setShowHistory(true);
+    }, [currentSessionId, sessionStartTime, activeProfile]);
 
     const handleGoToSettings = useCallback(() => {
         setIsReconfiguring(true);
@@ -438,10 +523,11 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             timestamp: new Date().toISOString(),
             routineId: currentRoutineId,
             routineName: currentRoutineName,
+            sessionId: currentSessionId,
             ...logData
         };
         setLogs(prev => [...prev, newLog].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
-    }, [userRoutine]);
+    }, [userRoutine, currentSessionId]);
 
     const handleUpdateExerciseLog = useCallback((exerciseName: ExerciseName, clusters: Cluster[], notes?: string, heartRate?: number) => {
         setSessionStartTime(prev => prev || new Date());
@@ -451,7 +537,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
 
         setLogs(prev => {
             const existingIdx = prev.findIndex(l => 
-                l.exerciseName === exerciseName && new Date(l.timestamp) >= sessionCutoff
+                l.exerciseName === exerciseName && (l.sessionId === currentSessionId || new Date(l.timestamp) >= sessionCutoff)
             );
 
             if (clusters.length === 0) {
@@ -470,7 +556,8 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                     heartRate: heartRate !== undefined ? heartRate : updated[existingIdx].heartRate,
                     timestamp: new Date().toISOString(),
                     routineId: currentRoutineId || updated[existingIdx].routineId,
-                    routineName: currentRoutineName || updated[existingIdx].routineName
+                    routineName: currentRoutineName || updated[existingIdx].routineName,
+                    sessionId: currentSessionId || updated[existingIdx].sessionId
                 };
                 return updated;
             } else {
@@ -482,12 +569,13 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                     notes,
                     heartRate,
                     routineId: currentRoutineId,
-                    routineName: currentRoutineName
+                    routineName: currentRoutineName,
+                    sessionId: currentSessionId
                 };
                 return [newLog, ...prev];
             }
         });
-    }, [sessionStartTime, userRoutine]);
+    }, [sessionStartTime, userRoutine, currentSessionId]);
     
     const handleAddLogs = useCallback((logsToAdd: ExerciseLog[]) => {
         setLogs(prev => 
@@ -512,9 +600,15 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
     }, [activeProfile, userRoutine, goals, restSettings, trainingType]);
     
     const handleDeleteRoutine = useCallback((routineId: string) => {
-        if(window.confirm("¿Estás seguro de que quieres eliminar esta rutina guardada?")) {
-            setSavedRoutines(prev => prev.filter(r => r.id !== routineId));
-        }
+        setSavedRoutines(prev => {
+            const updated = prev.filter(r => r.id !== routineId);
+            try {
+                safeStorage.setItem('savedRoutines', JSON.stringify(updated));
+            } catch (e) {
+                console.error('Failed to save savedRoutines:', e);
+            }
+            return updated;
+        });
     }, []);
     
     const handleSaveManualLog = useCallback((
@@ -619,6 +713,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                         goals={goals}
                         userProfile={activeProfile}
                         userRoutine={userRoutine}
+                        lastFinishedSessionMetrics={lastFinishedSessionMetrics}
                         onDelete={(idsToDelete) => setLogs(prev => prev.filter(log => !idsToDelete.includes(log.id)))}
                         onAddLogs={handleAddLogs}
                       />
@@ -638,6 +733,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                         onSaveProfile={handleSaveProfile}
                         onSaveRestSettings={setRestSettings}
                         onViewHistory={() => setShowHistory(true)}
+                        onFinishSession={handleFinishWorkoutSession}
                         onGoToSettings={handleGoToSettings}
                         onEditRoutine={handleEditTodaysRoutine}
                         trainingType={trainingType}

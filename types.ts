@@ -14,6 +14,8 @@ export type RoutineType = 'Calistenia' | 'Gym' | 'Personalizado';
 
 export type RoutineFocus = 'Core' | 'Tren Superior' | 'Tren Inferior' | 'Mixto';
 
+export type BodyZone = 'Tren superior' | 'Tren inferior' | 'Core' | 'Cuerpo completo';
+
 export type TrainingType = 'Normal' | 'Clúster' | 'Drop';
 
 export interface UserRoutine {
@@ -21,6 +23,7 @@ export interface UserRoutine {
   name?: string;
   type: RoutineType;
   focus: RoutineFocus;
+  zones?: string[];
   exercises: ExerciseName[];
   equipment?: string[];
 }
@@ -42,6 +45,9 @@ export interface ExerciseLog {
   notes?: string;
   routineId?: string;
   routineName?: string;
+  sessionId?: string;
+  sessionDurationSeconds?: number;
+  interExerciseRestSeconds?: number;
 }
 
 export interface ExerciseGoal {
@@ -53,6 +59,16 @@ export interface ExerciseGoal {
   isWeighted?: boolean;
   useTempo?: boolean;
   clusterGoals?: Cluster[];
+  executionMethod?: TrainingType;
+  restBetweenSets?: number;
+  clusterConfig?: {
+    microRestSeconds?: number;
+    repsPerBlock?: number;
+  };
+  dropSetConfig?: {
+    dropCount?: number;
+    reductionPercent?: number;
+  };
 }
 
 export type Goals = Partial<Record<ExerciseName, ExerciseGoal>>;
@@ -91,4 +107,23 @@ export interface SavedRoutine {
     goals: Goals;
     restSettings: RestSettings;
     trainingType: TrainingType;
+}
+
+export interface SessionAnalysisMetrics {
+    sessionDate: string;
+    totalVolume: number;
+    volumeByExercise: {
+        exerciseName: string;
+        volume: number;
+        sets: number;
+        reps: number;
+    }[];
+    estimatedSessionDurationMinutes: number;
+    estimatedSessionDurationFormatted: string;
+    totalRestMinutes: number;
+    totalRestFormatted: string;
+    loadDensity: number;
+    prevLoadDensity: number | null;
+    loadDensityDiffPercent: number | null;
+    hasPreviousSession: boolean;
 }

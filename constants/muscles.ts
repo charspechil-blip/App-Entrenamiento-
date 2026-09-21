@@ -1,5 +1,6 @@
 
 import type { ExerciseName } from '../types';
+import { getDynamicMusclesForExercise } from '../services/exerciseCatalog';
 
 export type MuscleGroup =
   | 'neck'
@@ -23,7 +24,7 @@ export type MuscleGroup =
   | 'hamstrings'
   | 'calves_rear';
 
-export const MUSCLE_GROUP_MAPPING: Partial<Record<ExerciseName, MuscleGroup[]>> = {
+const BASE_MUSCLE_GROUP_MAPPING: Partial<Record<ExerciseName, MuscleGroup[]>> = {
   // Calistenia - Tren Superior
   'Flexión / Inver': ['chest', 'shoulders_front', 'triceps'],
   'Dominadas': ['lats', 'biceps', 'mid_back'],
@@ -97,3 +98,16 @@ export const MUSCLE_GROUP_MAPPING: Partial<Record<ExerciseName, MuscleGroup[]>> 
   'Thrusters': ['quads', 'shoulders', 'glutes', 'triceps'],
   'Paseo del granjero': ['forearms', 'traps', 'abs', 'calves_rear']
 };
+
+export const MUSCLE_GROUP_MAPPING: Partial<Record<ExerciseName, MuscleGroup[]>> = new Proxy(BASE_MUSCLE_GROUP_MAPPING, {
+  get(target, prop: string) {
+    if (prop in target) {
+      return (target as any)[prop];
+    }
+    const dynamic = getDynamicMusclesForExercise(prop);
+    if (dynamic && dynamic.length > 0) {
+      return dynamic;
+    }
+    return undefined;
+  }
+});

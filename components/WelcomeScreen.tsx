@@ -18,9 +18,25 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ profiles, savedRou
     const [expandedProfileId, setExpandedProfileId] = useState<string | null>(() => {
         return profiles.length === 1 ? profiles[0].id : null;
     });
+    const [routineToDelete, setRoutineToDelete] = useState<SavedRoutine | null>(null);
+    const [profileToDelete, setProfileToDelete] = useState<UserProfile | null>(null);
 
     const handleProfileClick = (profileId: string) => {
         setExpandedProfileId(current => (current === profileId ? null : profileId));
+    };
+
+    const confirmDeleteRoutine = () => {
+        if (routineToDelete) {
+            onDeleteRoutine(routineToDelete.id);
+            setRoutineToDelete(null);
+        }
+    };
+
+    const confirmDeleteProfile = () => {
+        if (profileToDelete) {
+            onDeleteProfile(profileToDelete.id);
+            setProfileToDelete(null);
+        }
     };
 
     return (
@@ -55,11 +71,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ profiles, savedRou
                                             type="button"
                                             id={`btn-delete-profile-${profile.id}`}
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 e.stopPropagation();
-                                                onDeleteProfile(profile.id);
+                                                setProfileToDelete(profile);
                                             }}
-                                            className="p-2 text-slate-500 hover:text-rose-400 transition-opacity opacity-0 group-hover:opacity-100"
+                                            className="min-w-[44px] min-h-[44px] p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all flex items-center justify-center cursor-pointer active:scale-90"
                                             aria-label={`Eliminar perfil ${profile.name}`}
+                                            title={`Eliminar perfil ${profile.name}`}
                                         >
                                             <Trash2 className="h-5 w-5" />
                                         </button>
@@ -173,10 +191,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ profiles, savedRou
                                                                     type="button"
                                                                     id={`btn-del-routine-${routine.id}`}
                                                                     onClick={(e) => {
+                                                                        e.preventDefault();
                                                                         e.stopPropagation();
-                                                                        onDeleteRoutine(routine.id);
+                                                                        setRoutineToDelete(routine);
                                                                     }}
-                                                                    className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all ml-1.5 flex-shrink-0"
+                                                                    className="min-w-[44px] min-h-[44px] p-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 rounded-xl transition-all ml-1.5 flex-shrink-0 flex items-center justify-center cursor-pointer active:scale-90"
                                                                     title={`Eliminar rutina ${routine.name}`}
                                                                     aria-label={`Eliminar rutina ${routine.name}`}
                                                                 >
@@ -217,6 +236,92 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ profiles, savedRou
                     </button>
                 </div>
             </div>
+
+            {/* Modal de confirmación para eliminar rutina */}
+            {routineToDelete && (
+                <div 
+                    id="modal-confirm-delete-routine" 
+                    className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
+                    onClick={() => setRoutineToDelete(null)}
+                >
+                    <div 
+                        className="bg-slate-800 border border-slate-700 rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-in text-center"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="w-12 h-12 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center mx-auto">
+                            <Trash2 className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-white">¿Eliminar rutina?</h3>
+                            <p className="text-sm text-slate-300">
+                                ¿Deseas eliminar la rutina <span className="font-semibold text-cyan-300">"{routineToDelete.name}"</span> de tus rutinas guardadas?
+                            </p>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                type="button"
+                                id="btn-cancel-delete-routine"
+                                onClick={() => setRoutineToDelete(null)}
+                                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-600 text-slate-200 font-semibold text-sm transition-colors cursor-pointer"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-confirm-delete-routine"
+                                onClick={confirmDeleteRoutine}
+                                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-semibold text-sm transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Eliminar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación para eliminar perfil */}
+            {profileToDelete && (
+                <div 
+                    id="modal-confirm-delete-profile" 
+                    className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
+                    onClick={() => setProfileToDelete(null)}
+                >
+                    <div 
+                        className="bg-slate-800 border border-slate-700 rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-in text-center"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="w-12 h-12 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center mx-auto">
+                            <Trash2 className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-white">¿Eliminar perfil?</h3>
+                            <p className="text-sm text-slate-300">
+                                ¿Deseas eliminar el perfil <span className="font-semibold text-cyan-300">"{profileToDelete.name}"</span> y todos sus registros y rutinas asociadas? Esta acción no se puede deshacer.
+                            </p>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                type="button"
+                                id="btn-cancel-delete-profile"
+                                onClick={() => setProfileToDelete(null)}
+                                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-600 text-slate-200 font-semibold text-sm transition-colors cursor-pointer"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-confirm-delete-profile"
+                                onClick={confirmDeleteProfile}
+                                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-semibold text-sm transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Eliminar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

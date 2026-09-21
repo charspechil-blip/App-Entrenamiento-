@@ -4,8 +4,10 @@ import { UserProfile } from './UserProfile';
 import type { UserProfile as UserProfileType, RoutineType, RoutineFocus, ExerciseName, UserRoutine, ExerciseLog, TrainingType, RestSettings, Goals } from '../types';
 import { PREDEFINED_EXERCISES } from '../constants/exercises';
 import { ManualLogModal } from './ManualLogModal';
-import { AIConversationAssistant } from './AIConversationAssistant';
 import { getEquipmentForExercise, canPerformExerciseWithEquipment, DEFAULT_EQUIPMENT_LIST, DEFAULT_INITIAL_SELECTED_EQUIPMENT } from '../constants/equipment';
+import { CustomExerciseModal } from './CustomExerciseModal';
+import { getAllCatalogExercises } from '../services/exerciseCatalog';
+import { Sparkles, SlidersHorizontal } from 'lucide-react';
 
 
 interface SetupWizardProps {
@@ -63,7 +65,9 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
   const [newExerciseName, setNewExerciseName] = useState('');
   const [suggestions, setSuggestions] = useState<ExerciseName[]>([]);
   const [isManualLogOpen, setIsManualLogOpen] = useState(false);
-  const [isRoutineBuilderOpen, setIsRoutineBuilderOpen] = useState(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [customModalExerciseName, setCustomModalExerciseName] = useState('');
+  const [catalogVersion, setCatalogVersion] = useState(0);
   
   const [aiAssistMode, setAiAssistMode] = useState<'idle' | 'active' | 'manual'>('idle');
 
@@ -80,8 +84,13 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
           }
       });
     }
+
+    // Incorporar todos los ejercicios del catálogo maestro (ejercicios.json) y personalizados
+    const catalogList = getAllCatalogExercises();
+    catalogList.forEach(c => allExercises.add(c.nombre as ExerciseName));
+
     return Array.from(allExercises).sort();
-  }, []);
+  }, [catalogVersion]);
 
   useEffect(() => {
     setStep(startStep);
@@ -171,11 +180,20 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
 
   const handleAddNewExercise = () => {
     const trimmedName = newExerciseName.trim();
-    if (trimmedName && !selectedExercises.includes(trimmedName as ExerciseName)) {
-      handleExerciseToggle(trimmedName as ExerciseName);
-      setNewExerciseName('');
-      setSuggestions([]);
+    if (!trimmedName) return;
+    
+    // Abrir el modal de configuración con checklist (equipamiento, zona, músculo) y opción de Gemini AI
+    setCustomModalExerciseName(trimmedName);
+    setIsCustomModalOpen(true);
+  };
+
+  const handleCustomExerciseAdded = (exerciseName: string) => {
+    if (!selectedExercises.includes(exerciseName as ExerciseName)) {
+      handleExerciseToggle(exerciseName as ExerciseName);
     }
+    setCatalogVersion(v => v + 1);
+    setNewExerciseName('');
+    setSuggestions([]);
   };
 
   const handleContinueToStep3 = () => {
@@ -183,14 +201,6 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
         setStep(3);
     }
   }
-  
-  const handleRoutineBuilderComplete = (config: { trainingType: TrainingType, restSettings: RestSettings, goals: Goals }) => {
-    if (profile && routine && focus) {
-        onComplete(profile, routine, focus, selectedExercises, favoriteExercises, config, availableEquipment);
-    }
-    setIsRoutineBuilderOpen(false);
-  };
-
 
   const handleFinish = () => {
     if (profile && routine && focus) {
@@ -449,6 +459,19 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
 
                                                         <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
                                                           <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                              e.stopPropagation();
+                                                              setCustomModalExerciseName(ex);
+                                                              setIsCustomModalOpen(true);
+                                                            }}
+                                                            className="p-1.5 rounded-full text-slate-500 hover:text-cyan-300 hover:bg-slate-700 transition-colors"
+                                                            title={`Configurar equipamiento y zona de ${ex}`}
+                                                            aria-label={`Configurar equipamiento y zona de ${ex}`}
+                                                          >
+                                                            <SlidersHorizontal className="h-4 w-4" />
+                                                          </button>
+                                                          <button
                                                               type="button"
                                                               onClick={() => handleToggleFavorite(ex)}
                                                               className={`p-1.5 rounded-full transition-colors ${isFavorite ? 'text-amber-400 hover:bg-slate-700' : 'text-slate-500 hover:text-amber-300 hover:bg-slate-700'}`}
@@ -515,6 +538,19 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
                                 >
                                     Añadir
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCustomModalExerciseName(newExerciseName.trim() || 'Nuevo Ejercicio');
+                                      setIsCustomModalOpen(true);
+                                    }}
+                                    className="flex-shrink-0 whitespace-nowrap bg-indigo-600/90 hover:bg-indigo-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center gap-1.5 text-xs sm:text-sm"
+                                    title="Configurar con checklist o ayuda de Gemini"
+                                    aria-label="Configurar con IA"
+                                >
+                                    <Sparkles className="w-4 h-4 text-cyan-300" />
+                                    <span className="hidden sm:inline">Configurar con IA</span>
+                                </button>
                             </div>
                             {suggestions.length > 0 && (
                                 <ul className="absolute z-10 w-full bg-slate-600 border border-slate-500 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg animate-fade-in">
@@ -537,20 +573,6 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
                         )}
                     </div>
 
-                    <div className="mt-8 p-4 bg-slate-900/50 rounded-lg border border-slate-700 text-center">
-                        <h3 className="text-lg font-bold text-indigo-400 mb-2">¿Necesitas ayuda para configurar?</h3>
-                        <p className="text-sm text-slate-400 mb-4">Usa el asistente de IA para establecer tus metas, descansos y tipo de entrenamiento de forma rápida.</p>
-                        <button
-                            onClick={() => setIsRoutineBuilderOpen(true)}
-                            disabled={selectedExercises.length === 0}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg transition-all disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                            <span>Configurar con Asistente IA</span>
-                        </button>
-                    </div>
-
-
                     <div className="flex justify-center pt-8 gap-4">
                         <button
                         onClick={handleBackToStep2}
@@ -571,13 +593,6 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
             </div>
         </div>
         </div>
-        {isRoutineBuilderOpen && (
-            <AIConversationAssistant
-                selectedExercises={selectedExercises}
-                onComplete={handleRoutineBuilderComplete}
-                onCancel={() => setIsRoutineBuilderOpen(false)}
-            />
-        )}
         <ManualLogModal
             isOpen={isManualLogOpen}
             onClose={() => setIsManualLogOpen(false)}
@@ -586,6 +601,14 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete, initialPro
             }}
             userRoutine={initialRoutine} 
         />
+        {isCustomModalOpen && (
+            <CustomExerciseModal
+                isOpen={isCustomModalOpen}
+                onClose={() => setIsCustomModalOpen(false)}
+                initialExerciseName={customModalExerciseName}
+                onExerciseAdded={handleCustomExerciseAdded}
+            />
+        )}
     </>
   );
 };

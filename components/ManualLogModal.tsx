@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { ExerciseLog, UserRoutine, ExerciseName, Cluster, TrainingType } from '../types';
 import { PREDEFINED_EXERCISES } from '../constants/exercises';
+import { getAllCatalogExercises } from '../services/exerciseCatalog';
 import { isTimeBased as isTimeBasedUtil, isBodyweight as isBodyweightUtil } from '../utils/exerciseUtils';
 import { generateUUID } from '../utils/uuid';
 
@@ -46,6 +47,8 @@ export const ManualLogModal: React.FC<ManualLogModalProps> = ({ isOpen, onClose,
                 focus.forEach(ex => all.add(ex));
             });
         });
+        const catalogList = getAllCatalogExercises();
+        catalogList.forEach(c => all.add(c.nombre as ExerciseName));
         return Array.from(all).sort();
     }, []);
 

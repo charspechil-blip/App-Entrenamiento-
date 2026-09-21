@@ -26,3 +26,20 @@
 .animate-fade-in-up {
   animation: fadeInUp 0.3s ease-out forwards;
 }
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.015);
+    box-shadow: 0 0 22px 5px rgba(16, 185, 129, 0.7);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 1.8s ease-in-out infinite;
+}

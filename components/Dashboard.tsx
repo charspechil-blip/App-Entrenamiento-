@@ -2,9 +2,8 @@ import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import type { ExerciseLog, ExerciseName, Goals, UserProfile, UserRoutine, RestSettings, TrainingType, Cluster } from '../types';
 import { ExerciseCard } from './ExerciseCard';
 import { getExerciseColor } from '../colors';
-import { GoalSetter } from './GoalSetter';
 import { UserProfile as UserProfileComponent } from './UserProfile';
-import { FloatingRestTimer } from './FloatingRestTimer';
+import { RestTimerModal } from './RestTimerModal';
 import { Clock, Dumbbell, Layers, CheckCircle2 } from 'lucide-react';
 
 interface DashboardProps {
@@ -24,6 +23,7 @@ interface DashboardProps {
   onSaveRestSettings: (settings: RestSettings) => void;
   onSetTrainingType: (type: TrainingType) => void;
   onViewHistory: () => void;
+  onFinishSession?: (durationSeconds: number, interExerciseRestSeconds: number) => void;
   onGoToSettings: () => void;
   onEditRoutine: () => void;
 }
@@ -45,10 +45,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSaveRestSettings,
   onSetTrainingType,
   onViewHistory,
+  onFinishSession,
   onGoToSettings,
   onEditRoutine,
 }) => {
   const [interExerciseRestActive, setInterExerciseRestActive] = useState(false);
+  const [nextExerciseForRest, setNextExerciseForRest] = useState<string | null>(null);
   const [interExerciseRestTimeLeft, setInterExerciseRestTimeLeft] = useState(0);
   const interExerciseRestEndTimeRef = useRef<number | null>(null);
 
@@ -73,6 +75,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const mins = Math.floor(totalSec / 60);
     const secs = totalSec % 60;
     return `${mins}m ${secs}s`;
+  };
+
+  const handleFinishClick = () => {
+    // Exact duration from the active session stopwatch
+    const duration = elapsedSeconds;
+
+    // Sum of rests between exercises, strictly excluding series micro-rests
+    const completedExercisesCount = (logs || []).filter(l => Array.isArray(l.clusters) && l.clusters.length > 0).length;
+    const interRestPerTransition = Number(restSettings?.restBetweenExercises) || 180;
+    const totalInterExerciseRests = Math.max(0, completedExercisesCount - 1) * interRestPerTransition;
+
+    if (onFinishSession) {
+      onFinishSession(duration, totalInterExerciseRests);
+    } else {
+      onViewHistory();
+    }
   };
 
   const playRestCompleteChime = useCallback(() => {
@@ -273,34 +291,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [userProfile, onSaveProfile]);
   
+  const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+
   const handleSkipInterExerciseRest = useCallback(() => {
     interExerciseRestEndTimeRef.current = null;
     setInterExerciseRestActive(false);
     setInterExerciseRestTimeLeft(0);
   }, []);
 
+  const handleSaveDefaultRestDuration = useCallback((newSec: number) => {
+    onSaveRestSettings({
+      ...restSettings,
+      restBetweenExercises: newSec,
+    });
+  }, [restSettings, onSaveRestSettings]);
+
+  const handleFinishExerciseInDashboard = useCallback((finishedExercise: ExerciseName) => {
+    const currentIndex = exercisesForDisplay.indexOf(finishedExercise);
+    let nextEx: string | null = null;
+    if (currentIndex >= 0 && currentIndex < exercisesForDisplay.length - 1) {
+      nextEx = exercisesForDisplay[currentIndex + 1];
+    }
+    setNextExerciseForRest(nextEx);
+    setInterExerciseRestActive(true);
+
+    if (nextEx) {
+      const safeId = `exercise-card-${nextEx.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+      setTimeout(() => {
+        const nextEl = document.getElementById(safeId);
+        if (nextEl) {
+          nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  }, [exercisesForDisplay]);
+
   const exerciseElements = useMemo(() => {
     return exercisesForDisplay.map((exercise) => {
       const prevLog = getPreviousSessionLog(exercise);
       const currLog = logs.find(l => l.exerciseName === exercise) || null;
       const routineKey = userRoutine?.id || userRoutine?.name || 'routine';
+      const safeId = `exercise-card-${exercise.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
 
       return (
-        <ExerciseCard
-          key={`${routineKey}_${exercise}`}
-          exerciseName={exercise}
-          previousLog={prevLog}
-          currentLog={currLog}
-          onUpdateLog={handleExerciseLogUpdate}
-          goal={goals[exercise]}
-          color={getExerciseColor(exercise)}
-          userProfile={userProfile}
-          restBetweenSets={restSettings.restBetweenSets}
-          trainingType={trainingType}
-          autoRest={restSettings.mode === 'auto'}
-          onTriggerInterExerciseRest={handleTriggerInterExerciseRest}
-          isDisabled={interExerciseRestActive}
-        />
+        <div key={`${routineKey}_${exercise}`} id={safeId} className="transition-all">
+          <ExerciseCard
+            exerciseName={exercise}
+            previousLog={prevLog}
+            currentLog={currLog}
+            onUpdateLog={handleExerciseLogUpdate}
+            goal={goals[exercise]}
+            color={getExerciseColor(exercise)}
+            userProfile={userProfile}
+            restBetweenSets={restSettings.restBetweenSets}
+            trainingType={trainingType}
+            autoRest={restSettings.mode === 'auto'}
+            onTriggerInterExerciseRest={handleTriggerInterExerciseRest}
+            onFinishExercise={handleFinishExerciseInDashboard}
+            isDisabled={interExerciseRestActive}
+          />
+        </div>
       );
     });
   }, [
@@ -313,25 +363,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
     restSettings, 
     trainingType, 
     handleTriggerInterExerciseRest, 
+    handleFinishExerciseInDashboard,
     interExerciseRestActive,
     userRoutine
   ]);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <UserProfileComponent profile={userProfile} onSave={handleProfileSaveFromComponent} />
+    <div className="space-y-6 animate-fade-in">
+      {/* Quick toggle for advanced settings/profile (keeps main training view clear and immediate) */}
+      <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+        <span className="font-semibold text-slate-300">
+          Rutina: <span className="text-cyan-400 font-bold">{userRoutine?.name || 'Entrenamiento del día'}</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
+          className="hover:text-cyan-400 flex items-center gap-1 py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-800 transition-colors"
+        >
+          <span>👤</span>
+          <span>{showAdvancedConfig ? 'Ocultar perfil' : 'Perfil de usuario'}</span>
+        </button>
+      </div>
 
-      <GoalSetter 
-        exercises={exercisesForDisplay} 
-        currentGoals={goals} 
-        onSetGoals={onSetGoals} 
-        trainingType={trainingType}
-        onSetTrainingType={onSetTrainingType}
-        restSettings={restSettings}
-        onSaveRestSettings={onSaveRestSettings}
-      />
+      {showAdvancedConfig && (
+        <div className="space-y-6 animate-fade-in bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80">
+          <UserProfileComponent profile={userProfile} onSave={handleProfileSaveFromComponent} />
+        </div>
+      )}
 
-      {/* Botón Comenzar Entrenamiento ubicado debajo de la tarjeta "Metas de entreno" */}
+      {/* Botón Comenzar Entrenamiento */}
       <div id="section-start-training" className="animate-fade-in">
         {!sessionStartTime ? (
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl backdrop-blur-sm text-center">
@@ -412,8 +472,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
 
               <button
-                onClick={onViewHistory}
-                className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl transition-all shadow-md shadow-cyan-600/30 flex items-center gap-1.5"
+                onClick={handleFinishClick}
+                className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl transition-all shadow-md shadow-cyan-600/30 flex items-center gap-1.5 cursor-pointer"
                 aria-label="Terminar sesión"
               >
                 <CheckCircle2 className="w-4 h-4" />
@@ -482,7 +542,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 Has completado todos los ejercicios programados ({completedExercisesToday.size} de {routineExercises.length}). Tus datos ya están guardados.
               </p>
               <button
-                onClick={onViewHistory}
+                onClick={handleFinishClick}
                 className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-emerald-500/40 text-base sm:text-lg flex items-center justify-center gap-2 mx-auto cursor-pointer"
               >
                 <CheckCircle2 className="h-5 w-5" />
@@ -500,7 +560,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   : 'Registra tus series marcando las casillas con ✓. Puedes finalizar y guardar tu sesión en cualquier momento.'}
               </p>
               <button
-                onClick={onViewHistory}
+                onClick={handleFinishClick}
                 className="w-full sm:w-auto bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3.5 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/30 text-base sm:text-lg flex items-center justify-center gap-2 mx-auto cursor-pointer"
                 aria-label="Guardar sesión de entrenamiento ahora"
               >
@@ -512,11 +572,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      <FloatingRestTimer
-        isActive={interExerciseRestActive}
-        timeLeft={interExerciseRestTimeLeft}
-        totalDuration={restSettings.restBetweenExercises}
-        onSkip={handleSkipInterExerciseRest}
+      <RestTimerModal
+        isOpen={interExerciseRestActive}
+        onClose={() => setInterExerciseRestActive(false)}
+        nextExerciseName={nextExerciseForRest}
+        defaultDurationSec={restSettings.restBetweenExercises || 180}
+        onSaveDefaultDuration={handleSaveDefaultRestDuration}
+        onRestComplete={() => {
+          setInterExerciseRestActive(false);
+        }}
       />
     </div>
   );

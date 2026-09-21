@@ -3,7 +3,7 @@ import type { ExerciseLog, ExerciseGoal, ExerciseName, Cluster, ColorTheme, User
 import { GoalProgress } from './GoalProgress';
 import { isTimeBased as isTimeBasedUtil, isEffectivelyRepBased as isRepBasedUtil } from '../utils/exerciseUtils';
 import { generateUUID } from '../utils/uuid';
-import { Check, Plus, Trash2, Clock, Dumbbell, Heart, Info } from 'lucide-react';
+import { Check, Plus, Trash2, Clock, Dumbbell, Heart, Info, ArrowRight, SlidersHorizontal } from 'lucide-react';
 
 interface ExerciseCardProps {
   exerciseName: ExerciseName;
@@ -17,6 +17,7 @@ interface ExerciseCardProps {
   trainingType: TrainingType;
   autoRest?: boolean;
   onTriggerInterExerciseRest?: () => void;
+  onFinishExercise?: (exerciseName: ExerciseName) => void;
   isDisabled?: boolean;
 }
 
@@ -27,6 +28,8 @@ interface LocalSeriesRow {
   rir: string;
   time: number;
   isCompleted: boolean;
+  dropWeight?: string;
+  dropReps?: string;
 }
 
 const formatSecondsToMMSS = (totalSeconds: number): string => {
@@ -50,10 +53,35 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   trainingType,
   autoRest = true,
   onTriggerInterExerciseRest,
+  onFinishExercise,
   isDisabled = false
 }) => {
   const isTimeBased = useMemo(() => isTimeBasedUtil(exerciseName), [exerciseName]);
-  const isEffectivelyRepBased = useMemo(() => isRepBasedUtil(exerciseName, goal, trainingType), [exerciseName, goal, trainingType]);
+
+  // Inline execution method: Normal (default), Clúster, or Drop set
+  const [executionMethod, setExecutionMethod] = useState<TrainingType>(() => {
+    return goal?.executionMethod || trainingType || 'Normal';
+  });
+
+  // Inline rest time configuration for this exercise
+  const [inlineRest, setInlineRest] = useState<number>(() => {
+    return goal?.restBetweenSets || restBetweenSets || 60;
+  });
+
+  // Cluster parameters
+  const [clusterMicroRest, setClusterMicroRest] = useState<number>(() => {
+    return goal?.clusterConfig?.microRestSeconds || 15;
+  });
+  const [clusterBlockReps, setClusterBlockReps] = useState<number>(() => {
+    return goal?.clusterConfig?.repsPerBlock || 2;
+  });
+
+  // Drop set parameters
+  const [dropReductionPercent, setDropReductionPercent] = useState<number>(() => {
+    return goal?.dropSetConfig?.reductionPercent || 20;
+  });
+
+  const isEffectivelyRepBased = useMemo(() => isRepBasedUtil(exerciseName, goal, executionMethod), [exerciseName, goal, executionMethod]);
 
   const [notes, setNotes] = useState<string>(currentLog?.notes || '');
   const [bpm, setBpm] = useState<string>(() => {
@@ -67,31 +95,99 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   const [intraSetRestTimeLeft, setIntraSetRestTimeLeft] = useState(0);
   const intraSetRestEndTimeRef = useRef<number | null>(null);
 
-  // Initialize series list from existing session log or empty rows based on planned count
-  const [series, setSeries] = useState<LocalSeriesRow[]>(() => {
-    if (currentLog?.clusters && currentLog.clusters.length > 0) {
-      return currentLog.clusters.map((c) => ({
-        id: generateUUID(),
-        weight: c.weight !== undefined ? String(c.weight) : '',
-        reps: c.reps !== undefined ? String(c.reps) : '',
-        rir: c.rir !== undefined ? String(c.rir) : '',
-        time: c.time || 0,
-        isCompleted: true
-      }));
+  // Helper to obtain goal or historical values for any series/cluster row
+  const getGoalOrFallbackValues = useCallback((index: number) => {
+    const isClusterGoalMode = !!(goal?.clusterGoals && goal.clusterGoals.length > 0);
+    const clusterGoal = isClusterGoalMode ? goal?.clusterGoals?.[index] : undefined;
+    const hasClusterWeight = clusterGoal?.weight !== undefined && clusterGoal.weight > 0;
+    const hasClusterReps = clusterGoal?.reps !== undefined && clusterGoal.reps > 0;
+
+    // General exercise goal (only if NOT in cluster mode with individual goals)
+    const hasGeneralWeight = !isClusterGoalMode && goal?.weight !== undefined && goal.weight > 0;
+    const hasGeneralReps = !isClusterGoalMode && goal?.reps !== undefined && goal.reps > 0;
+
+    // Previous session log records
+    const prevCluster = previousLog?.clusters?.[index];
+    const prevFirstCluster = previousLog?.clusters?.[0];
+    const hasPrevWeight = prevCluster?.weight !== undefined && prevCluster.weight > 0;
+    const hasPrevReps = prevCluster?.reps !== undefined && prevCluster.reps > 0;
+    const prevRir = prevCluster?.rir !== undefined 
+      ? String(prevCluster.rir) 
+      : (prevFirstCluster?.rir !== undefined ? String(prevFirstCluster.rir) : '2');
+
+    // Resolve weight
+    let defaultWeight = '';
+    if (hasClusterWeight) {
+      defaultWeight = String(clusterGoal!.weight);
+    } else if (hasGeneralWeight) {
+      defaultWeight = String(goal!.weight);
+    } else if (hasPrevWeight) {
+      defaultWeight = String(prevCluster!.weight);
+    } else if (prevFirstCluster?.weight !== undefined && prevFirstCluster.weight > 0) {
+      defaultWeight = String(prevFirstCluster.weight);
     }
 
+    // Resolve reps / time
+    let defaultReps = '';
+    if (isTimeBased) {
+      defaultReps = String(goal?.totalTime || prevCluster?.time || prevFirstCluster?.time || 30);
+    } else if (hasClusterReps) {
+      defaultReps = String(clusterGoal!.reps);
+    } else if (hasGeneralReps) {
+      defaultReps = String(goal!.reps);
+    } else if (hasPrevReps) {
+      defaultReps = String(prevCluster!.reps);
+    } else if (prevFirstCluster?.reps !== undefined && prevFirstCluster.reps > 0) {
+      defaultReps = String(prevFirstCluster.reps);
+    }
+
+    return {
+      weight: defaultWeight,
+      reps: defaultReps,
+      rir: prevRir || '2',
+      time: isTimeBased ? (parseInt(defaultReps, 10) || 30) : 0,
+    };
+  }, [goal, previousLog, isTimeBased]);
+
+  // Progressive Configuration: initialize series list ensuring all goal series (clusters or standard)
+  // are created with their corresponding target weight and reps loaded from the start
+  const [series, setSeries] = useState<LocalSeriesRow[]>(() => {
+    const prevClusters = previousLog?.clusters || [];
+    const currentClusters = currentLog?.clusters || [];
+    const goalSeriesCount = (goal?.clusterGoals && goal.clusterGoals.length > 0)
+      ? goal.clusterGoals.length
+      : (goal?.series && goal.series > 0 ? goal.series : 0);
+
+    // If user configured a goal, plannedCount strictly equals the goal series count (or completed rows count if higher)
+    // Only if NO goal is set, fallback to previous log clusters or default 3
+    const plannedCount = goalSeriesCount > 0
+      ? Math.max(goalSeriesCount, currentClusters.length)
+      : Math.max(1, prevClusters.length || 3, currentClusters.length);
+
     const initialRows: LocalSeriesRow[] = [];
-    const plannedCount = Math.max(1, goal?.series || 3);
 
     for (let i = 0; i < plannedCount; i++) {
-      initialRows.push({
-        id: generateUUID(),
-        weight: '',
-        reps: '',
-        rir: '',
-        time: isTimeBased ? (goal?.totalTime || 30) : 0,
-        isCompleted: false
-      });
+      if (i < currentClusters.length) {
+        const c = currentClusters[i];
+        initialRows.push({
+          id: generateUUID(),
+          weight: c.weight !== undefined ? String(c.weight) : '',
+          reps: c.reps !== undefined ? String(c.reps) : '',
+          rir: c.rir !== undefined ? String(c.rir) : '',
+          time: c.time || 0,
+          isCompleted: true
+        });
+      } else {
+        const fallback = getGoalOrFallbackValues(i);
+        initialRows.push({
+          id: generateUUID(),
+          weight: fallback.weight,
+          reps: fallback.reps,
+          rir: fallback.rir,
+          time: fallback.time,
+          isCompleted: false
+        });
+      }
     }
 
     return initialRows;
@@ -102,6 +198,77 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   const notesRef = useRef<string>(notes);
   notesRef.current = notes;
 
+  // Reactively sync execution method when goal changes
+  useEffect(() => {
+    if (goal?.executionMethod) {
+      setExecutionMethod(goal.executionMethod);
+    }
+  }, [goal?.executionMethod]);
+
+  // Reactively sync rows when goals are present or updated
+  useEffect(() => {
+    if (!goal) return;
+
+    const goalSeriesCount = (goal.clusterGoals && goal.clusterGoals.length > 0)
+      ? goal.clusterGoals.length
+      : (goal.series && goal.series > 0 ? goal.series : 0);
+
+    if (goalSeriesCount <= 0) return;
+
+    const prev = seriesRef.current;
+    
+    // Check completed series
+    const completedCount = prev.filter(s => s.isCompleted).length;
+    // The target number of rows reflects the goal count, or completed count if higher
+    const targetCount = Math.max(goalSeriesCount, completedCount);
+
+    let updated = [...prev];
+
+    // If we have extra uncompleted rows that exceed targetCount (e.g. from a previous 3 default), trim them
+    if (updated.length > targetCount) {
+      const trimmed: LocalSeriesRow[] = [];
+      let uncompletedKept = 0;
+      const maxUncompletedToKeep = Math.max(0, targetCount - completedCount);
+      for (const row of updated) {
+        if (row.isCompleted) {
+          trimmed.push(row);
+        } else if (uncompletedKept < maxUncompletedToKeep) {
+          trimmed.push(row);
+          uncompletedKept++;
+        }
+      }
+      updated = trimmed;
+    }
+
+    // Now update/populate each row according to the target goal values
+    for (let i = 0; i < targetCount; i++) {
+      const suggested = getGoalOrFallbackValues(i);
+      if (i < updated.length) {
+        if (!updated[i].isCompleted) {
+          updated[i] = {
+            ...updated[i],
+            weight: suggested.weight,
+            reps: suggested.reps,
+            rir: updated[i].rir || suggested.rir,
+            time: suggested.time
+          };
+        }
+      } else {
+        updated.push({
+          id: generateUUID(),
+          weight: suggested.weight,
+          reps: suggested.reps,
+          rir: suggested.rir,
+          time: suggested.time,
+          isCompleted: false
+        });
+      }
+    }
+
+    seriesRef.current = updated;
+    setSeries(updated);
+  }, [goal, getGoalOrFallbackValues]);
+
   // Sync state if currentLog gets updated externally
   useEffect(() => {
     if (currentLog?.heartRate !== undefined) {
@@ -110,16 +277,18 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }
 
     if (!currentLog || !currentLog.clusters || currentLog.clusters.length === 0) {
-      // If current session log is cleared or reset, reset series completion and empty inputs
       const isAnyCompleted = seriesRef.current.some(s => s.isCompleted);
       if (isAnyCompleted) {
-        const resetRows = seriesRef.current.map(s => ({
-          ...s,
-          isCompleted: false,
-          weight: '',
-          reps: '',
-          rir: ''
-        }));
+        const resetRows = seriesRef.current.map((s, idx) => {
+          const fallback = getGoalOrFallbackValues(idx);
+          return {
+            ...s,
+            isCompleted: false,
+            weight: fallback.weight,
+            reps: fallback.reps,
+            rir: fallback.rir
+          };
+        });
         seriesRef.current = resetRows;
         setSeries(resetRows);
       }
@@ -160,9 +329,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         });
       }
     });
+
     seriesRef.current = updated;
     setSeries(updated);
-  }, [currentLog]);
+  }, [currentLog, getGoalOrFallbackValues]);
 
   const playRestCompleteChime = useCallback(() => {
     try {
@@ -309,27 +479,17 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
       let effReps = s.reps;
       let effRir = s.rir;
 
-      // If newly completing and values are empty, auto-fill with defaults
+      // If newly completing and values are empty, use goals or sensible defaults
       if (willBeCompleted) {
+        const fallback = getGoalOrFallbackValues(idx);
         if (!effReps || effReps.trim() === '' || effReps === '0') {
-          const fallbackReps = goal?.clusterGoals?.[idx]?.reps || 
-                               goal?.reps || 
-                               previousLog?.clusters?.[idx]?.reps || 
-                               (isTimeBased ? (goal?.totalTime || 30) : 10);
-          effReps = String(fallbackReps);
+          effReps = fallback.reps || (isTimeBased ? '30' : '10');
         }
         if (!isTimeBased && (!effWeight || effWeight.trim() === '')) {
-          const fallbackWeight = goal?.clusterGoals?.[idx]?.weight ?? 
-                                 goal?.weight ?? 
-                                 previousLog?.clusters?.[idx]?.weight ?? 
-                                 0;
-          effWeight = String(fallbackWeight);
+          effWeight = fallback.weight || '0';
         }
         if (!effRir || effRir.trim() === '') {
-          const fallbackRir = previousLog?.clusters?.[idx]?.rir !== undefined 
-            ? String(previousLog.clusters[idx].rir) 
-            : '2';
-          effRir = fallbackRir;
+          effRir = fallback.rir || '2';
         }
       }
 
@@ -363,31 +523,55 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
       // Check if there are more series to do in this exercise
       const hasUncheckedSeries = updated.some(s => !s.isCompleted);
-      const restDuration = restBetweenSets || 40;
+      const restDuration = inlineRest || restBetweenSets || 40;
 
       if (autoRest && restDuration > 0) {
         if (hasUncheckedSeries) {
           intraSetRestEndTimeRef.current = Date.now() + restDuration * 1000;
           setIntraSetRestTimeLeft(restDuration);
           setIsIntraSetResting(true);
-        } else if (onTriggerInterExerciseRest) {
-          onTriggerInterExerciseRest();
         }
+        // Inter-exercise rest is not triggered on series check; user clicks "Finalizar ejercicio"
       }
+    }
+  };
+
+  // Handler for "Finalizar ejercicio →"
+  const handleFinishExercise = () => {
+    const completedClusters: Cluster[] = seriesRef.current
+      .filter(s => s.isCompleted)
+      .map(s => ({
+        weight: parseFloat(s.weight) || 0,
+        reps: parseInt(s.reps, 10) || 0,
+        ...(s.rir !== '' && { rir: parseFloat(s.rir) || 0 }),
+        ...(isTimeBased && { time: parseInt(s.reps, 10) || s.time || 0 })
+      }));
+
+    const hr = bpmRef.current.trim() ? parseInt(bpmRef.current, 10) || undefined : undefined;
+    if (completedClusters.length > 0) {
+      onUpdateLog(exerciseName, completedClusters, notesRef.current, hr);
+    }
+
+    if (onFinishExercise) {
+      onFinishExercise(exerciseName);
     }
   };
 
   // Add a new series row
   const handleAddSeries = () => {
     const current = seriesRef.current;
+    const newIndex = current.length;
+    const fallback = getGoalOrFallbackValues(newIndex);
+    const lastRow = current[current.length - 1];
+
     const updated: LocalSeriesRow[] = [
       ...current,
       {
         id: generateUUID(),
-        weight: '',
-        reps: '',
-        rir: '',
-        time: isTimeBased ? (goal?.totalTime || 30) : 0,
+        weight: fallback.weight || lastRow?.weight || '',
+        reps: fallback.reps || lastRow?.reps || '',
+        rir: fallback.rir || lastRow?.rir || '2',
+        time: isTimeBased ? (parseInt(fallback.reps || lastRow?.reps || '30', 10) || 30) : 0,
         isCompleted: false
       }
     ];
@@ -475,7 +659,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             </h3>
             <div className="flex items-center gap-2 text-xs font-medium text-cyan-400/90 mt-0.5">
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Descanso: {restBetweenSets || 40}s</span>
+              <span>Descanso: {inlineRest}s</span>
             </div>
           </div>
         </div>
@@ -489,10 +673,111 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
                 : 'bg-slate-800 text-slate-400 border border-slate-700'
           }`}>
-            {completedCount}/{series.length} {trainingType === 'Clúster' ? 'clústeres' : 'series'}
+            {completedCount}/{series.length} {executionMethod === 'Clúster' ? 'clústeres' : 'series'}
           </span>
         </div>
       </div>
+
+      {/* Inline Configuration Bar: Método & Descanso */}
+      <div className="mb-3 bg-slate-950/60 rounded-xl p-2 border border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+        {/* Execution Method Selector */}
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] font-semibold text-slate-400 mr-1">Método:</span>
+          {(['Normal', 'Clúster', 'Drop'] as TrainingType[]).map((m) => {
+            const isSel = executionMethod === m;
+            const label = m === 'Drop' ? 'Drop set' : m;
+            return (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setExecutionMethod(m)}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-colors ${
+                  isSel
+                    ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Rest selector */}
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] font-semibold text-slate-400 mr-1">Descanso:</span>
+          {[30, 60, 90, 120].map((sec) => (
+            <button
+              key={sec}
+              type="button"
+              onClick={() => setInlineRest(sec)}
+              className={`px-1.5 py-0.5 rounded text-[11px] font-medium transition-colors ${
+                inlineRest === sec
+                  ? 'bg-teal-500/30 text-teal-300 border border-teal-500/50'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {sec}s
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Advanced Method Configuration (Only visible when Clúster or Drop set is active) */}
+      {executionMethod === 'Clúster' && (
+        <div className="mb-3 p-2 bg-cyan-950/30 border border-cyan-500/30 rounded-xl text-xs flex items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-1 text-cyan-300 font-semibold">
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Configuración Clúster:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1 text-slate-300 text-[11px]">
+              <span>Micro-pausa:</span>
+              <input
+                type="number"
+                value={clusterMicroRest}
+                onChange={(e) => setClusterMicroRest(parseInt(e.target.value, 10) || 15)}
+                className="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-center text-cyan-300 font-bold"
+                min="5"
+                max="60"
+              />
+              <span>s</span>
+            </label>
+            <label className="flex items-center gap-1 text-slate-300 text-[11px]">
+              <span>Reps/bloque:</span>
+              <input
+                type="number"
+                value={clusterBlockReps}
+                onChange={(e) => setClusterBlockReps(parseInt(e.target.value, 10) || 2)}
+                className="w-10 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-center text-cyan-300 font-bold"
+                min="1"
+                max="10"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {executionMethod === 'Drop' && (
+        <div className="mb-3 p-2 bg-amber-950/30 border border-amber-500/30 rounded-xl text-xs flex items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-1 text-amber-300 font-semibold">
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Configuración Drop Set:</span>
+          </div>
+          <label className="flex items-center gap-1 text-slate-300 text-[11px]">
+            <span>Reducción de carga:</span>
+            <input
+              type="number"
+              value={dropReductionPercent}
+              onChange={(e) => setDropReductionPercent(parseInt(e.target.value, 10) || 20)}
+              className="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-center text-amber-300 font-bold"
+              min="5"
+              max="50"
+            />
+            <span>%</span>
+          </label>
+        </div>
+      )}
 
       {/* Notes Input */}
       <div className="mb-3">
@@ -672,42 +957,67 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         className="w-full mt-3 py-2 px-4 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200"
       >
         <Plus className="w-4 h-4 text-cyan-400" />
-        <span>{trainingType === 'Clúster' ? 'Agregar Clúster' : 'Agregar Serie'}</span>
+        <span>{executionMethod === 'Clúster' ? 'Agregar Clúster' : 'Agregar Serie'}</span>
       </button>
 
-      {/* BPM Bar (al finalizar el ejercicio) */}
-      <div className="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2.5 bg-slate-950/40 rounded-xl p-2.5 border border-slate-800/60">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
-            <Heart className="w-4 h-4 text-rose-400 fill-rose-400/30" />
-          </div>
-          <div className="flex items-center flex-wrap gap-1 min-w-0">
-            <span className="text-xs sm:text-sm font-bold text-white tracking-wide">BPM</span>
-            <span className="text-[11px] sm:text-xs text-slate-400 truncate">(al finalizar el ejercicio)</span>
-            <div className="relative group cursor-pointer inline-flex items-center">
-              <Info className="w-3.5 h-3.5 text-slate-400 hover:text-slate-300 ml-0.5" />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block w-48 p-2 bg-slate-900 text-[11px] text-slate-300 rounded-lg shadow-xl border border-slate-700 z-20 text-center pointer-events-none">
-                Frecuencia cardíaca (pulsaciones por minuto) registrada al terminar este ejercicio.
+      {/* BPM Section (Registrar al finalizar el ejercicio) */}
+      <div className={`mt-3.5 pt-3 border-t rounded-xl p-3 transition-all duration-200 ${
+        isAllSeriesCompleted
+          ? 'bg-rose-950/20 border-rose-500/30'
+          : 'bg-slate-950/40 border-slate-800/60'
+      }`}>
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+              <Heart className="w-4 h-4 text-rose-400 fill-rose-400/30" />
+            </div>
+            <div className="flex items-center flex-wrap gap-1 min-w-0">
+              <span className="text-xs sm:text-sm font-bold text-white tracking-wide">BPM</span>
+              <span className="text-[11px] sm:text-xs text-slate-400 truncate">
+                Registrar al finalizar el ejercicio
+              </span>
+              <div className="relative group cursor-pointer inline-flex items-center">
+                <Info className="w-3.5 h-3.5 text-slate-400 hover:text-slate-300 ml-0.5" />
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block w-48 p-2 bg-slate-900 text-[11px] text-slate-300 rounded-lg shadow-xl border border-slate-700 z-20 text-center pointer-events-none">
+                  Frecuencia cardíaca (pulsaciones por minuto) registrada al terminar este ejercicio.
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <input
-            type="number"
-            value={bpm}
-            onChange={(e) => handleBpmChange(e.target.value)}
-            placeholder="--"
-            min="40"
-            max="240"
-            className="w-16 sm:w-20 bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-lg py-1.5 px-2 text-center text-sm font-bold text-white placeholder-slate-600 focus:outline-none transition-all"
-          />
-          <span className="text-xs font-semibold text-slate-400">BPM</span>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <input
+              type="number"
+              value={bpm}
+              onChange={(e) => handleBpmChange(e.target.value)}
+              placeholder="--"
+              min="40"
+              max="240"
+              className="w-16 sm:w-20 bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-lg py-1.5 px-2 text-center text-sm font-bold text-white placeholder-slate-600 focus:outline-none transition-all"
+            />
+            <span className="text-xs font-semibold text-slate-400">BPM</span>
+          </div>
         </div>
       </div>
 
-      {/* Note: NO individual "Registrar Entrenamiento" button! Finalization happens globally via "Finalizar sesión ahora" / "Guardar sesión ahora" */}
+      {/* Button: Finalizar ejercicio → (Al completar las series o registrar BPM) */}
+      {(isAllSeriesCompleted || completedCount > 0) && (
+        <div className="mt-3">
+          <button
+            type="button"
+            id={`btn-finish-exercise-${exerciseName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`}
+            onClick={handleFinishExercise}
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md cursor-pointer ${
+              isAllSeriesCompleted
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-emerald-500/20 active:scale-[0.99] animate-subtle-pulse ring-2 ring-emerald-400/60'
+                : 'bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700'
+            }`}
+          >
+            <span>Finalizar ejercicio</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

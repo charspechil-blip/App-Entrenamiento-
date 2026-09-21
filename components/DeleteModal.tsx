@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import type { ExerciseLog } from '../types';
 
+const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString('es-ES', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 interface DeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,6 +21,15 @@ interface DeleteModalProps {
 export const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onDelete, logsBySession, sortedSessionKeys }) => {
   const [selectedSessions, setSelectedSessions] = useState<string[]>([]);
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const getSessionDisplayTitle = (sessionKey: string): string => {
+    const sessionLogs = logsBySession[sessionKey] || [];
+    const first = sessionLogs[0];
+    if (!first) return sessionKey;
+    const dateStr = formatDate(first.timestamp);
+    const routineStr = first.routineName ? ` · ${first.routineName}` : '';
+    return `${dateStr}${routineStr}`;
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -88,7 +106,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onDel
                           onChange={() => handleToggleSelection(sessionKey)}
                           className="h-5 w-5 rounded bg-slate-600 border-slate-500 text-cyan-500 focus:ring-cyan-500"
                         />
-                        <span className="ml-3 text-sm text-slate-200">{sessionKey}</span>
+                        <span className="ml-3 text-sm text-slate-200 truncate">{getSessionDisplayTitle(sessionKey)}</span>
                       </label>
                     ))
                   ) : (
