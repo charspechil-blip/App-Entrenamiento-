@@ -5,211 +5,267 @@ import {
   Check, 
   Loader2, 
   Dumbbell, 
-  Activity, 
-  ChevronDown, 
-  ChevronUp, 
-  FileText,
+  ChevronLeft, 
+  ChevronRight,
   AlertCircle
 } from 'lucide-react';
 import { 
   CatalogExercise, 
   saveCustomExerciseToCatalog, 
   findExerciseByName,
-  normalizeEquipmentTags,
   extractMuscleGroups
 } from '../services/exerciseCatalog';
 import type { MuscleGroup } from '../constants/muscles';
+import { ExerciseFormData, ExerciseFormStep } from './exercise-form/types';
+import { ExerciseStepIndicator } from './exercise-form/ExerciseStepIndicator';
+import { Step1Basics } from './exercise-form/Step1Basics';
+import { Step2Equipment } from './exercise-form/Step2Equipment';
+import { Step3Muscles } from './exercise-form/Step3Muscles';
+import { Step4Details } from './exercise-form/Step4Details';
+import { AiProposalModal } from './exercise-form/AiProposalModal';
 
-interface CustomExerciseModalProps {
+export interface CustomExerciseModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialExerciseName: string;
   onExerciseAdded: (exerciseName: string) => void;
+  initialExerciseData?: Partial<CatalogExercise>;
 }
 
-// Checkbox items for equipment as explicitly requested by the user
-const PRIMARY_EQUIPMENT_OPTIONS = [
-  { id: 'peso_corporal', label: 'Peso corporal', value: 'Peso corporal (Sin equipo)' },
-  { id: 'mancuernas', label: 'Mancuernas', value: 'Mancuernas' },
-  { id: 'barra_olimpica', label: 'Barra olímpica', value: 'Barra olímpica / Discos' },
-  { id: 'maquina_gym', label: 'Maquina Gym', value: 'Máquina de poleas / Smith' }
-];
-
-const SECONDARY_EQUIPMENT_OPTIONS = [
-  { id: 'pesas_rusas', label: 'Pesas rusas / Kettlebells', value: 'Pesas rusas / Kettlebells' },
-  { id: 'bandas', label: 'Bandas elásticas', value: 'Bandas elásticas' },
-  { id: 'banco', label: 'Banco de pesas', value: 'Banco de pesas' },
-  { id: 'barra_dominadas', label: 'Barra de dominadas', value: 'Barra de dominadas' }
-];
-
-// Zones checklist as structured by the user
-interface ZoneOption {
-  zone: 'inferior' | 'superior';
-  subzone: string;
-  label: string;
-  suggestedMuscles: string[];
-}
-
-const ZONE_OPTIONS: ZoneOption[] = [
-  // Inferior
-  { zone: 'inferior', subzone: 'Core', label: 'Core', suggestedMuscles: ['Abdominales', 'Oblicuos', 'Lumbar'] },
-  { zone: 'inferior', subzone: 'Piernas', label: 'Piernas', suggestedMuscles: ['Cuádriceps', 'Glúteos', 'Isquiotibiales', 'Aductores', 'Gemelos'] },
-  // Superior
-  { zone: 'superior', subzone: 'Torso', label: 'Torso', suggestedMuscles: ['Pectoral mayor', 'Deltoides anterior', 'Pectoral menor'] },
-  { zone: 'superior', subzone: 'Brazos', label: 'Brazos', suggestedMuscles: ['Bíceps braquial', 'Tríceps braquial', 'Antebrazos'] },
-  { zone: 'superior', subzone: 'Espalda', label: 'Espalda', suggestedMuscles: ['Dorsal ancho', 'Trapecio', 'Romboides', 'Erectores espinales'] }
-];
+const DEFAULT_FORM_DATA: ExerciseFormData = {
+  name: '',
+  category: 'Fuerza',
+  secondaryCategories: [],
+  description: '',
+  image: '',
+  equipment: ['Peso corporal'],
+  equipmentVariants: [],
+  canBeDoneWithoutEquipment: true,
+  bodyZones: ['Tren inferior'],
+  subzones: ['Piernas'],
+  primaryMuscles: ['Cuádriceps', 'Glúteos'],
+  secondaryMuscles: ['Isquiotibiales', 'Core'],
+  movementType: 'Sentadilla',
+  movementPatterns: ['Sentadilla'],
+  laterality: 'Bilateral',
+  position: 'De pie',
+  difficulty: 'Intermedio',
+  technicalDescription: '',
+  executionSteps: [
+    'Adopta la postura inicial correcta manteniendo la alineación y el core activo.',
+    'Inicia el movimiento con control excéntrico y respiración adecuada.',
+    'Alcanza el rango completo de recorrido sin compensaciones posturales.',
+    'Regresa a la posición inicial con contracción sostenida y controlada.'
+  ],
+  commonErrors: [],
+  executionTips: [],
+  precautions: 'Mantener la columna neutra y no bloquear articulaciones bruscamente.',
+  videoUrl: ''
+};
 
 export const CustomExerciseModal: React.FC<CustomExerciseModalProps> = ({
   isOpen,
   onClose,
   initialExerciseName,
-  onExerciseAdded
+  onExerciseAdded,
+  initialExerciseData
 }) => {
-  const [name, setName] = useState('');
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>(['Peso corporal (Sin equipo)']);
-  const [selectedZone, setSelectedZone] = useState<'inferior' | 'superior'>('inferior');
-  const [selectedSubzones, setSelectedSubzones] = useState<string[]>(['Piernas']);
-  const [muscleText, setMuscleText] = useState('');
-  const [selectedMuscleChips, setSelectedMuscleChips] = useState<string[]>([]);
-  
-  // Gemini AI state
+  const [currentStep, setCurrentStep] = useState<ExerciseFormStep>(1);
+  const [formData, setFormData] = useState<ExerciseFormData>({ ...DEFAULT_FORM_DATA });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // AI State
   const [isSearchingWithAI, setIsSearchingWithAI] = useState(false);
   const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null);
   const [aiSource, setAiSource] = useState<string | null>(null);
+  const [aiProposalOpen, setAiProposalOpen] = useState(false);
+  const [pendingAiData, setPendingAiData] = useState<Partial<ExerciseFormData> | null>(null);
 
-  // Technical ficha details
-  const [description, setDescription] = useState('');
-  const [executionSteps, setExecutionSteps] = useState<string[]>([]);
-  const [showAdvancedDetails, setShowAdvancedDetails] = useState(false);
+  // Saving state
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Load existing exercise if already known, or initialize with provided name
+  // Load existing exercise or pre-fill with defaults
   useEffect(() => {
     if (!isOpen) return;
 
-    const trimmed = initialExerciseName.trim();
-    setName(trimmed);
-    setAiStatusMessage(null);
-    setAiSource(null);
+    const trimmedName = initialExerciseName?.trim() || '';
+    const existing = initialExerciseData || (trimmedName ? findExerciseByName(trimmedName) : undefined);
 
-    const existing = findExerciseByName(trimmed);
     if (existing) {
-      // Pre-fill from existing catalog entry
-      const normalizedEq = normalizeEquipmentTags(existing.equipamiento);
-      setSelectedEquipment(normalizedEq);
-      setSelectedZone(existing.zona === 'superior' ? 'superior' : 'inferior');
-      setSelectedSubzones(existing.subzona ? [existing.subzona] : existing.zona === 'superior' ? ['Torso'] : ['Piernas']);
-      setMuscleText([...(existing.musculos_principales || []), ...(existing.musculos_secundarios || [])].join(', '));
-      setSelectedMuscleChips(existing.musculos_principales || []);
-      setDescription(existing.descripcion || '');
-      setExecutionSteps(existing.ejecucion_pasos || []);
-    } else {
-      // Infer initial settings from name if common
-      const lower = trimmed.toLowerCase();
-      let initEq = ['Peso corporal (Sin equipo)'];
-      let initZone: 'inferior' | 'superior' = 'inferior';
-      let initSubzones = ['Piernas'];
-      let initMuscles = 'Cuádriceps, glúteos';
+      setIsEditMode(true);
+      const priMuscles = existing.muscles?.primary || existing.musculos_principales || [];
+      const secMuscles = existing.muscles?.secondary || existing.musculos_secundarios || [];
+      const eqList = existing.equipment || existing.equipamiento || ['Peso corporal'];
 
-      if (lower.includes('sumo') || lower.includes('squat') || lower.includes('sentadilla') || lower.includes('prensa') || lower.includes('zancada')) {
-        initZone = 'inferior';
-        initSubzones = ['Piernas'];
-        initEq = ['Peso corporal (Sin equipo)', 'Mancuernas', 'Barra olímpica / Discos'];
-        initMuscles = lower.includes('sumo') ? 'Aductor mayor, glúteo mayor, cuádriceps' : 'Cuádriceps, glúteos, isquiotibiales';
-      } else if (lower.includes('press') || lower.includes('pecho') || lower.includes('banca') || lower.includes('flexi')) {
-        initZone = 'superior';
-        initSubzones = ['Torso'];
-        initEq = ['Mancuernas', 'Barra olímpica / Discos', 'Peso corporal (Sin equipo)'];
-        initMuscles = 'Pectoral mayor, tríceps, deltoides anterior';
-      } else if (lower.includes('remo') || lower.includes('dominada') || lower.includes('jal') || lower.includes('espalda')) {
-        initZone = 'superior';
+      setFormData({
+        id: existing.id,
+        name: existing.name || existing.nombre || trimmedName,
+        category: existing.category || existing.categoria || 'Fuerza',
+        secondaryCategories: existing.secondaryCategories || existing.categorias_secundarias || [],
+        description: existing.description || existing.descripcion_breve || existing.descripcion || '',
+        image: existing.image || existing.imagen || '',
+        equipment: eqList,
+        equipmentVariants: existing.equipmentVariants || existing.variantes_equipamiento || existing.variantes || [],
+        canBeDoneWithoutEquipment: existing.canBeDoneWithoutEquipment !== undefined ? Boolean(existing.canBeDoneWithoutEquipment) : existing.sin_equipamiento_posible !== undefined ? Boolean(existing.sin_equipamiento_posible) : eqList.includes('Peso corporal'),
+        bodyZones: existing.bodyZones || existing.zonas_corporales || (existing.zona ? [existing.zona] : ['Tren superior']),
+        subzones: existing.subzones || existing.subzonas || (existing.subzona ? [existing.subzona] : []),
+        primaryMuscles: priMuscles,
+        secondaryMuscles: secMuscles,
+        muscleGroups: existing.muscle_groups || extractMuscleGroups(priMuscles, secMuscles),
+        movementType: existing.movementType || existing.tipo_movimiento || 'Empuje',
+        movementPatterns: existing.movementPattern || existing.patrones_movimiento || (existing.patron_movimiento ? [existing.patron_movimiento] : []),
+        laterality: (existing.laterality as any) || (existing.lado_cuerpo as any) || (existing.unilateral ? 'Unilateral' : 'Bilateral'),
+        position: existing.position || existing.posicion_principal || 'De pie',
+        difficulty: (existing.difficulty as any) || (existing.nivel_dificultad as any) || 'Intermedio',
+        technicalDescription: existing.executionDescription || existing.descripcion_tecnica || existing.descripcion || '',
+        executionSteps: existing.executionSteps || existing.ejecucion_pasos || DEFAULT_FORM_DATA.executionSteps,
+        commonErrors: existing.commonErrors || existing.errores_comunes || [],
+        executionTips: existing.executionTips || existing.consejos_ejecucion || [],
+        precautions: (existing.precautions ? (Array.isArray(existing.precautions) ? existing.precautions.join('. ') : existing.precautions) : undefined) || (existing.precauciones ? (Array.isArray(existing.precauciones) ? existing.precauciones.join('. ') : existing.precauciones) : DEFAULT_FORM_DATA.precautions),
+        videoUrl: existing.videoUrl || existing.video_url || ''
+      });
+    } else {
+      setIsEditMode(false);
+      // Smart infer from name for fresh exercises
+      const lower = trimmedName.toLowerCase();
+      let initCat = 'Fuerza';
+      let initEq = ['Peso corporal'];
+      let initZones = ['Tren inferior'];
+      let initSubzones = ['Piernas'];
+      let initPri = ['Cuádriceps', 'Glúteos'];
+      let initSec = ['Isquiotibiales'];
+      let initType = 'Sentadilla';
+      let initPattern = ['Sentadilla'];
+      let initPos = 'De pie';
+
+      if (lower.includes('elevaci') || lower.includes('lateral') || lower.includes('vuelo')) {
+        initCat = 'Aislamiento';
+        initEq = ['Mancuernas'];
+        initZones = ['Tren superior'];
+        initSubzones = ['Hombros'];
+        initPri = ['Deltoides lateral'];
+        initSec = ['Deltoides anterior', 'Trapecio'];
+        initType = 'Elevación';
+        initPattern = ['Aislamiento'];
+      } else if (lower.includes('press') || lower.includes('banca') || lower.includes('pecho') || lower.includes('flexi')) {
+        initCat = 'Fuerza';
+        initEq = lower.includes('flexi') ? ['Peso corporal'] : ['Mancuernas', 'Banco'];
+        initZones = ['Tren superior'];
+        initSubzones = ['Pecho'];
+        initPri = ['Pectoral mayor', 'Tríceps braquial'];
+        initSec = ['Deltoides anterior'];
+        initType = 'Empuje';
+        initPattern = ['Empuje horizontal'];
+        initPos = lower.includes('flexi') ? 'Apoyado' : 'Acostado';
+      } else if (lower.includes('remo') || lower.includes('jal') || lower.includes('espalda') || lower.includes('dominada')) {
+        initCat = 'Fuerza';
+        initEq = lower.includes('dominada') ? ['Barra de dominadas', 'Peso corporal'] : ['Polea', 'Mancuernas'];
+        initZones = ['Tren superior'];
         initSubzones = ['Espalda'];
-        initEq = ['Barra olímpica / Discos', 'Mancuernas', 'Máquina de poleas / Smith'];
-        initMuscles = 'Dorsal ancho, trapecio, bíceps';
+        initPri = ['Dorsal ancho', 'Trapecio'];
+        initSec = ['Bíceps braquial', 'Romboides'];
+        initType = 'Tirón';
+        initPattern = lower.includes('jal') || lower.includes('dominada') ? ['Tracción vertical'] : ['Tracción horizontal'];
       } else if (lower.includes('curl') || lower.includes('bicep') || lower.includes('tricep')) {
-        initZone = 'superior';
+        initCat = 'Aislamiento';
+        initEq = ['Mancuernas'];
+        initZones = ['Tren superior'];
         initSubzones = ['Brazos'];
-        initEq = ['Mancuernas', 'Barra olímpica / Discos'];
-        initMuscles = lower.includes('tricep') ? 'Tríceps braquial' : 'Bíceps braquial, antebrazos';
+        initPri = lower.includes('tricep') ? ['Tríceps braquial'] : ['Bíceps braquial'];
+        initSec = ['Antebrazo'];
+        initType = lower.includes('tricep') ? 'Extensión' : 'Flexión';
+        initPattern = ['Aislamiento'];
       } else if (lower.includes('plancha') || lower.includes('crunch') || lower.includes('abdom') || lower.includes('core')) {
-        initZone = 'inferior';
-        initSubzones = ['Core'];
-        initEq = ['Peso corporal (Sin equipo)'];
-        initMuscles = 'Recto abdominal, oblicuos';
+        initCat = 'Funcional';
+        initEq = ['Peso corporal'];
+        initZones = ['Core'];
+        initSubzones = ['Abdominales'];
+        initPri = ['Recto abdominal', 'Oblicuos'];
+        initSec = ['Transverso del abdomen'];
+        initType = 'Isométrico';
+        initPattern = ['Anti-extensión'];
+        initPos = 'Apoyado';
       }
 
-      setSelectedEquipment(initEq);
-      setSelectedZone(initZone);
-      setSelectedSubzones(initSubzones);
-      setMuscleText(initMuscles);
-      setSelectedMuscleChips(initMuscles.split(',').map(s => s.trim()));
-      setDescription(`Ejercicio de fuerza y acondicionamiento enfocado en ${trimmed}.`);
-      setExecutionSteps([
-        'Mantén la postura firme y la columna en posición neutra.',
-        'Realiza la fase excéntrica con descenso o flexión controlada.',
-        'Aplica fuerza continua para volver a la posición inicial.'
-      ]);
+      setFormData({
+        ...DEFAULT_FORM_DATA,
+        name: trimmedName,
+        category: initCat,
+        equipment: initEq,
+        bodyZones: initZones,
+        subzones: initSubzones,
+        primaryMuscles: initPri,
+        secondaryMuscles: initSec,
+        movementType: initType,
+        movementPatterns: initPattern,
+        position: initPos,
+        description: trimmedName ? `Ejercicio enfocado en el desarrollo de ${trimmedName}.` : ''
+      });
     }
-  }, [isOpen, initialExerciseName]);
+
+    setCurrentStep(1);
+    setErrors({});
+    setAiStatusMessage(null);
+    setAiSource(null);
+    setPendingAiData(null);
+  }, [isOpen, initialExerciseName, initialExerciseData]);
 
   if (!isOpen) return null;
 
-  // Toggle equipment checklist
-  const toggleEquipment = (eqValue: string) => {
-    setSelectedEquipment(prev => {
-      if (prev.includes(eqValue)) {
-        // Prevent unselecting all
-        if (prev.length === 1) return prev;
-        return prev.filter(item => item !== eqValue);
-      } else {
-        return [...prev, eqValue];
-      }
-    });
-  };
-
-  // Toggle subzone checklist
-  const toggleSubzone = (zone: 'inferior' | 'superior', subzone: string) => {
-    setSelectedZone(zone);
-    setSelectedSubzones(prev => {
-      if (prev.includes(subzone)) {
-        if (prev.length === 1) return prev;
-        return prev.filter(s => s !== subzone);
-      } else {
-        return [...prev, subzone];
-      }
-    });
-  };
-
-  // Toggle muscle chip
-  const toggleMuscleChip = (muscle: string) => {
-    const chipFormatted = muscle.trim();
-    let updatedChips: string[];
-    if (selectedMuscleChips.includes(chipFormatted)) {
-      updatedChips = selectedMuscleChips.filter(m => m !== chipFormatted);
-    } else {
-      updatedChips = [...selectedMuscleChips, chipFormatted];
+  const updateFormData = (updates: Partial<ExerciseFormData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+    if (updates.name && errors.name) {
+      setErrors(prev => ({ ...prev, name: '' }));
     }
-    setSelectedMuscleChips(updatedChips);
+  };
 
-    // Sync with text field if not already there
-    const currentList = muscleText.split(',').map(s => s.trim()).filter(Boolean);
-    if (!currentList.includes(chipFormatted)) {
-      const merged = [...currentList, chipFormatted].join(', ');
-      setMuscleText(merged);
+  // Step completion checking for indicator
+  const isStepComplete = (step: ExerciseFormStep): boolean => {
+    switch (step) {
+      case 1:
+        return Boolean(formData.name.trim());
+      case 2:
+        return formData.equipment.length > 0;
+      case 3:
+        return formData.primaryMuscles.length > 0;
+      case 4:
+        return Boolean(formData.movementType && formData.difficulty);
+      default:
+        return false;
+    }
+  };
+
+  // Validate before advancing
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (!formData.name.trim()) {
+        setErrors({ name: 'El nombre del ejercicio es obligatorio para continuar.' });
+        return;
+      }
+    }
+    setErrors({});
+    if (currentStep < 4) {
+      setCurrentStep((prev) => (prev + 1) as ExerciseFormStep);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as ExerciseFormStep);
     }
   };
 
   // Trigger Gemini AI Web Search Grounding
   const handleGeminiLookup = async () => {
-    const searchTarget = name.trim();
+    const searchTarget = formData.name.trim();
     if (!searchTarget) {
-      setAiStatusMessage('Por favor escribe el nombre del ejercicio para investigarlo.');
+      setErrors({ name: 'Escribe el nombre del ejercicio para investigarlo con Gemini.' });
       return;
     }
 
     setIsSearchingWithAI(true);
-    setAiStatusMessage('Buscando en la web y analizando biomecánica con Gemini...');
+    setAiStatusMessage('Investigando biomecánica y equipamiento con Gemini...');
 
     try {
       const res = await fetch('/api/gemini/lookup-exercise', {
@@ -226,82 +282,131 @@ export const CustomExerciseModal: React.FC<CustomExerciseModalProps> = ({
       if (data && data.exercise) {
         const ex = data.exercise;
 
-        // Apply equipment
-        if (ex.equipamiento && Array.isArray(ex.equipamiento) && ex.equipamiento.length > 0) {
-          const normalizedEq = normalizeEquipmentTags(ex.equipamiento);
-          setSelectedEquipment(normalizedEq);
-        }
+        const proposed: Partial<ExerciseFormData> = {
+          name: ex.name || ex.nombre || searchTarget,
+          category: ex.category || ex.categoria || 'Fuerza',
+          secondaryCategories: ex.secondaryCategories || ex.categorias_secundarias || [],
+          description: ex.description || ex.descripcion_breve || ex.descripcion || '',
+          equipment: ex.equipment || ex.equipamiento || ['Peso corporal'],
+          equipmentVariants: ex.equipmentVariants || ex.variantes_equipamiento || [],
+          canBeDoneWithoutEquipment: ex.canBeDoneWithoutEquipment !== undefined ? Boolean(ex.canBeDoneWithoutEquipment) : Boolean(ex.sin_equipamiento_posible),
+          bodyZones: ex.bodyZones || ex.zonas_corporales || (ex.zona ? [ex.zona] : ['Tren superior']),
+          subzones: ex.subzones || ex.subzona ? [ex.subzona] : [],
+          primaryMuscles: ex.muscles?.primary || ex.musculos_principales || [],
+          secondaryMuscles: ex.muscles?.secondary || ex.musculos_secundarios || [],
+          movementType: ex.movementType || ex.tipo_movimiento || 'Empuje',
+          movementPatterns: ex.movementPattern || ex.patrones_movimiento || [],
+          laterality: (ex.laterality as any) || (ex.lado_cuerpo as any) || 'Bilateral',
+          position: ex.position || ex.posicion_principal || 'De pie',
+          difficulty: (ex.difficulty as any) || (ex.nivel_dificultad as any) || 'Intermedio',
+          technicalDescription: ex.executionDescription || ex.descripcion_tecnica || ex.descripcion || '',
+          executionSteps: ex.executionSteps || ex.ejecucion_pasos || DEFAULT_FORM_DATA.executionSteps,
+          commonErrors: ex.commonErrors || ex.errores_comunes || [],
+          executionTips: ex.executionTips || ex.consejos_ejecucion || [],
+          precautions: Array.isArray(ex.precautions) ? ex.precautions.join('. ') : ex.precautions || ex.precauciones || DEFAULT_FORM_DATA.precautions,
+          videoUrl: ex.videoUrl || ex.video_url || ''
+        };
 
-        // Apply zone & subzone
-        if (ex.zona) {
-          setSelectedZone(ex.zona === 'superior' ? 'superior' : 'inferior');
-        }
-        if (ex.subzone || ex.subzona) {
-          const s = ex.subzone || ex.subzona;
-          setSelectedSubzones([s]);
-        }
-
-        // Apply muscles
-        const musclesList: string[] = [
-          ...(ex.musculos_principales || []),
-          ...(ex.musculos_secundarios || [])
-        ];
-        if (musclesList.length > 0) {
-          setMuscleText(musclesList.join(', '));
-          setSelectedMuscleChips(ex.musculos_principales || musclesList.slice(0, 3));
-        }
-
-        // Apply description & steps
-        if (ex.descripcion) {
-          setDescription(ex.descripcion);
-        }
-        if (ex.ejecucion_pasos && Array.isArray(ex.ejecucion_pasos)) {
-          setExecutionSteps(ex.ejecucion_pasos);
-        }
-
+        setPendingAiData(proposed);
         setAiSource(data.source || 'gemini-web-search');
-        setAiStatusMessage(
-          data.source === 'gemini-web-search' 
-            ? '✓ ¡Ficha completada con información verificada en la web! Revisa las casillas a continuación.'
-            : '✓ Ficha estructurada con análisis biomecánico asistido. Puedes ajustar las opciones.'
-        );
+        // Open confirmation modal: "LA IA PROPONE. EL USUARIO CONFIRMA."
+        setAiProposalOpen(true);
       }
     } catch (err: any) {
       console.warn('Error during Gemini search:', err);
-      setAiStatusMessage('Análisis asistido completado con parámetros recomendados.');
+      setAiStatusMessage('No se pudo completar la búsqueda asistida. Puedes ingresar los datos manualmente.');
     } finally {
       setIsSearchingWithAI(false);
     }
   };
 
-  // Save and add exercise
+  // User confirmed applying AI proposal
+  const handleApplyAiProposal = () => {
+    if (pendingAiData) {
+      setFormData(prev => ({
+        ...prev,
+        ...pendingAiData,
+        // Preserve current image if already set
+        image: prev.image || pendingAiData.image || ''
+      }));
+      setAiStatusMessage(
+        aiSource === 'gemini-web-search'
+          ? '✓ Ficha completada con información verificada en la web. Revisa y ajusta cualquier campo.'
+          : '✓ Ficha estructurada con análisis biomecánico asistido. Puedes ajustar cualquier campo.'
+      );
+    }
+    setAiProposalOpen(false);
+  };
+
+  // Save Exercise
   const handleSaveAndAdd = async () => {
-    const exerciseName = name.trim();
-    if (!exerciseName) return;
+    const exerciseName = formData.name.trim();
+    if (!exerciseName) {
+      setCurrentStep(1);
+      setErrors({ name: 'Por favor ingresa el nombre del ejercicio.' });
+      return;
+    }
 
     setIsSaving(true);
 
-    const parsedMuscles = muscleText
-      .split(',')
-      .map(m => m.trim())
-      .filter(Boolean);
-
-    const muscleGroups: MuscleGroup[] = extractMuscleGroups(parsedMuscles);
+    const muscleGroups: MuscleGroup[] = extractMuscleGroups(
+      formData.primaryMuscles,
+      formData.secondaryMuscles
+    );
 
     const exerciseEntry: Partial<CatalogExercise> & { nombre: string } = {
+      id: formData.id,
       nombre: exerciseName,
-      equipamiento: selectedEquipment,
-      zona: selectedZone,
-      subzona: selectedSubzones.join(', '),
-      musculos_principales: parsedMuscles.slice(0, 3),
-      musculos_secundarios: parsedMuscles.slice(3),
+      name: exerciseName,
+      categoria: formData.category,
+      category: formData.category,
+      categorias_secundarias: formData.secondaryCategories,
+      secondaryCategories: formData.secondaryCategories,
+      descripcion: formData.description || formData.technicalDescription || `Ejercicio de fuerza para ${exerciseName}.`,
+      descripcion_breve: formData.description,
+      description: formData.description,
+      imagen: formData.image,
+      image: formData.image,
+      equipamiento: formData.equipment,
+      equipment: formData.equipment,
+      variantes_equipamiento: formData.equipmentVariants,
+      equipmentVariants: formData.equipmentVariants,
+      sin_equipamiento_posible: formData.canBeDoneWithoutEquipment,
+      canBeDoneWithoutEquipment: formData.canBeDoneWithoutEquipment,
+      zonas_corporales: formData.bodyZones,
+      bodyZones: formData.bodyZones,
+      zona: formData.bodyZones[0] || 'superior',
+      subzonas: formData.subzones,
+      subzones: formData.subzones,
+      musculos_principales: formData.primaryMuscles,
+      musculos_secundarios: formData.secondaryMuscles,
+      muscles: {
+        primary: formData.primaryMuscles,
+        secondary: formData.secondaryMuscles
+      },
       muscle_groups: muscleGroups,
-      descripcion: description || `Ejercicio para ${exerciseName}.`,
-      ejecucion_pasos: executionSteps.length > 0 ? executionSteps : [
-        'Adopta la postura inicial correcta.',
-        'Realiza la ejecución con rango completo y ritmo controlado.',
-        'Regresa a la posición inicial manteniendo la estabilidad.'
-      ],
+      tipo_movimiento: formData.movementType,
+      movementType: formData.movementType,
+      patrones_movimiento: formData.movementPatterns,
+      movementPattern: formData.movementPatterns,
+      lado_cuerpo: formData.laterality,
+      laterality: formData.laterality,
+      posicion_principal: formData.position,
+      position: formData.position,
+      nivel_dificultad: formData.difficulty,
+      difficulty: formData.difficulty,
+      descripcion_tecnica: formData.technicalDescription,
+      executionDescription: formData.technicalDescription,
+      ejecucion_pasos: formData.executionSteps,
+      executionSteps: formData.executionSteps,
+      errores_comunes: formData.commonErrors,
+      commonErrors: formData.commonErrors,
+      consejos_ejecucion: formData.executionTips,
+      executionTips: formData.executionTips,
+      precauciones: formData.precautions ? [formData.precautions] : [],
+      precautions: formData.precautions ? [formData.precautions] : [],
+      video_url: formData.videoUrl,
+      videoUrl: formData.videoUrl,
       personalizado: true
     };
 
@@ -311,7 +416,6 @@ export const CustomExerciseModal: React.FC<CustomExerciseModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error saving exercise:', error);
-      // Fallback add directly
       onExerciseAdded(exerciseName);
       onClose();
     } finally {
@@ -320,361 +424,197 @@ export const CustomExerciseModal: React.FC<CustomExerciseModalProps> = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-850">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <Dumbbell className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 id="modal-title" className="text-base sm:text-lg font-bold text-white leading-tight">
-                Configurar Ficha de Ejercicio
-              </h3>
-              <p className="text-xs text-slate-400">
-                Personaliza equipamiento, zona corporal y musculatura activa
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-            aria-label="Cerrar modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div className="p-5 overflow-y-auto space-y-5 text-sm">
-          {/* Exercise Name Input */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Nombre del Ejercicio
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Sentadilla sumo, Curl martillo..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 font-medium"
-            />
-          </div>
-
-          {/* Gemini AI Web Search Grounding Banner / Button */}
-          <div className="p-3.5 bg-gradient-to-r from-cyan-950/40 via-indigo-950/30 to-purple-950/30 border border-cyan-500/30 rounded-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 mt-0.5">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-cyan-200">
-                    ¿Prefieres autocompletar con IA?
-                  </h4>
-                  <p className="text-xs text-slate-300 mt-0.5">
-                    Activa la búsqueda web de Gemini para investigar <span className="font-semibold text-cyan-300">"{name || 'este ejercicio'}"</span> y rellenar automáticamente la ficha.
-                  </p>
-                </div>
+    <>
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-850">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <Dumbbell className="w-5 h-5" />
               </div>
-              <button
-                type="button"
-                onClick={handleGeminiLookup}
-                disabled={isSearchingWithAI || !name.trim()}
-                className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Ayuda de Gemini con búsqueda web"
-              >
-                {isSearchingWithAI ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Buscando en la web...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Ayuda de Gemini</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {aiStatusMessage && (
-              <div className={`mt-3 pt-2.5 border-t border-cyan-500/20 flex items-center gap-2 text-xs ${aiSource === 'gemini-web-search' ? 'text-emerald-400' : 'text-cyan-300'}`}>
-                <Check className="w-4 h-4 flex-shrink-0" />
-                <span>{aiStatusMessage}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Section 1: Equipment Checklist */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Dumbbell className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Equipamiento (Casillas Checklist)</span>
-              </label>
-              <span className="text-[11px] text-slate-400">Puedes marcar varias</span>
-            </div>
-
-            {/* Primary checklist requested by user */}
-            <div className="grid grid-cols-2 gap-2.5">
-              {PRIMARY_EQUIPMENT_OPTIONS.map((opt) => {
-                const checked = selectedEquipment.includes(opt.value);
-                return (
-                  <label
-                    key={opt.id}
-                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                      checked 
-                        ? 'bg-cyan-950/40 border-cyan-500/50 text-white shadow-sm' 
-                        : 'bg-slate-800/60 border-slate-700/70 text-slate-300 hover:border-slate-600'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleEquipment(opt.value)}
-                      className="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 border-slate-600 bg-slate-700"
-                    />
-                    <span className="text-xs font-medium">{opt.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-
-            {/* Optional secondary equipment chips */}
-            <div className="mt-2.5 pt-2 border-t border-slate-800/80">
-              <span className="text-[11px] text-slate-400 block mb-1.5">Otras variantes de equipamiento:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {SECONDARY_EQUIPMENT_OPTIONS.map((opt) => {
-                  const checked = selectedEquipment.includes(opt.value);
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => toggleEquipment(opt.value)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                        checked
-                          ? 'bg-cyan-900/40 border-cyan-500/40 text-cyan-200'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {checked ? '✓ ' : '+ '}{opt.label}
-                    </button>
-                  );
-                })}
+              <div>
+                <h3 id="modal-title" className="text-base sm:text-lg font-bold text-white leading-tight">
+                  {isEditMode ? 'Editar Ficha de Ejercicio' : 'Configurar Ficha de Ejercicio'}
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Formulario estructurado en 4 pasos • Base de datos rica
+                </p>
               </div>
             </div>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors"
+              aria-label="Cerrar modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          {/* Section 2: Zona Checklist (Inferior / Superior with Subzones) */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Zona Corporal</span>
-            </label>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Zona Inferior */}
-              <div className={`p-3 rounded-xl border transition-all ${selectedZone === 'inferior' ? 'bg-slate-800/80 border-cyan-500/40' : 'bg-slate-850/50 border-slate-800'}`}>
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-700/50">
-                  <span className="text-xs font-bold text-cyan-300 flex items-center gap-1">
-                    <span>+</span> Inferior
-                  </span>
-                  <span className="text-[10px] text-slate-400">Piernas / Core</span>
-                </div>
-                <div className="space-y-1.5">
-                  {ZONE_OPTIONS.filter(z => z.zone === 'inferior').map(opt => {
-                    const isChecked = selectedZone === 'inferior' && selectedSubzones.includes(opt.subzone);
-                    return (
-                      <label
-                        key={opt.subzone}
-                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          isChecked ? 'bg-cyan-950/40 text-cyan-200 font-semibold' : 'hover:bg-slate-800 text-slate-300'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSubzone('inferior', opt.subzone)}
-                          className="w-3.5 h-3.5 rounded text-cyan-600 focus:ring-cyan-500 border-slate-600 bg-slate-700"
-                        />
-                        <span className="text-xs">{opt.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Zona Superior */}
-              <div className={`p-3 rounded-xl border transition-all ${selectedZone === 'superior' ? 'bg-slate-800/80 border-cyan-500/40' : 'bg-slate-850/50 border-slate-800'}`}>
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-700/50">
-                  <span className="text-xs font-bold text-cyan-300 flex items-center gap-1">
-                    <span>+</span> Superior
-                  </span>
-                  <span className="text-[10px] text-slate-400">Torso / Brazos / Espalda</span>
-                </div>
-                <div className="space-y-1.5">
-                  {ZONE_OPTIONS.filter(z => z.zone === 'superior').map(opt => {
-                    const isChecked = selectedZone === 'superior' && selectedSubzones.includes(opt.subzone);
-                    return (
-                      <label
-                        key={opt.subzone}
-                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          isChecked ? 'bg-cyan-950/40 text-cyan-200 font-semibold' : 'hover:bg-slate-800 text-slate-300'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSubzone('superior', opt.subzone)}
-                          className="w-3.5 h-3.5 rounded text-cyan-600 focus:ring-cyan-500 border-slate-600 bg-slate-700"
-                        />
-                        <span className="text-xs">{opt.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
+          {/* Gemini AI Bar */}
+          <div className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-cyan-950/40 via-indigo-950/20 to-slate-900 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-cyan-400 flex-shrink-0 animate-pulse" />
+              <div className="text-xs">
+                <span className="font-bold text-cyan-200">Asistente Gemini: </span>
+                <span className="text-slate-300">
+                  Investiga técnica, anatomía y biomecánica en la web
+                </span>
               </div>
             </div>
-          </div>
-
-          {/* Section 3: Musculo */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Músculos Estimulados
-              </label>
-              <span className="text-[11px] text-slate-400">Toca chips o edita el texto</span>
-            </div>
-
-            {/* Quick suggested chips based on selected zones */}
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {ZONE_OPTIONS
-                .filter(z => z.zone === selectedZone && selectedSubzones.includes(z.subzone))
-                .flatMap(z => z.suggestedMuscles)
-                .map(muscle => {
-                  const active = selectedMuscleChips.includes(muscle) || muscleText.toLowerCase().includes(muscle.toLowerCase());
-                  return (
-                    <button
-                      key={muscle}
-                      type="button"
-                      onClick={() => toggleMuscleChip(muscle)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                        active
-                          ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300'
-                          : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {active ? '✓ ' : '+ '}{muscle}
-                    </button>
-                  );
-                })}
-            </div>
-
-            <input
-              type="text"
-              value={muscleText}
-              onChange={(e) => setMuscleText(e.target.value)}
-              placeholder="Ej: Aductor mayor, glúteo mayor, cuádriceps..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 px-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-xs"
-            />
-          </div>
-
-          {/* Collapsible: Additional Technical Ficha (Description & Steps) */}
-          <div className="border-t border-slate-800 pt-3">
             <button
               type="button"
-              onClick={() => setShowAdvancedDetails(!showAdvancedDetails)}
-              className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-cyan-300 transition-colors py-1"
+              onClick={handleGeminiLookup}
+              disabled={isSearchingWithAI || !formData.name.trim()}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
-              <span className="flex items-center gap-1.5 font-medium">
-                <FileText className="w-3.5 h-3.5" />
-                <span>Ver descripción y pasos técnicos de ejecución</span>
-              </span>
-              {showAdvancedDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {isSearchingWithAI ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Investigando...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>✦ Completar con Gemini</span>
+                </>
+              )}
             </button>
+          </div>
 
-            {showAdvancedDetails && (
-              <div className="mt-3 space-y-3 bg-slate-850 p-3.5 rounded-xl border border-slate-800">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                    Descripción
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Breve descripción del movimiento..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                  />
-                </div>
+          {/* AI Feedback message */}
+          {aiStatusMessage && (
+            <div className="px-4 sm:px-6 py-2 bg-slate-850 border-b border-slate-800 flex items-center gap-2 text-xs text-emerald-400">
+              <Check className="w-4 h-4 flex-shrink-0" />
+              <span>{aiStatusMessage}</span>
+            </div>
+          )}
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                    Pasos de ejecución
-                  </label>
-                  <div className="space-y-1.5">
-                    {executionSteps.map((step, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs text-slate-300">
-                        <span className="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-cyan-400 flex-shrink-0 mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <input
-                          type="text"
-                          value={step}
-                          onChange={(e) => {
-                            const newSteps = [...executionSteps];
-                            newSteps[idx] = e.target.value;
-                            setExecutionSteps(newSteps);
-                          }}
-                          className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          {/* 4-Step Progress Indicator */}
+          <ExerciseStepIndicator
+            currentStep={currentStep}
+            onStepClick={(step) => {
+              if (currentStep === 1 && step > 1 && !formData.name.trim()) {
+                setErrors({ name: 'El nombre del ejercicio es obligatorio para continuar.' });
+                return;
+              }
+              setErrors({});
+              setCurrentStep(step);
+            }}
+            isStepComplete={isStepComplete}
+          />
+
+          {/* Scrollable Step Content */}
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+            {currentStep === 1 && (
+              <Step1Basics
+                data={formData}
+                onChange={updateFormData}
+                errors={errors}
+              />
+            )}
+
+            {currentStep === 2 && (
+              <Step2Equipment
+                data={formData}
+                onChange={updateFormData}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <Step3Muscles
+                data={formData}
+                onChange={updateFormData}
+              />
+            )}
+
+            {currentStep === 4 && (
+              <Step4Details
+                data={formData}
+                onChange={updateFormData}
+              />
             )}
           </div>
-        </div>
 
-        {/* Modal Footer */}
-        <div className="px-5 py-3.5 border-t border-slate-800 bg-slate-850 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSaving}
-            className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSaveAndAdd}
-            disabled={isSaving || !name.trim()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-950/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Guardando...</span>
-              </>
+          {/* Modal Footer with Step Navigation & Save */}
+          <div className="px-4 sm:px-6 py-3.5 border-t border-slate-800 bg-slate-850 flex items-center justify-between gap-3">
+            {/* Prev Button or Cancel */}
+            {currentStep > 1 ? (
+              <button
+                type="button"
+                onClick={handlePrevStep}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 border border-slate-700 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Anterior</span>
+              </button>
             ) : (
-              <>
-                <Check className="w-4 h-4" />
-                <span>Guardar y Añadir a Rutina</span>
-              </>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSaving}
+                className="px-3.5 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+              >
+                Cancelar
+              </button>
             )}
-          </button>
+
+            <div className="text-[11px] text-slate-400 hidden sm:block">
+              Paso <strong className="text-cyan-300">{currentStep}</strong> de 4
+            </div>
+
+            {/* Next or Finish Button */}
+            <div className="flex items-center gap-2">
+              {currentStep < 4 ? (
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl shadow transition-colors"
+                >
+                  <span>Siguiente</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSaveAndAdd}
+                  disabled={isSaving || !formData.name.trim()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-950/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando en catálogo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                      <span>{isEditMode ? 'Guardar Cambios' : '✓ Guardar y añadir al catálogo'}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* AI Proposal Confirmation Modal */}
+      {aiProposalOpen && pendingAiData && (
+        <AiProposalModal
+          isOpen={aiProposalOpen}
+          onClose={() => setAiProposalOpen(false)}
+          onConfirmApply={handleApplyAiProposal}
+          proposalData={pendingAiData}
+          exerciseName={formData.name}
+        />
+      )}
+    </>
   );
 };
