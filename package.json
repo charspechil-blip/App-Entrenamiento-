@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "catalog:validate": "node scripts/validateCatalog.js",
     "catalog:build": "node scripts/buildCatalog.js",
-    "catalog:normalize": "node scripts/normalizeCatalog.js && node scripts/buildCatalog.js"
+    "catalog:normalize": "node scripts/normalizeCatalog.js && node scripts/buildCatalog.js",
+    "muscles:validate": "node scripts/validateMuscles.js"
   },
   "dependencies": {
     "@google/genai": "^1.27.0",

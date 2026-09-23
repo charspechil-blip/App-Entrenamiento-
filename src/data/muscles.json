@@ -1,0 +1,1795 @@
+{
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "descripcion": "Taxonomía muscular oficial y vocabulario anatómico controlado para el Catálogo Maestro de Ejercicios — Entreno",
+  "total_musculos": 84,
+  "musculos": [
+    {
+      "id": "pectoral_mayor",
+      "nombre": "Pectoral mayor",
+      "nombre_latino": "Musculus pectoralis major",
+      "zona": "superior",
+      "region": "pecho",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "pectoral_mayor_clavicular",
+        "pectoral_mayor_esternal"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Aducción horizontal, flexión y rotación interna de la articulación glenohumeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "pectoral mayor",
+        "pecho",
+        "pectorales",
+        "pectoralis major",
+        "chest"
+      ]
+    },
+    {
+      "id": "pectoral_mayor_clavicular",
+      "nombre": "Pectoral mayor (haz clavicular)",
+      "nombre_latino": "Musculus pectoralis major (pars clavicularis)",
+      "zona": "superior",
+      "region": "pecho",
+      "tipo": "porcion_anatomica",
+      "padre": "pectoral_mayor",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión glenohumeral, aducción diagonal superior y aducción horizontal por encima de 60 grados.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "pectoral superior",
+        "haz clavicular del pectoral",
+        "porción clavicular del pectoral mayor",
+        "clavicular head"
+      ]
+    },
+    {
+      "id": "pectoral_mayor_esternal",
+      "nombre": "Pectoral mayor (haz esternocostal)",
+      "nombre_latino": "Musculus pectoralis major (pars sternocostalis)",
+      "zona": "superior",
+      "region": "pecho",
+      "tipo": "porcion_anatomica",
+      "padre": "pectoral_mayor",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción horizontal pura, depresión y extensión desde posición flexionada del brazo.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "pectoral medio",
+        "pectoral inferior",
+        "haz esternocostal",
+        "porción esternal del pectoral mayor",
+        "sternal head"
+      ]
+    },
+    {
+      "id": "pectoral_menor",
+      "nombre": "Pectoral menor",
+      "nombre_latino": "Musculus pectoralis minor",
+      "zona": "superior",
+      "region": "pecho",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Tracción anterior e inferior de la escápula (antepulsión y depresión escapular).",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "pectoral menor",
+        "pectoralis minor"
+      ]
+    },
+    {
+      "id": "subclavio",
+      "nombre": "Subclavio",
+      "nombre_latino": "Musculus subclavius",
+      "zona": "superior",
+      "region": "pecho",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Depresión y fijación de la clavícula en la articulación esternoclavicular.",
+      "articulaciones_asociadas": [
+        "esternoclavicular"
+      ],
+      "aliases": [
+        "subclavio"
+      ]
+    },
+    {
+      "id": "deltoides",
+      "nombre": "Deltoides",
+      "nombre_latino": "Musculus deltoideus",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "deltoides_anterior",
+        "deltoides_lateral",
+        "deltoides_posterior"
+      ],
+      "nivel_catalogacion": "agrupador_jerarquico",
+      "funcion_principal": "Complejo motor primario tridimensional del hombro (flexión, abducción y extensión horizontal).",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "deltoides",
+        "hombros",
+        "delts",
+        "shoulder"
+      ]
+    },
+    {
+      "id": "deltoides_anterior",
+      "nombre": "Deltoides anterior",
+      "nombre_latino": "Musculus deltoideus (pars clavicularis)",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "porcion_anatomica",
+      "padre": "deltoides",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión glenohumeral, aducción horizontal y rotación interna del húmero.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "deltoides frontal",
+        "porción anterior del deltoides",
+        "anterior deltoid",
+        "front delt"
+      ]
+    },
+    {
+      "id": "deltoides_lateral",
+      "nombre": "Deltoides lateral",
+      "nombre_latino": "Musculus deltoideus (pars acromialis)",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "porcion_anatomica",
+      "padre": "deltoides",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Abducción glenohumeral pura en el plano frontal y escapular (entre 15 y 90-110 grados).",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "deltoides medio",
+        "porción media del deltoides",
+        "porción lateral del deltoides",
+        "lateral deltoid",
+        "side delt"
+      ]
+    },
+    {
+      "id": "deltoides_posterior",
+      "nombre": "Deltoides posterior",
+      "nombre_latino": "Musculus deltoideus (pars spinalis)",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "porcion_anatomica",
+      "padre": "deltoides",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión horizontal, abducción horizontal y rotación externa del húmero.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "deltoides posterior",
+        "porción posterior del deltoides",
+        "posterior deltoid",
+        "rear delt"
+      ]
+    },
+    {
+      "id": "manguito_rotador",
+      "nombre": "Manguito rotador",
+      "nombre_latino": "Rotator cuff",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "supraespinoso",
+        "infraespinoso",
+        "redondo_menor",
+        "subescapular"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Coaptación dinámica y centrado de la cabeza humeral en la cavidad glenoidea; rotación humeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "manguito de los rotadores",
+        "rotator cuff",
+        "manguito rotador"
+      ]
+    },
+    {
+      "id": "supraespinoso",
+      "nombre": "Supraespinoso",
+      "nombre_latino": "Musculus supraspinatus",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "musculo_individual",
+      "padre": "manguito_rotador",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Iniciación de la abducción glenohumeral (0-15°) y compresión de la cabeza humeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "supraespinoso",
+        "supraspinatus"
+      ]
+    },
+    {
+      "id": "infraespinoso",
+      "nombre": "Infraespinoso",
+      "nombre_latino": "Musculus infraspinatus",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "musculo_individual",
+      "padre": "manguito_rotador",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Rotación externa del húmero y estabilización posterior de la articulación glenohumeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "infraespinoso",
+        "infraspinatus"
+      ]
+    },
+    {
+      "id": "redondo_menor",
+      "nombre": "Redondo menor",
+      "nombre_latino": "Musculus teres minor",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "musculo_individual",
+      "padre": "manguito_rotador",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Rotación externa y débil aducción del húmero; soporte de la cápsula articular posterior.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "redondo menor",
+        "teres minor"
+      ]
+    },
+    {
+      "id": "subescapular",
+      "nombre": "Subescapular",
+      "nombre_latino": "Musculus subscapularis",
+      "zona": "superior",
+      "region": "hombro",
+      "tipo": "musculo_individual",
+      "padre": "manguito_rotador",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Rotación interna del húmero y freno anterior contra la luxación humeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "subescapular",
+        "subscapularis"
+      ]
+    },
+    {
+      "id": "dorsal_ancho",
+      "nombre": "Dorsal ancho",
+      "nombre_latino": "Musculus latissimus dorsi",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión, aducción y rotación interna de la articulación glenohumeral; depresión escapular indirecta.",
+      "articulaciones_asociadas": [
+        "hombro",
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "dorsal ancho",
+        "dorsales",
+        "latissimus dorsi",
+        "lats"
+      ]
+    },
+    {
+      "id": "redondo_mayor",
+      "nombre": "Redondo mayor",
+      "nombre_latino": "Musculus teres major",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción, extensión y rotación interna del húmero (sinergista del dorsal ancho).",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "redondo mayor",
+        "teres major"
+      ]
+    },
+    {
+      "id": "trapecio",
+      "nombre": "Trapecio",
+      "nombre_latino": "Musculus trapezius",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "trapecio_superior",
+        "trapecio_medio",
+        "trapecio_inferior"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Control tridimensional escápulo-torácico: elevación, retracción, rotación superior y depresión de la escápula.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "trapecio",
+        "trapecios",
+        "trapezius",
+        "traps"
+      ]
+    },
+    {
+      "id": "trapecio_superior",
+      "nombre": "Trapecio (porción superior)",
+      "nombre_latino": "Musculus trapezius (pars descendens)",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "porcion_anatomica",
+      "padre": "trapecio",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Elevación escapular y rotación superior de la escápula; extensión ipsilateral del cuello.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica",
+        "cuello"
+      ],
+      "aliases": [
+        "trapecio superior",
+        "upper traps",
+        "upper trapezius"
+      ]
+    },
+    {
+      "id": "trapecio_medio",
+      "nombre": "Trapecio (porción media)",
+      "nombre_latino": "Musculus trapezius (pars transversa)",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "porcion_anatomica",
+      "padre": "trapecio",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Retracción pura (aducción) de la escápula hacia la línea media vertebral.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "trapecio medio",
+        "middle traps",
+        "mid traps"
+      ]
+    },
+    {
+      "id": "trapecio_inferior",
+      "nombre": "Trapecio (porción inferior)",
+      "nombre_latino": "Musculus trapezius (pars ascendens)",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "porcion_anatomica",
+      "padre": "trapecio",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Depresión escapular y asistencia crítica a la rotación superior de la cavidad glenoidea.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "trapecio inferior",
+        "lower traps",
+        "lower trapezius"
+      ]
+    },
+    {
+      "id": "romboides",
+      "nombre": "Romboides",
+      "nombre_latino": "Musculi rhomboidei",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "romboides_mayor",
+        "romboides_menor"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Retracción y rotación hacia abajo (báscula interna) de la escápula; fijación escapular a la caja torácica.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "romboides",
+        "rhomboideus",
+        "rhomboids",
+        "espalda media"
+      ]
+    },
+    {
+      "id": "romboides_mayor",
+      "nombre": "Romboides mayor",
+      "nombre_latino": "Musculus rhomboideus major",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": "romboides",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Retracción de la escápula desde las apófisis espinosas T2-T5.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "romboides mayor"
+      ]
+    },
+    {
+      "id": "romboides_menor",
+      "nombre": "Romboides menor",
+      "nombre_latino": "Musculus rhomboideus minor",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": "romboides",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Retracción y elevación medial de la escápula desde C7-T1.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "romboides menor"
+      ]
+    },
+    {
+      "id": "elevador_escapula",
+      "nombre": "Elevador de la escápula",
+      "nombre_latino": "Musculus levator scapulae",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Elevación y rotación medial escapular; flexión lateral cervical.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica",
+        "cuello"
+      ],
+      "aliases": [
+        "elevador de la escápula",
+        "angular del omóplato",
+        "levator scapulae"
+      ]
+    },
+    {
+      "id": "serrato_anterior",
+      "nombre": "Serrato anterior",
+      "nombre_latino": "Musculus serratus anterior",
+      "zona": "superior",
+      "region": "espalda",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Protracción de la escápula, rotación superior glenohumeral y mantenimiento de la escápula adosada al tórax.",
+      "articulaciones_asociadas": [
+        "escapulo_toracica"
+      ],
+      "aliases": [
+        "serrato anterior",
+        "serrato mayor",
+        "serratus anterior"
+      ]
+    },
+    {
+      "id": "biceps_braquial",
+      "nombre": "Bíceps braquial",
+      "nombre_latino": "Musculus biceps brachii",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "biceps_cabeza_larga",
+        "biceps_cabeza_corta"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión de codo (especialmente en supinación), supinación del antebrazo y flexión accesoria de hombro.",
+      "articulaciones_asociadas": [
+        "codo",
+        "hombro",
+        "antebrazo"
+      ],
+      "aliases": [
+        "bíceps braquial",
+        "biceps braquial",
+        "biceps",
+        "bíceps",
+        "biceps brachii"
+      ]
+    },
+    {
+      "id": "biceps_cabeza_larga",
+      "nombre": "Bíceps braquial (cabeza larga)",
+      "nombre_latino": "Musculus biceps brachii (caput longum)",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "porcion_anatomica",
+      "padre": "biceps_braquial",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión y supinación de codo; estabilizador anterior y depresor de la cabeza humeral.",
+      "articulaciones_asociadas": [
+        "codo",
+        "hombro"
+      ],
+      "aliases": [
+        "cabeza larga del bíceps",
+        "biceps long head"
+      ]
+    },
+    {
+      "id": "biceps_cabeza_corta",
+      "nombre": "Bíceps braquial (cabeza corta)",
+      "nombre_latino": "Musculus biceps brachii (caput breve)",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "porcion_anatomica",
+      "padre": "biceps_braquial",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión de codo y aducción horizontal accesoria del brazo.",
+      "articulaciones_asociadas": [
+        "codo",
+        "hombro"
+      ],
+      "aliases": [
+        "cabeza corta del bíceps",
+        "biceps short head"
+      ]
+    },
+    {
+      "id": "braquial",
+      "nombre": "Braquial",
+      "nombre_latino": "Musculus brachialis",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexor puro monoarticular del codo en cualquier posición del antebrazo (pronación, neutra o supinación).",
+      "articulaciones_asociadas": [
+        "codo"
+      ],
+      "aliases": [
+        "braquial anterior",
+        "brachialis"
+      ]
+    },
+    {
+      "id": "coracobraquial",
+      "nombre": "Coracobraquial",
+      "nombre_latino": "Musculus coracobrachialis",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión y aducción del húmero en la articulación glenohumeral.",
+      "articulaciones_asociadas": [
+        "hombro"
+      ],
+      "aliases": [
+        "coracobraquial",
+        "coracobrachialis"
+      ]
+    },
+    {
+      "id": "triceps_braquial",
+      "nombre": "Tríceps braquial",
+      "nombre_latino": "Musculus triceps brachii",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "triceps_cabeza_larga",
+        "triceps_cabeza_lateral",
+        "triceps_cabeza_medial"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión de la articulación del codo; extensión y aducción de hombro (cabeza larga).",
+      "articulaciones_asociadas": [
+        "codo",
+        "hombro"
+      ],
+      "aliases": [
+        "tríceps braquial",
+        "triceps braquial",
+        "triceps",
+        "tríceps",
+        "triceps brachii"
+      ]
+    },
+    {
+      "id": "triceps_cabeza_larga",
+      "nombre": "Tríceps braquial (cabeza larga)",
+      "nombre_latino": "Musculus triceps brachii (caput longum)",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "porcion_anatomica",
+      "padre": "triceps_braquial",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de codo y extensión/aducción glenohumeral (biarticular).",
+      "articulaciones_asociadas": [
+        "codo",
+        "hombro"
+      ],
+      "aliases": [
+        "cabeza larga del tríceps",
+        "triceps long head"
+      ]
+    },
+    {
+      "id": "triceps_cabeza_lateral",
+      "nombre": "Tríceps braquial (cabeza lateral)",
+      "nombre_latino": "Musculus triceps brachii (caput laterale)",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "porcion_anatomica",
+      "padre": "triceps_braquial",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión pura y potente de codo contra resistencias medias y altas.",
+      "articulaciones_asociadas": [
+        "codo"
+      ],
+      "aliases": [
+        "cabeza lateral del tríceps",
+        "triceps lateral head"
+      ]
+    },
+    {
+      "id": "triceps_cabeza_medial",
+      "nombre": "Tríceps braquial (cabeza medial)",
+      "nombre_latino": "Musculus triceps brachii (caput mediale)",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "porcion_anatomica",
+      "padre": "triceps_braquial",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de codo (activo de forma constante en todo el rango y velocidad).",
+      "articulaciones_asociadas": [
+        "codo"
+      ],
+      "aliases": [
+        "cabeza medial del tríceps",
+        "triceps medial head"
+      ]
+    },
+    {
+      "id": "anconeo",
+      "nombre": "Ancóneo",
+      "nombre_latino": "Musculus anconeus",
+      "zona": "superior",
+      "region": "brazo",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Asistencia a la extensión de codo y estabilización de la articulación radioulnar durante pronación.",
+      "articulaciones_asociadas": [
+        "codo"
+      ],
+      "aliases": [
+        "ancóneo",
+        "anconeus"
+      ]
+    },
+    {
+      "id": "antebrazo",
+      "nombre": "Antebrazo",
+      "nombre_latino": "Antebrachium",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "flexores_muneca",
+        "extensores_muneca",
+        "braquiorradial",
+        "pronadores_antebrazo",
+        "supinador"
+      ],
+      "nivel_catalogacion": "agrupador_jerarquico",
+      "funcion_principal": "Control neuromuscular de muñeca, carpo, dedos y articulaciones radioulnares.",
+      "articulaciones_asociadas": [
+        "muneca",
+        "antebrazo",
+        "codo"
+      ],
+      "aliases": [
+        "antebrazos",
+        "antebrazo",
+        "forearms",
+        "forearm"
+      ]
+    },
+    {
+      "id": "braquiorradial",
+      "nombre": "Braquiorradial",
+      "nombre_latino": "Musculus brachioradialis",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "musculo_individual",
+      "padre": "antebrazo",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión de codo con antebrazo en posición neutra (semiprona).",
+      "articulaciones_asociadas": [
+        "codo"
+      ],
+      "aliases": [
+        "braquiorradial",
+        "supinador largo",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "flexores_muneca",
+      "nombre": "Flexores de muñeca y dedos",
+      "nombre_latino": "Musculi flexores carpi et digitorum",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "grupo_muscular",
+      "padre": "antebrazo",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión de muñeca, flexión de dedos y fuerza de prensión (agarre).",
+      "articulaciones_asociadas": [
+        "muneca",
+        "dedos"
+      ],
+      "aliases": [
+        "flexores de muñeca",
+        "flexores de dedos",
+        "flexor radial del carpo",
+        "flexor cubital",
+        "wrist flexors"
+      ]
+    },
+    {
+      "id": "extensores_muneca",
+      "nombre": "Extensores de muñeca y dedos",
+      "nombre_latino": "Musculi extensores carpi et digitorum",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "grupo_muscular",
+      "padre": "antebrazo",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión de muñeca, extensión de dedos y estabilización de la mano en agarres firmes.",
+      "articulaciones_asociadas": [
+        "muneca",
+        "dedos"
+      ],
+      "aliases": [
+        "extensores de muñeca",
+        "extensores de dedos",
+        "extensor radial",
+        "wrist extensors"
+      ]
+    },
+    {
+      "id": "pronadores_antebrazo",
+      "nombre": "Pronadores del antebrazo",
+      "nombre_latino": "Musculus pronator teres et quadratus",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "grupo_muscular",
+      "padre": "antebrazo",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Pronación del antebrazo en las articulaciones radioulnares.",
+      "articulaciones_asociadas": [
+        "antebrazo"
+      ],
+      "aliases": [
+        "pronador redondo",
+        "pronador cuadrado",
+        "pronadores"
+      ]
+    },
+    {
+      "id": "supinador",
+      "nombre": "Supinador",
+      "nombre_latino": "Musculus supinator",
+      "zona": "superior",
+      "region": "antebrazo",
+      "tipo": "musculo_individual",
+      "padre": "antebrazo",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Supinación del antebrazo con codo extendido o flexionado.",
+      "articulaciones_asociadas": [
+        "antebrazo"
+      ],
+      "aliases": [
+        "supinador corto",
+        "supinator"
+      ]
+    },
+    {
+      "id": "gluteos",
+      "nombre": "Glúteos",
+      "nombre_latino": "Musculi glutei",
+      "zona": "inferior",
+      "region": "gluteo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "gluteo_mayor",
+        "gluteo_medio",
+        "gluteo_menor"
+      ],
+      "nivel_catalogacion": "agrupador_jerarquico",
+      "funcion_principal": "Complejo motor primario tridimensional lumbopélvico y de cadera (extensión, abducción y rotación).",
+      "articulaciones_asociadas": [
+        "cadera",
+        "pelvis"
+      ],
+      "aliases": [
+        "glúteos",
+        "gluteos",
+        "glutes"
+      ]
+    },
+    {
+      "id": "gluteo_mayor",
+      "nombre": "Glúteo mayor",
+      "nombre_latino": "Musculus gluteus maximus",
+      "zona": "inferior",
+      "region": "gluteo",
+      "tipo": "musculo_individual",
+      "padre": "gluteos",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión potente y rotación externa de la cadera; retroversión pélvica.",
+      "articulaciones_asociadas": [
+        "cadera",
+        "pelvis"
+      ],
+      "aliases": [
+        "glúteo mayor",
+        "gluteo mayor",
+        "gluteus maximus"
+      ]
+    },
+    {
+      "id": "gluteo_medio",
+      "nombre": "Glúteo medio",
+      "nombre_latino": "Musculus gluteus medius",
+      "zona": "inferior",
+      "region": "gluteo",
+      "tipo": "musculo_individual",
+      "padre": "gluteos",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Abducción de cadera y estabilizador frontal primario de la pelvis (signo de Trendelenburg).",
+      "articulaciones_asociadas": [
+        "cadera",
+        "pelvis"
+      ],
+      "aliases": [
+        "glúteo medio",
+        "gluteo medio",
+        "gluteus medius"
+      ]
+    },
+    {
+      "id": "gluteo_menor",
+      "nombre": "Glúteo menor",
+      "nombre_latino": "Musculus gluteus minimus",
+      "zona": "inferior",
+      "region": "gluteo",
+      "tipo": "musculo_individual",
+      "padre": "gluteos",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Abducción y rotación interna de cadera; coaptador de la cabeza femoral en el acetábulo.",
+      "articulaciones_asociadas": [
+        "cadera",
+        "pelvis"
+      ],
+      "aliases": [
+        "glúteo menor",
+        "gluteo menor",
+        "gluteus minimus"
+      ]
+    },
+    {
+      "id": "cuadriceps",
+      "nombre": "Cuádriceps",
+      "nombre_latino": "Musculus quadriceps femoris",
+      "zona": "inferior",
+      "region": "muslo_anterior",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "recto_femoral",
+        "vasto_lateral",
+        "vasto_medial",
+        "vasto_intermedio"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión de la articulación de la rodilla; flexión de cadera (recto femoral).",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "cuádriceps",
+        "cuadriceps",
+        "quadriceps",
+        "quads",
+        "muslo anterior"
+      ]
+    },
+    {
+      "id": "recto_femoral",
+      "nombre": "Recto femoral",
+      "nombre_latino": "Musculus rectus femoris",
+      "zona": "inferior",
+      "region": "muslo_anterior",
+      "tipo": "porcion_anatomica",
+      "padre": "cuadriceps",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de rodilla y flexión de cadera (músculo biarticular).",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "recto femoral",
+        "rectus femoris",
+        "recto anterior del muslo"
+      ]
+    },
+    {
+      "id": "vasto_lateral",
+      "nombre": "Vasto lateral",
+      "nombre_latino": "Musculus vastus lateralis",
+      "zona": "inferior",
+      "region": "muslo_anterior",
+      "tipo": "porcion_anatomica",
+      "padre": "cuadriceps",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de rodilla (mayor volumen de las cabezas del cuádriceps).",
+      "articulaciones_asociadas": [
+        "rodilla"
+      ],
+      "aliases": [
+        "vasto lateral",
+        "vasto externo",
+        "vastus lateralis"
+      ]
+    },
+    {
+      "id": "vasto_medial",
+      "nombre": "Vasto medial",
+      "nombre_latino": "Musculus vastus medialis",
+      "zona": "inferior",
+      "region": "muslo_anterior",
+      "tipo": "porcion_anatomica",
+      "padre": "cuadriceps",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de rodilla y estabilización medial de la rótula (VMO).",
+      "articulaciones_asociadas": [
+        "rodilla"
+      ],
+      "aliases": [
+        "vasto medial",
+        "vasto interno",
+        "vastus medialis",
+        "vmo"
+      ]
+    },
+    {
+      "id": "vasto_intermedio",
+      "nombre": "Vasto intermedio",
+      "nombre_latino": "Musculus vastus intermedius",
+      "zona": "inferior",
+      "region": "muslo_anterior",
+      "tipo": "porcion_anatomica",
+      "padre": "cuadriceps",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión de rodilla situado profundamente bajo el recto femoral.",
+      "articulaciones_asociadas": [
+        "rodilla"
+      ],
+      "aliases": [
+        "vasto intermedio",
+        "crural",
+        "vastus intermedius"
+      ]
+    },
+    {
+      "id": "isquiotibiales",
+      "nombre": "Isquiotibiales",
+      "nombre_latino": "Musculi ischiocrurales",
+      "zona": "inferior",
+      "region": "muslo_posterior",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "biceps_femoral",
+        "semitendinoso",
+        "semimembranoso"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión de rodilla, extensión de cadera y desaceleración de la tibia.",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "isquiotibiales",
+        "femorales",
+        "isquiosururales",
+        "hamstrings",
+        "isquios"
+      ]
+    },
+    {
+      "id": "biceps_femoral",
+      "nombre": "Bíceps femoral",
+      "nombre_latino": "Musculus biceps femoris",
+      "zona": "inferior",
+      "region": "muslo_posterior",
+      "tipo": "musculo_individual",
+      "padre": "isquiotibiales",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión de rodilla, rotación externa de rodilla flexionada y extensión de cadera (cabeza larga).",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "bíceps femoral",
+        "biceps femoral",
+        "biceps femoris"
+      ]
+    },
+    {
+      "id": "semitendinoso",
+      "nombre": "Semitendinoso",
+      "nombre_latino": "Musculus semitendinosus",
+      "zona": "inferior",
+      "region": "muslo_posterior",
+      "tipo": "musculo_individual",
+      "padre": "isquiotibiales",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión y rotación interna de rodilla flexionada; extensión de cadera.",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "semitendinoso",
+        "semitendinosus"
+      ]
+    },
+    {
+      "id": "semimembranoso",
+      "nombre": "Semimembranoso",
+      "nombre_latino": "Musculus semimembranosus",
+      "zona": "inferior",
+      "region": "muslo_posterior",
+      "tipo": "musculo_individual",
+      "padre": "isquiotibiales",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión y rotación interna de rodilla; extensión potente de cadera.",
+      "articulaciones_asociadas": [
+        "rodilla",
+        "cadera"
+      ],
+      "aliases": [
+        "semimembranoso",
+        "semimembranosus"
+      ]
+    },
+    {
+      "id": "aductores_cadera",
+      "nombre": "Aductores de cadera",
+      "nombre_latino": "Musculi adductores femoris",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "aductor_mayor",
+        "aductor_largo",
+        "aductor_corto",
+        "gracil",
+        "pectineo"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Aducción de cadera, asistencia en flexión/extensión según el ángulo articular.",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "aductores",
+        "aductores de cadera",
+        "adductors"
+      ]
+    },
+    {
+      "id": "aductor_mayor",
+      "nombre": "Aductor mayor",
+      "nombre_latino": "Musculus adductor magnus",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "aductores_cadera",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Aducción de cadera y potente extensor de cadera en ángulos profundos de flexión (>60°).",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "aductor mayor",
+        "adductor magnus"
+      ]
+    },
+    {
+      "id": "aductor_largo",
+      "nombre": "Aductor largo",
+      "nombre_latino": "Musculus adductor longus",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "aductores_cadera",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción y flexión de cadera.",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "aductor largo",
+        "aductor mediano",
+        "adductor longus"
+      ]
+    },
+    {
+      "id": "aductor_corto",
+      "nombre": "Aductor corto",
+      "nombre_latino": "Musculus adductor brevis",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "aductores_cadera",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción y rotación externa de cadera.",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "aductor corto",
+        "adductor brevis"
+      ]
+    },
+    {
+      "id": "gracil",
+      "nombre": "Grácil",
+      "nombre_latino": "Musculus gracilis",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "aductores_cadera",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción de cadera y flexión accesoria de rodilla (biarticular).",
+      "articulaciones_asociadas": [
+        "cadera",
+        "rodilla"
+      ],
+      "aliases": [
+        "grácil",
+        "gracil",
+        "recto interno",
+        "gracilis"
+      ]
+    },
+    {
+      "id": "pectineo",
+      "nombre": "Pectíneo",
+      "nombre_latino": "Musculus pectineus",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "aductores_cadera",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Aducción, flexión y rotación interna de la cadera.",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "pectíneo",
+        "pectineo",
+        "pectineus"
+      ]
+    },
+    {
+      "id": "iliopsoas",
+      "nombre": "Iliopsoas",
+      "nombre_latino": "Musculus iliopsoas",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "psoas_mayor",
+        "iliaco"
+      ],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexor primario más potente de la cadera; lordotizante y estabilizador lumbopélvico.",
+      "articulaciones_asociadas": [
+        "cadera",
+        "columna_lumbar"
+      ],
+      "aliases": [
+        "iliopsoas",
+        "psoas iliaco",
+        "psoas ilíaco",
+        "hip flexors",
+        "flexores de cadera"
+      ]
+    },
+    {
+      "id": "psoas_mayor",
+      "nombre": "Psoas mayor",
+      "nombre_latino": "Musculus psoas major",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "iliopsoas",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión de cadera y tracción lumbar anterior.",
+      "articulaciones_asociadas": [
+        "cadera",
+        "columna_lumbar"
+      ],
+      "aliases": [
+        "psoas mayor",
+        "psoas"
+      ]
+    },
+    {
+      "id": "iliaco",
+      "nombre": "Ilíaco",
+      "nombre_latino": "Musculus iliacus",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": "iliopsoas",
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión coxofemoral pura originada en la fosa ilíaca.",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "ilíaco",
+        "iliaco"
+      ]
+    },
+    {
+      "id": "tensor_fascia_lata",
+      "nombre": "Tensor de la fascia lata",
+      "nombre_latino": "Musculus tensor fasciae latae",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Abducción, flexión y rotación interna de cadera; tensión de la cintilla iliotibial.",
+      "articulaciones_asociadas": [
+        "cadera",
+        "rodilla"
+      ],
+      "aliases": [
+        "tensor de la fascia lata",
+        "tfl",
+        "tensor fasciae latae"
+      ]
+    },
+    {
+      "id": "sartorio",
+      "nombre": "Sartorio",
+      "nombre_latino": "Musculus sartorius",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión, abducción y rotación externa de cadera; flexión de rodilla (biarticular).",
+      "articulaciones_asociadas": [
+        "cadera",
+        "rodilla"
+      ],
+      "aliases": [
+        "sartorio",
+        "sartorius"
+      ]
+    },
+    {
+      "id": "rotadores_cadera_profundos",
+      "nombre": "Rotadores profundos de cadera",
+      "nombre_latino": "Musculi pelvitrochanterici",
+      "zona": "inferior",
+      "region": "cadera_pelvis",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Rotación externa y estabilización articular fina pelvitrocantérea (manguito de la cadera).",
+      "articulaciones_asociadas": [
+        "cadera"
+      ],
+      "aliases": [
+        "pelvitrocantéreos",
+        "piriforme",
+        "obturadores",
+        "cuadrado femoral"
+      ]
+    },
+    {
+      "id": "triceps_sural",
+      "nombre": "Tríceps sural",
+      "nombre_latino": "Musculus triceps surae",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [
+        "gastrocnemio",
+        "soleo"
+      ],
+      "nivel_catalogacion": "agrupador_jerarquico",
+      "funcion_principal": "Flexión plantar del tobillo a través del tendón de Aquiles.",
+      "articulaciones_asociadas": [
+        "tobillo",
+        "rodilla"
+      ],
+      "aliases": [
+        "tríceps sural",
+        "triceps sural",
+        "pantorrillas",
+        "pantorrilla",
+        "calves"
+      ]
+    },
+    {
+      "id": "gastrocnemio",
+      "nombre": "Gastrocnemio",
+      "nombre_latino": "Musculus gastrocnemius",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "porcion_anatomica",
+      "padre": "triceps_sural",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión plantar con rodilla extendida; flexor sinergista de rodilla (biarticular).",
+      "articulaciones_asociadas": [
+        "tobillo",
+        "rodilla"
+      ],
+      "aliases": [
+        "gemelos",
+        "gemelo",
+        "gastrocnemio",
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "soleo",
+      "nombre": "Sóleo",
+      "nombre_latino": "Musculus soleus",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "porcion_anatomica",
+      "padre": "triceps_sural",
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión plantar monoarticular del tobillo (predominante con rodilla en flexión).",
+      "articulaciones_asociadas": [
+        "tobillo"
+      ],
+      "aliases": [
+        "sóleo",
+        "soleo",
+        "soleus"
+      ]
+    },
+    {
+      "id": "tibial_anterior",
+      "nombre": "Tibial anterior",
+      "nombre_latino": "Musculus tibialis anterior",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Dorsiflexión e inversión del pie; control de caída plantar en la marcha y sentadilla.",
+      "articulaciones_asociadas": [
+        "tobillo"
+      ],
+      "aliases": [
+        "tibial anterior",
+        "tibialis anterior"
+      ]
+    },
+    {
+      "id": "tibial_posterior",
+      "nombre": "Tibial posterior",
+      "nombre_latino": "Musculus tibialis posterior",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Inversión del pie, flexión plantar y mantenimiento del arco plantar longitudinal.",
+      "articulaciones_asociadas": [
+        "tobillo"
+      ],
+      "aliases": [
+        "tibial posterior",
+        "tibialis posterior"
+      ]
+    },
+    {
+      "id": "peroneos",
+      "nombre": "Peroneos laterales",
+      "nombre_latino": "Musculi fibulares (peronei)",
+      "zona": "inferior",
+      "region": "pierna_tobillo",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Eversión del pie y estabilidad lateral de tobillo (peroneo largo y corto).",
+      "articulaciones_asociadas": [
+        "tobillo"
+      ],
+      "aliases": [
+        "peroneos",
+        "fibulare",
+        "peroneo lateral largo",
+        "peroneo lateral corto"
+      ]
+    },
+    {
+      "id": "recto_abdominal",
+      "nombre": "Recto abdominal",
+      "nombre_latino": "Musculus rectus abdominis",
+      "zona": "core",
+      "region": "pared_abdominal",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión de columna toracolumbar y soporte estático anti-extensión del raquis.",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "columna_toracica"
+      ],
+      "aliases": [
+        "recto abdominal",
+        "recto anterior del abdomen",
+        "abdominales",
+        "abs",
+        "rectus abdominis"
+      ]
+    },
+    {
+      "id": "oblicuo_externo",
+      "nombre": "Oblicuo externo",
+      "nombre_latino": "Musculus obliquus externus abdominis",
+      "zona": "core",
+      "region": "pared_abdominal",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Rotación contralateral del tronco, flexión lateral ipsilateral y resistencia anti-rotación.",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "columna_toracica"
+      ],
+      "aliases": [
+        "oblicuo externo",
+        "oblicuo mayor",
+        "oblicuos",
+        "external oblique"
+      ]
+    },
+    {
+      "id": "oblicuo_interno",
+      "nombre": "Oblicuo interno",
+      "nombre_latino": "Musculus obliquus internus abdominis",
+      "zona": "core",
+      "region": "pared_abdominal",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Rotación ipsilateral del tronco, flexión lateral y soporte de la pared abdominal profunda.",
+      "articulaciones_asociadas": [
+        "columna_lumbar"
+      ],
+      "aliases": [
+        "oblicuo interno",
+        "oblicuo menor",
+        "internal oblique"
+      ]
+    },
+    {
+      "id": "transverso_abdominal",
+      "nombre": "Transverso abdominal",
+      "nombre_latino": "Musculus transversus abdominis",
+      "zona": "core",
+      "region": "pared_abdominal",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Compresión visceral, tensión de la fascia toracolumbar e incremento de la presión intraabdominal (IAP).",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "pelvis"
+      ],
+      "aliases": [
+        "transverso abdominal",
+        "transverso del abdomen",
+        "tva",
+        "transversus abdominis"
+      ]
+    },
+    {
+      "id": "erectores_espinales",
+      "nombre": "Erectores espinales",
+      "nombre_latino": "Musculus erector spinae",
+      "zona": "core",
+      "region": "raquis_posterior",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Extensión de la columna torácica y lumbar; control excéntrico e isométrico de anti-flexión vertebral.",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "columna_toracica"
+      ],
+      "aliases": [
+        "erectores espinales",
+        "erector de la columna",
+        "sacrolumbar",
+        "iliocostal",
+        "longísimo",
+        "espinales",
+        "erector spinae",
+        "lumbares",
+        "lumbar"
+      ]
+    },
+    {
+      "id": "multifidos",
+      "nombre": "Multífidos",
+      "nombre_latino": "Musculi multifidi",
+      "zona": "core",
+      "region": "raquis_posterior",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Estabilización segmentaria intervertebral fina y control de cizallamiento entre vértebras contiguas.",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "columna_toracica"
+      ],
+      "aliases": [
+        "multífidos",
+        "multifidos",
+        "multifidus"
+      ]
+    },
+    {
+      "id": "cuadrado_lumbar",
+      "nombre": "Cuadrado lumbar",
+      "nombre_latino": "Musculus quadratus lumborum",
+      "zona": "core",
+      "region": "raquis_posterior",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "operativo_recomendado",
+      "funcion_principal": "Flexión lateral del tronco, estabilización frontal lumbopélvica y fijación de la 12ª costilla.",
+      "articulaciones_asociadas": [
+        "columna_lumbar",
+        "pelvis"
+      ],
+      "aliases": [
+        "cuadrado lumbar",
+        "quadratus lumborum",
+        "ql"
+      ]
+    },
+    {
+      "id": "diafragma",
+      "nombre": "Diafragma",
+      "nombre_latino": "Diaphragma",
+      "zona": "core",
+      "region": "suelo_y_diafragma",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Músculo inspiratorio primario y techo presurizador del cilindro manométrico intraabdominal.",
+      "articulaciones_asociadas": [
+        "caja_toracica"
+      ],
+      "aliases": [
+        "diafragma",
+        "diaphragm"
+      ]
+    },
+    {
+      "id": "suelo_pelvico",
+      "nombre": "Suelo pélvico",
+      "nombre_latino": "Diaphragma pelvis",
+      "zona": "core",
+      "region": "suelo_y_diafragma",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Soporte visceral caudal y co-activación refleja con el transverso para la presión intraabdominal.",
+      "articulaciones_asociadas": [
+        "pelvis"
+      ],
+      "aliases": [
+        "suelo pélvico",
+        "suelo pelvico",
+        "diafragma pélvico",
+        "pelvic floor"
+      ]
+    },
+    {
+      "id": "esternocleidomastoideo",
+      "nombre": "Esternocleidomastoideo",
+      "nombre_latino": "Musculus sternocleidomastoideus",
+      "zona": "cuello",
+      "region": "cervical",
+      "tipo": "musculo_individual",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión, flexión lateral y rotación contralateral de la cabeza.",
+      "articulaciones_asociadas": [
+        "cuello"
+      ],
+      "aliases": [
+        "esternocleidomastoideo",
+        "ecm",
+        "sternocleidomastoid"
+      ]
+    },
+    {
+      "id": "esplenio_cabeza",
+      "nombre": "Esplenio de la cabeza y cuello",
+      "nombre_latino": "Musculus splenius capitis et cervicis",
+      "zona": "cuello",
+      "region": "cervical",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Extensión, flexión lateral y rotación ipsilateral del cuello y cabeza.",
+      "articulaciones_asociadas": [
+        "cuello"
+      ],
+      "aliases": [
+        "esplenio",
+        "esplenio de la cabeza",
+        "splenius"
+      ]
+    },
+    {
+      "id": "escalenos",
+      "nombre": "Escalenos",
+      "nombre_latino": "Musculi scaleni",
+      "zona": "cuello",
+      "region": "cervical",
+      "tipo": "grupo_muscular",
+      "padre": null,
+      "hijos": [],
+      "nivel_catalogacion": "especifico_avanzado",
+      "funcion_principal": "Flexión lateral del cuello y elevación de las dos primeras costillas durante la inspiración forzada.",
+      "articulaciones_asociadas": [
+        "cuello",
+        "caja_toracica"
+      ],
+      "aliases": [
+        "escalenos",
+        "scalene"
+      ]
+    }
+  ]
+}
