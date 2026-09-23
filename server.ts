@@ -649,36 +649,34 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
         e.id === generatedId || e.nombre.toLowerCase() === normalizedExercise.nombre.toLowerCase()
       );
 
-      if (existingIndex >= 0) {
-        catalog.ejercicios[existingIndex] = { ...catalog.ejercicios[existingIndex], ...normalizedExercise };
-      } else {
-        catalog.ejercicios.push(normalizedExercise);
-      }
-      catalog.total_ejercicios = catalog.ejercicios.length;
-
-      const outputData = JSON.stringify(catalog, null, 2);
-
-      // Write to public/ejercicios.json
+      const customStorePath = path.resolve(process.cwd(), 'src', 'data', 'user_custom_exercises.json');
+      let customCatalog: { ejercicios: any[] } = { ejercicios: [] };
       try {
-        fs.writeFileSync(publicPath, outputData, 'utf-8');
-      } catch (errPublic) {
-        console.warn("Could not write to public/ejercicios.json:", errPublic);
-      }
-
-      // Also write to src/data/ejercicios.json
-      try {
-        if (fs.existsSync(path.dirname(srcPath))) {
-          fs.writeFileSync(srcPath, outputData, 'utf-8');
+        if (fs.existsSync(customStorePath)) {
+          customCatalog = JSON.parse(fs.readFileSync(customStorePath, 'utf-8'));
         }
-      } catch (errSrc) {
-        console.warn("Could not write to src/data/ejercicios.json:", errSrc);
+      } catch (readCustomErr) {
+        console.warn("Could not read user_custom_exercises.json:", readCustomErr);
+      }
+
+      const customIndex = customCatalog.ejercicios.findIndex(e => e.id === normalizedExercise.id);
+      if (customIndex >= 0) {
+        customCatalog.ejercicios[customIndex] = normalizedExercise;
+      } else {
+        customCatalog.ejercicios.push(normalizedExercise);
+      }
+
+      try {
+        fs.writeFileSync(customStorePath, JSON.stringify(customCatalog, null, 2), 'utf-8');
+      } catch (writeErr) {
+        console.warn("Could not write to user_custom_exercises.json:", writeErr);
       }
 
       return res.json({ 
         success: true, 
         exercise: normalizedExercise, 
         total: catalog.total_ejercicios,
-        message: "Ejercicio guardado en el archivo JSON correctamente."
+        message: "Ejercicio personalizado guardado correctamente sin modificar el catálogo maestro."
       });
     } catch (error: any) {
       console.error("Error in /api/exercises/save-custom:", error);
