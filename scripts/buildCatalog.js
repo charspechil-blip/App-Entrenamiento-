@@ -1,51 +1,59 @@
 import fs from 'fs';
 import path from 'path';
-import { lowerExercises } from './data_lower.js';
-import { upperPushExercises } from './data_upper_push.js';
-import { upperPullExercises } from './data_upper_pull.js';
-import { coreCardioMovExercises } from './data_core_cardio_mov.js';
+import { validateCatalog } from './validateCatalog.js';
 
-const allExercises = [
-  ...lowerExercises,
-  ...upperPushExercises,
-  ...upperPullExercises,
-  ...coreCardioMovExercises
-];
+/**
+ * Script de Publicación del Catálogo Maestro — Entreno
+ * 
+ * ARQUITECTURA OFICIAL:
+ * 
+ *                     CATÁLOGO MAESTRO
+ *                          │
+ *                          ▼
+ *               src/data/ejercicios.json   ◄── FUENTE CANÓNICA OFICIAL
+ *                          │
+ *                          ├──────────────► exerciseCatalog.ts (Servicio App)
+ *                          │
+ *                          ▼
+ *               publicación para aplicación
+ *                          │
+ *                          ▼
+ *               public/ejercicios.json      ◄── COPIA DERIVADA DE PUBLICACIÓN
+ * 
+ * NOTA HISTÓRICA / LEGACY:
+ * Los archivos modulares:
+ * - data_lower.js
+ * - data_upper_push.js
+ * - data_upper_pull.js
+ * - data_core_cardio_mov.js
+ * corresponden a la fase inicial de bootstrap del catálogo y se conservan intactos
+ * como fuentes legacy para trazabilidad histórica, pero NO constituyen la fuente de verdad.
+ */
 
-// Verify duplicate IDs
-const idSet = new Set();
-const duplicates = [];
-for (const ex of allExercises) {
-  if (idSet.has(ex.id)) {
-    duplicates.push(ex.id);
-  }
-  idSet.add(ex.id);
-}
-
-if (duplicates.length > 0) {
-  console.error("Duplicate IDs found:", duplicates);
+// 1. Validar la fuente canónica antes de publicar
+const validationResult = validateCatalog();
+if (!validationResult.valid) {
+  console.error('\n✖ Error: El catálogo maestro no superó la validación. Cancelando publicación.');
   process.exit(1);
 }
 
-const catalog = {
-  version: "1.0.0",
-  descripcion: "Catálogo maestro normalizado de ejercicios físicos para la aplicación de entrenamiento",
-  total_ejercicios: allExercises.length,
-  ejercicios: allExercises
-};
+// 2. Leer la fuente canónica oficial
+const canonicalPath = path.resolve('src', 'data', 'ejercicios.json');
+const canonicalContent = fs.readFileSync(canonicalPath, 'utf-8');
+const catalog = JSON.parse(canonicalContent);
 
-const jsonContent = JSON.stringify(catalog, null, 2);
-
-// Write to public/ejercicios.json
-const publicPath = path.resolve('public', 'ejercicios.json');
-fs.writeFileSync(publicPath, jsonContent, 'utf-8');
-console.log(`Saved ${allExercises.length} exercises to ${publicPath}`);
-
-// Also ensure src/data/ejercicios.json exists for direct imports if needed
-const srcDataDir = path.resolve('src', 'data');
-if (!fs.existsSync(srcDataDir)) {
-  fs.mkdirSync(srcDataDir, { recursive: true });
+// 3. Escribir la copia derivada de publicación en public/ejercicios.json
+const publicDir = path.resolve('public');
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
 }
-const srcPath = path.resolve(srcDataDir, 'ejercicios.json');
-fs.writeFileSync(srcPath, jsonContent, 'utf-8');
-console.log(`Saved copy to ${srcPath}`);
+const publicPath = path.resolve(publicDir, 'ejercicios.json');
+
+// Formatear JSON limpio y consistente
+const publishedContent = JSON.stringify(catalog, null, 2);
+fs.writeFileSync(publicPath, publishedContent, 'utf-8');
+
+console.log(`\n✔ Publicación exitosa:`);
+console.log(`  - Fuente canónica: ${canonicalPath}`);
+console.log(`  - Copia derivada : ${publicPath}`);
+console.log(`  - Total ejercicios: ${catalog.total_ejercicios} (Versión ${catalog.version})\n`);

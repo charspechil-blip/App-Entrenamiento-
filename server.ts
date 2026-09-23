@@ -565,11 +565,11 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
       };
 
       try {
-        if (fs.existsSync(publicPath)) {
-          const content = fs.readFileSync(publicPath, 'utf-8');
-          catalog = JSON.parse(content);
-        } else if (fs.existsSync(srcPath)) {
+        if (fs.existsSync(srcPath)) {
           const content = fs.readFileSync(srcPath, 'utf-8');
+          catalog = JSON.parse(content);
+        } else if (fs.existsSync(publicPath)) {
+          const content = fs.readFileSync(publicPath, 'utf-8');
           catalog = JSON.parse(content);
         }
       } catch (readErr) {
@@ -689,14 +689,14 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
   // Get master exercises catalog
   app.get("/api/exercises", (_req, res) => {
     try {
-      const publicPath = path.resolve(process.cwd(), 'public', 'ejercicios.json');
-      if (fs.existsSync(publicPath)) {
-        const content = fs.readFileSync(publicPath, 'utf-8');
-        return res.type('application/json').send(content);
-      }
       const srcPath = path.resolve(process.cwd(), 'src', 'data', 'ejercicios.json');
       if (fs.existsSync(srcPath)) {
         const content = fs.readFileSync(srcPath, 'utf-8');
+        return res.type('application/json').send(content);
+      }
+      const publicPath = path.resolve(process.cwd(), 'public', 'ejercicios.json');
+      if (fs.existsSync(publicPath)) {
+        const content = fs.readFileSync(publicPath, 'utf-8');
         return res.type('application/json').send(content);
       }
       return res.json({ total_ejercicios: 0, ejercicios: [] });

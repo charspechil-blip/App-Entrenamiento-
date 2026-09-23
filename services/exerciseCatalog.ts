@@ -65,6 +65,23 @@ export interface CatalogExercise {
   tags?: string[];
   personalizado?: boolean;
   actualizado_en?: string;
+  // Dimensiones conceptuales normalizadas del Catálogo Maestro (Punto 3A/3B/3C)
+  zona_anatomica?: string;
+  tipo_ejercicio?: 'multiarticular' | 'aislamiento' | string;
+  categoria_funcional?: string;
+  estabilizadores?: string[];
+  ejercicios_relacionados?: string[];
+  sustitutos?: string[];
+  capacidad_fisica?: string;
+  cadena_cinetica?: 'abierta' | 'cerrada' | 'mixta' | string;
+  articulaciones_principales?: string[];
+  articulaciones_secundarias?: string[];
+  plano_predominante?: 'sagital' | 'frontal' | 'transversal' | 'multiplanar' | string;
+  unilateralidad?: 'bilateral' | 'unilateral' | 'alternado' | 'asimetrico' | string;
+  tipo_resistencia?: 'peso_libre' | 'peso_corporal' | 'polea' | 'maquina_guiada' | 'elastico' | string;
+  demanda_estabilidad?: 'baja' | 'media' | 'alta' | string;
+  objetivo?: string;
+  funcion?: string;
 }
 
 // Storage key for custom user exercises
