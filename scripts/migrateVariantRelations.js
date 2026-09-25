@@ -335,49 +335,57 @@ setClass('perro-boca-abajo', 'gato-camello', 'RELACIONADO', 'ALTA', 'Extensión 
 
 setClass('dislocaciones-de-hombro-con-banda', 'gato-camello', 'PENDIENTE_REVISION', 'BAJA', 'Movilidad de cintura escapular vs flexoextensión de columna; relación histórica dudosa.');
 
-// Apply to all 109 exercises
-let totalVariantsCount = 0;
-let totalRelatedCount = 0;
-let totalReviewCount = 0;
+// Apply to all 109 exercises only when executed directly from CLI
+import { fileURLToPath } from 'url';
 
-exercises.forEach(ex => {
-  const currentVariants = ex.variantes || [];
-  const trueVariants = [];
-  const related = [];
-  const substitutes = []; // conservative initialization
+function runMigration() {
+  let totalVariantsCount = 0;
+  let totalRelatedCount = 0;
+  let totalReviewCount = 0;
 
-  currentVariants.forEach(targetId => {
-    const key = `${ex.id}->${targetId}`;
-    const cl = classificationMap.get(key);
-    if (!cl) {
-      console.warn('Missing classification for:', key);
-      return;
-    }
-    if (cl.type === 'VARIANTE') {
-      trueVariants.push(targetId);
-      totalVariantsCount++;
-    } else if (cl.type === 'RELACIONADO') {
-      related.push(targetId);
-      totalRelatedCount++;
-    } else if (cl.type === 'PENDIENTE_REVISION') {
-      // Conservative handling as per section 13:
-      // Keep in related with flag or in document
-      related.push(targetId);
-      totalReviewCount++;
-    }
+  exercises.forEach(ex => {
+    const currentVariants = ex.variantes || [];
+    const trueVariants = [];
+    const related = [];
+    const substitutes = []; // conservative initialization
+
+    currentVariants.forEach(targetId => {
+      const key = `${ex.id}->${targetId}`;
+      const cl = classificationMap.get(key);
+      if (!cl) {
+        console.warn('Missing classification for:', key);
+        return;
+      }
+      if (cl.type === 'VARIANTE') {
+        trueVariants.push(targetId);
+        totalVariantsCount++;
+      } else if (cl.type === 'RELACIONADO') {
+        related.push(targetId);
+        totalRelatedCount++;
+      } else if (cl.type === 'PENDIENTE_REVISION') {
+        // Conservative handling as per section 13:
+        // Keep in related with flag or in document
+        related.push(targetId);
+        totalReviewCount++;
+      }
+    });
+
+    ex.variantes = trueVariants;
+    ex.ejercicios_relacionados = related;
+    ex.sustitutos = substitutes;
   });
 
-  ex.variantes = trueVariants;
-  ex.ejercicios_relacionados = related;
-  ex.sustitutos = substitutes;
-});
+  console.log('Processed exercises:', exercises.length);
+  console.log('Total True Variants kept in variantes:', totalVariantsCount);
+  console.log('Total Related moved to ejercicios_relacionados:', totalRelatedCount);
+  console.log('Total Pending Review kept in ejercicios_relacionados:', totalReviewCount);
+  console.log('Total sum of relations:', totalVariantsCount + totalRelatedCount + totalReviewCount);
 
-console.log('Processed exercises:', exercises.length);
-console.log('Total True Variants kept in variantes:', totalVariantsCount);
-console.log('Total Related moved to ejercicios_relacionados:', totalRelatedCount);
-console.log('Total Pending Review kept in ejercicios_relacionados:', totalReviewCount);
-console.log('Total sum of relations:', totalVariantsCount + totalRelatedCount + totalReviewCount);
+  // Save updated JSON
+  fs.writeFileSync(SRC_PATH, JSON.stringify(cat, null, 2), 'utf-8');
+  console.log('Updated', SRC_PATH);
+}
 
-// Save updated JSON
-fs.writeFileSync(SRC_PATH, JSON.stringify(cat, null, 2), 'utf-8');
-console.log('Updated', SRC_PATH);
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  runMigration();
+}

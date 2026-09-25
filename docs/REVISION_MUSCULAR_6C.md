@@ -77,14 +77,14 @@ El presente documento registra las decisiones técnicas y biomecánicas adoptada
 ---
 
 ### Caso 6: Extensiones de Tríceps Tras Nuca (`extension-triceps-tras-nuca-mancuerna` y `-polea`)
-- **Problema:** Asignar `triceps_braquial` indistinto vs porción anatómica.
+- **Problema:** Asignar `triceps_braquial` indistinto vs porción anatómica específica (`triceps_cabeza_larga`), y evitar la doble contabilización jerárquica padre/hijo.
 - **Clasificación Aplicada:**
   - `musculos_principales`: `["triceps_cabeza_larga"]`
-  - `musculos_secundarios`: `["triceps_braquial"]`
+  - `musculos_secundarios`: `[]`
   - `estabilizadores`: `["recto_abdominal", "manguito_rotador"]`
-- **Alternativa Posible:** Usar únicamente el grupo padre `triceps_braquial`.
-- **Decisión Adoptada:** Asignar específicamente `triceps_cabeza_larga` como motor principal.
-- **Justificación Biomecánica:** La cabeza larga del tríceps tiene su origen en el tubérculo infraglenoideo de la escápula. La posición con flexión de hombro a 180° la sitúa en su máxima elongación funcional fisiológica, colocándola en la cresta de la curva longitud-tensión activa e induciendo hipertrofia mediada por estiramiento demostrada en ensayos clínicos. En extensiones estándar pegadas al cuerpo (`extension-triceps-polea-alta`), la cabeza larga está insuficientemente estirada, trabajando más las cabezas monoarticulares.
+- **Alternativa Posible:** Usar únicamente el grupo padre `triceps_braquial` o incluir simultáneamente padre e hijo en roles distintos.
+- **Decisión Adoptada:** Asignar específicamente `triceps_cabeza_larga` como único motor principal y eliminar al grupo padre `triceps_braquial` de `musculos_secundarios` para erradicar la duplicación jerárquica padre/hijo.
+- **Justificación Biomecánica:** La cabeza larga del tríceps tiene su origen en el tubérculo infraglenoideo de la escápula. La posición con flexión de hombro a 180° la sitúa en su máxima elongación funcional fisiológica, colocándola en la cresta de la curva longitud-tensión activa e induciendo hipertrofia mediada por estiramiento demostrada en ensayos clínicos. Registrar simultáneamente el grupo padre (`triceps_braquial`) en secundarios generaba una doble contabilización jerárquica padre/hijo prohibida por las reglas de normalización. Siendo un movimiento monoarticular de aislamiento de extensión de codo con los hombros verticalizados, la cabeza larga lidera el torque motor principal sin sinergistas dinámicos secundarios diferenciados.
 
 ---
 

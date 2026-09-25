@@ -17,15 +17,29 @@ const CANONICAL_SRC_PATH = path.resolve('src', 'data', 'ejercicios.json');
 const DERIVED_PUBLIC_PATH = path.resolve('public', 'ejercicios.json');
 const MUSCLES_SRC_PATH = path.resolve('src', 'data', 'muscles.json');
 
-// Cargar catálogo de músculos canónicos si existe
+// Cargar catálogo de músculos canónicos y jerarquía padre-hijo si existe
 let canonicalMuscleIds = new Set();
+let muscleParentMap = new Map();
 if (fs.existsSync(MUSCLES_SRC_PATH)) {
   try {
     const musclesDoc = JSON.parse(fs.readFileSync(MUSCLES_SRC_PATH, 'utf-8'));
     canonicalMuscleIds = new Set((musclesDoc.musculos || []).map(m => m.id));
+    (musclesDoc.musculos || []).forEach(m => {
+      muscleParentMap.set(m.id, m.padre || null);
+    });
   } catch (e) {
     // Ignorar si falla parseo preliminar
   }
+}
+
+function getMuscleAncestors(muscleId) {
+  const ancestors = new Set();
+  let curr = muscleParentMap.get(muscleId);
+  while (curr) {
+    ancestors.add(curr);
+    curr = muscleParentMap.get(curr);
+  }
+  return ancestors;
 }
 
 const REQUIRED_FIELDS = [
@@ -273,6 +287,23 @@ export function validateCatalog() {
         errors.push(`${pos}: Músculo "${m}" duplicado en secundarios y estabilizadores.`);
       }
     });
+
+    // 5C. Verificar ausencia de doble contabilización jerárquica padre/hijo en el mismo ejercicio
+    const allAssignedMuscles = [
+      ...(ex.musculos_principales || []),
+      ...(ex.musculos_secundarios || []),
+      ...(ex.estabilizadores || [])
+    ];
+    for (let i = 0; i < allAssignedMuscles.length; i++) {
+      const childCandidate = allAssignedMuscles[i];
+      const ancestors = getMuscleAncestors(childCandidate);
+      for (let j = 0; j < allAssignedMuscles.length; j++) {
+        const parentCandidate = allAssignedMuscles[j];
+        if (i !== j && ancestors.has(parentCandidate)) {
+          errors.push(`${pos}: Conflicto jerárquico padre/hijo detectado. Músculo específico "${childCandidate}" y su grupo ancestro "${parentCandidate}" están presentes en el mismo ejercicio.`);
+        }
+      }
+    }
 
     // 6. Relaciones: Variantes, Ejercicios Relacionados y Sustitutos
     if (ex.variantes) {

@@ -1,77 +1,55 @@
+/**
+ * SINGLE SOURCE OF TRUTH (SSOT) — SERVICIO DEL CATÁLOGO DE EJERCICIOS
+ * ===================================================================
+ * 
+ * ARQUITECTURA OFICIAL:
+ * 
+ *     ┌─────────────────────────────────────────────────────────┐
+ *     │              src/data/ejercicios.json                   │
+ *     │             (FUENTE CANÓNICA MAESTRA)                  │
+ *     │            109 Ejercicios Oficiales 1.3                │
+ *     └───────────────────────────┬─────────────────────────────┘
+ *                                 │
+ *                                 ▼  (Lectura determinista en build / runtime)
+ *     ┌─────────────────────────────────────────────────────────┐
+ *     │             services/exerciseCatalog.ts                 │
+ *     │          - Proyección de Campos Derivados               │
+ *     │          - Adaptadores de Compatibilidad (Legacy)       │
+ *     │          - Fusión con Ejercicios Personalizados         │
+ *     └───────────────────────────┬─────────────────────────────┘
+ *                                 │
+ *        ┌────────────────────────┴────────────────────────┐
+ *        ▼                                                 ▼
+ *    Componentes UI                                 Servicios y Utilidades
+ *    (CustomExerciseModal,                          (constants/muscles.ts,
+ *     ManualLogModal, SetupWizard,                   constants/equipment.ts,
+ *     RestTimerModal, App.tsx)                       workoutFlowUtils.ts)
+ * 
+ * PRINCIPIO FUNDAMENTAL:
+ * Ningún dato canónico se almacena duplicado manualmente.
+ * Las propiedades derivadas (muscle_groups, muscles.primary, etc.) se computan
+ * dinámicamente mediante toCatalogExercise() preservando la pureza de src/data/ejercicios.json.
+ */
+
 import masterData from '../src/data/ejercicios.json';
 import type { MuscleGroup } from '../constants/muscles';
 
-export interface CatalogExercise {
+// =====================================================================
+// 1. ESQUEMA DE DATOS
+// =====================================================================
+
+/**
+ * Esquema canónico de un ejercicio en src/data/ejercicios.json (Puntos 3A/3B/3C/4/6C)
+ */
+export interface CanonicalExercise {
   id: string;
   nombre: string;
-  name?: string;
   nombres_alternativos?: string[];
-  familia?: string;
-  patron_movimiento?: string;
-  zona?: 'inferior' | 'superior' | 'core' | 'cuerpo_completo' | 'cardiovascular' | 'movilidad' | string;
+  familia: string;
+  patron_movimiento: string;
+  zona: 'inferior' | 'superior' | 'core' | 'cuerpo_completo' | string;
   subzona?: string;
-  musculos_principales: string[];
-  musculos_secundarios: string[];
-  muscle_groups?: MuscleGroup[];
-  descripcion: string;
-  descripcion_breve?: string;
-  description?: string;
-  ejecucion_pasos: string[];
-  executionSteps?: string[];
-  equipamiento: string[];
-  equipment?: string[];
-  variantes_equipamiento?: string[];
-  equipmentVariants?: string[];
-  sin_equipamiento_posible?: boolean;
-  canBeDoneWithoutEquipment?: boolean;
-  zonas_corporales?: string[];
-  bodyZones?: string[];
-  subzonas?: string[];
-  subzones?: string[];
-  categoria?: string;
-  category?: string;
-  categorias_secundarias?: string[];
-  secondaryCategories?: string[];
-  tipo_movimiento?: string;
-  movementType?: string;
-  patrones_movimiento?: string[];
-  movementPattern?: string[];
-  lado_cuerpo?: string;
-  laterality?: string;
-  posicion_principal?: string;
-  position?: string;
-  nivel_dificultad?: string;
-  difficulty?: string;
-  descripcion_tecnica?: string;
-  executionDescription?: string;
-  errores_comunes?: string[];
-  commonErrors?: string[];
-  consejos_ejecucion?: string[];
-  executionTips?: string[];
-  precauciones?: string[];
-  precautions?: string[];
-  video_url?: string;
-  videoUrl?: string;
-  imagen?: string;
-  image?: string;
-  muscles?: {
-    primary: string[];
-    secondary: string[];
-  };
-  tipo?: 'multiarticular' | 'aislamiento' | 'potencia' | string;
-  nivel?: 'principiante' | 'intermedio' | 'avanzado' | string;
-  unilateral?: boolean;
-  variantes?: string[];
-  tags?: string[];
-  personalizado?: boolean;
-  actualizado_en?: string;
-  // Dimensiones conceptuales normalizadas del Catálogo Maestro (Punto 3A/3B/3C)
-  zona_anatomica?: string;
-  tipo_ejercicio?: 'multiarticular' | 'aislamiento' | string;
-  categoria_funcional?: string;
-  estabilizadores?: string[];
-  ejercicios_relacionados?: string[];
-  sustitutos?: string[];
+  tipo: 'multiarticular' | 'aislamiento' | string;
   capacidad_fisica?: string;
   cadena_cinetica?: 'abierta' | 'cerrada' | 'mixta' | string;
   articulaciones_principales?: string[];
@@ -80,33 +58,113 @@ export interface CatalogExercise {
   unilateralidad?: 'bilateral' | 'unilateral' | 'alternado' | 'asimetrico' | string;
   tipo_resistencia?: 'peso_libre' | 'peso_corporal' | 'polea' | 'maquina_guiada' | 'elastico' | string;
   demanda_estabilidad?: 'baja' | 'media' | 'alta' | string;
+  musculos_principales: string[];
+  musculos_secundarios: string[];
+  estabilizadores?: string[];
+  equipamiento: string[];
+  variantes?: string[];
+  ejercicios_relacionados?: string[];
+  sustitutos?: string[];
+  descripcion: string;
+  ejecucion_pasos: string[];
+  errores_comunes?: string[];
+  consejos_ejecucion?: string[];
+  precauciones?: string[];
+  video_url?: string;
+  imagen?: string;
+  nivel?: string;
+  personalizado?: boolean;
+  actualizado_en?: string;
+}
+
+/**
+ * Interfaz extendida para la aplicación con campos derivados y de compatibilidad (Tipo B y C)
+ */
+export interface CatalogExercise extends CanonicalExercise {
+  // Campos derivados (Tipo B)
+  muscle_groups: MuscleGroup[];
+  unilateral: boolean;
+  sin_equipamiento_posible: boolean;
+  canBeDoneWithoutEquipment: boolean;
+
+  // Adaptadores de compatibilidad tipada hacia UI legacy (Tipo C)
+  name?: string;
+  description?: string;
+  descripcion_breve?: string;
+  muscles?: {
+    primary: string[];
+    secondary: string[];
+  };
+  executionSteps?: string[];
+  equipment?: string[];
+  equipmentVariants?: string[];
+  variantes_equipamiento?: string[];
+  bodyZones?: string[];
+  zonas_corporales?: string[];
+  subzones?: string[];
+  subzonas?: string[];
+  category?: string;
+  categoria?: string;
+  secondaryCategories?: string[];
+  categorias_secundarias?: string[];
+  movementType?: string;
+  tipo_movimiento?: string;
+  movementPattern?: string[];
+  patrones_movimiento?: string[];
+  laterality?: string;
+  lado_cuerpo?: string;
+  position?: string;
+  posicion_principal?: string;
+  difficulty?: string;
+  nivel_dificultad?: string;
+  executionDescription?: string;
+  descripcion_tecnica?: string;
+  commonErrors?: string[];
+  executionTips?: string[];
+  precautions?: string[];
+  videoUrl?: string;
+  image?: string;
+  tags?: string[];
+  zona_anatomica?: string;
+  tipo_ejercicio?: string;
+  categoria_funcional?: string;
   objetivo?: string;
   funcion?: string;
 }
 
-// Storage key for custom user exercises
+// =====================================================================
+// 2. CONSTANTES Y MAPEOS DE SERVICIO
+// =====================================================================
+
 const STORAGE_KEY = 'user_custom_exercises_catalog';
 
-// Cache of all loaded exercises
 let cachedExercises: CatalogExercise[] = [];
 const dynamicEquipmentMap = new Map<string, string[]>();
 const dynamicMuscleMap = new Map<string, MuscleGroup[]>();
 
-// Muscle key translation map from Spanish anatomy to internal MuscleGroup keys
-const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
+/**
+ * Mapeo de tokens anatómicos canónicos (muscles.json) hacia regiones visuales de interfaz (MuscleGroup)
+ */
+export const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   // Inferior
   'cuadriceps': 'quads',
   'recto_femoral': 'quads',
   'vasto_lateral': 'quads',
   'vasto_medial': 'quads',
+  'vasto_intermedio': 'quads',
   'isquiotibiales': 'hamstrings',
   'biceps_femoral': 'hamstrings',
+  'semitendinoso': 'hamstrings',
+  'semimembranoso': 'hamstrings',
   'gluteo_mayor': 'glutes',
   'gluteo_medio': 'glutes',
   'gluteo_menor': 'glutes',
   'gluteos': 'glutes',
   'aductor_mayor': 'adductors',
   'aductor_largo': 'adductors',
+  'aductor_corto': 'adductors',
+  'pectineo': 'adductors',
+  'gracil': 'adductors',
   'aductores': 'adductors',
   'aductores_cadera': 'adductors',
   'gastrocnemio': 'calves_rear',
@@ -115,8 +173,15 @@ const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   'pantorrillas': 'calves_rear',
   'triceps_sural': 'calves_rear',
   'tibial_anterior': 'calves_front',
+  'tibial_posterior': 'calves_rear',
   'iliopsoas': 'quads',
+  'psoas_mayor': 'quads',
+  'iliaco': 'quads',
+  'sartorio': 'quads',
   'tensor_fascia_lata': 'glutes',
+  'rotadores_cadera_profundos': 'glutes',
+  'piriforme': 'glutes',
+
   // Superior
   'pectoral_mayor': 'chest',
   'pectoral_mayor_clavicular': 'chest',
@@ -136,7 +201,10 @@ const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   'subescapular': 'shoulders',
   'triceps_braquial': 'triceps',
   'triceps_cabeza_larga': 'triceps',
+  'triceps_cabeza_lateral': 'triceps',
+  'triceps_cabeza_medial': 'triceps',
   'triceps': 'triceps',
+  'anconeo': 'triceps',
   'biceps_braquial': 'biceps',
   'biceps': 'biceps',
   'braquial': 'biceps',
@@ -145,6 +213,7 @@ const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   'extensores_muneca': 'forearms',
   'antebrazo': 'forearms',
   'antebrazos': 'forearms',
+  'pronador_redondo': 'forearms',
   'dorsal_ancho': 'lats',
   'dorsales': 'lats',
   'redondo_mayor': 'lats',
@@ -154,13 +223,20 @@ const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   'trapecio_inferior': 'traps',
   'trapecios': 'traps',
   'romboides': 'mid_back',
+  'romboides_mayor': 'mid_back',
+  'romboides_menor': 'mid_back',
   'espalda_media': 'mid_back',
+  'elevador_escapula': 'traps',
   'serrato_anterior': 'chest',
   'erectores_espinales': 'lower_back',
+  'iliocostal': 'lower_back',
+  'longisimo': 'lower_back',
+  'espinal': 'lower_back',
   'lumbar': 'lower_back',
   'lumbares': 'lower_back',
   'cuadrado_lumbar': 'lower_back',
   'multifidos': 'lower_back',
+
   // Core
   'recto_abdominal': 'abs',
   'abdomen': 'abs',
@@ -169,11 +245,19 @@ const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   'oblicuo_interno': 'obliques',
   'oblicuos': 'obliques',
   'transverso_abdominal': 'abs',
+  'suelo_pelvico': 'abs',
+  'diafragma': 'abs',
   'core': 'abs'
 };
 
-// Map raw catalog equipment to user-friendly equipment names
-export const normalizeEquipmentTags = (rawList: string[]): string[] => {
+// =====================================================================
+// 3. FUNCIONES DERIVADORAS DETERMINISTAS
+// =====================================================================
+
+/**
+ * Normaliza y traduce equipamiento técnico en etiquetas amigables para filtros de interfaz
+ */
+export const normalizeEquipmentTags = (rawList: string[] = []): string[] => {
   if (!rawList || rawList.length === 0) return ['Peso corporal (Sin equipo)'];
   const results = new Set<string>();
 
@@ -214,14 +298,8 @@ export const normalizeEquipmentTags = (rawList: string[]): string[] => {
     if (lower.includes('cuerda') || lower.includes('saltar')) {
       results.add('Cuerda de saltar');
     }
-    // Also accept exact names directly
     if (lower === 'mancuernas') results.add('Mancuernas');
     if (lower === 'barra olímpica / discos' || lower === 'barra olimpica / discos') results.add('Barra olímpica / Discos');
-    if (lower === 'máquina gym' || lower === 'maquina gym') {
-      results.add('Máquina de poleas / Smith');
-      results.add('Máquinas de piernas');
-      results.add('Máquina multifunción / Gimnasio en casa');
-    }
   });
 
   if (results.size === 0) {
@@ -231,16 +309,22 @@ export const normalizeEquipmentTags = (rawList: string[]): string[] => {
   return Array.from(results);
 };
 
-// Extract muscle groups for map highlighting
-export const extractMuscleGroups = (principales: string[] = [], secundarios: string[] = []): MuscleGroup[] => {
+/**
+ * Extrae deterministamente los grupos visuales MuscleGroup para mapas corporales
+ */
+export const extractMuscleGroups = (
+  principales: string[] = [], 
+  secundarios: string[] = []
+): MuscleGroup[] => {
   const groups = new Set<MuscleGroup>();
-  
+
   [...principales, ...secundarios].forEach(m => {
+    if (!m) return;
     const key = m.toLowerCase().replace(/[\s-]+/g, '_');
     if (ANATOMY_TO_MUSCLE_GROUP[key]) {
       groups.add(ANATOMY_TO_MUSCLE_GROUP[key]);
+      return;
     }
-    // Also check substring matching
     for (const [anatomyKey, muscleGroup] of Object.entries(ANATOMY_TO_MUSCLE_GROUP)) {
       if (key.includes(anatomyKey)) {
         groups.add(muscleGroup);
@@ -251,11 +335,133 @@ export const extractMuscleGroups = (principales: string[] = [], secundarios: str
   return Array.from(groups);
 };
 
-// Initialize exercises from bundled master JSON and localStorage
-export const initializeExerciseCatalog = (): CatalogExercise[] => {
-  const baseExercises: CatalogExercise[] = (masterData?.ejercicios || []) as CatalogExercise[];
+/**
+ * Función canónica de proyección SSOT: Transforma un registro canónico en CatalogExercise
+ * calculando todas las propiedades derivadas y adaptadores de compatibilidad.
+ */
+export const toCatalogExercise = (canonical: CanonicalExercise | any): CatalogExercise => {
+  const priMuscles = canonical.musculos_principales || canonical.muscles?.primary || [];
+  const secMuscles = canonical.musculos_secundarios || canonical.muscles?.secondary || [];
+  const eqList = canonical.equipamiento || canonical.equipment || [];
   
-  let customExercises: CatalogExercise[] = [];
+  const muscleGroups = canonical.muscle_groups && canonical.muscle_groups.length > 0
+    ? canonical.muscle_groups
+    : extractMuscleGroups(priMuscles, secMuscles);
+
+  const isUnilateral = canonical.unilateral !== undefined
+    ? Boolean(canonical.unilateral)
+    : (canonical.unilateralidad === 'unilateral' || canonical.unilateralidad === 'alternado');
+
+  const canBeBodyweight = canonical.canBeDoneWithoutEquipment !== undefined
+    ? Boolean(canonical.canBeDoneWithoutEquipment)
+    : canonical.sin_equipamiento_posible !== undefined
+      ? Boolean(canonical.sin_equipamiento_posible)
+      : (eqList.includes('peso_corporal') || eqList.some((e: string) => e.toLowerCase().includes('corporal')));
+
+  const rawName = canonical.nombre || canonical.name || canonical.id || 'Ejercicio';
+  const desc = canonical.descripcion || canonical.description || canonical.descripcion_breve || `Ejercicio de entrenamiento: ${rawName}.`;
+  const steps = canonical.ejecucion_pasos || canonical.executionSteps || ['Realiza el movimiento con técnica controlada.'];
+
+  const friendlyEq = normalizeEquipmentTags(eqList);
+
+  return {
+    // 1. Propiedades Canónicas Oficiales
+    id: canonical.id,
+    nombre: rawName,
+    nombres_alternativos: canonical.nombres_alternativos || [],
+    familia: canonical.familia || canonical.patron_movimiento || 'general',
+    patron_movimiento: canonical.patron_movimiento || 'general',
+    zona: canonical.zona || 'superior',
+    subzona: canonical.subzona || '',
+    tipo: canonical.tipo || 'multiarticular',
+    capacidad_fisica: canonical.capacidad_fisica || 'hipertrofia',
+    cadena_cinetica: canonical.cadena_cinetica || 'abierta',
+    articulaciones_principales: canonical.articulaciones_principales || [],
+    articulaciones_secundarias: canonical.articulaciones_secundarias || [],
+    plano_predominante: canonical.plano_predominante || 'sagital',
+    unilateralidad: canonical.unilateralidad || (isUnilateral ? 'unilateral' : 'bilateral'),
+    tipo_resistencia: canonical.tipo_resistencia || 'peso_libre',
+    demanda_estabilidad: canonical.demanda_estabilidad || 'media',
+    musculos_principales: priMuscles,
+    musculos_secundarios: secMuscles,
+    estabilizadores: canonical.estabilizadores || [],
+    equipamiento: eqList,
+    variantes: canonical.variantes || [],
+    ejercicios_relacionados: canonical.ejercicios_relacionados || [],
+    sustitutos: canonical.sustitutos || [],
+    descripcion: desc,
+    ejecucion_pasos: steps,
+    errores_comunes: canonical.errores_comunes || canonical.commonErrors || [],
+    consejos_ejecucion: canonical.consejos_ejecucion || canonical.executionTips || [],
+    precauciones: canonical.precauciones || canonical.precautions || [],
+    video_url: canonical.video_url || canonical.videoUrl || '',
+    imagen: canonical.imagen || canonical.image || '',
+    nivel: canonical.nivel || 'intermedio',
+    personalizado: Boolean(canonical.personalizado),
+    actualizado_en: canonical.actualizado_en || new Date().toISOString(),
+
+    // 2. Propiedades Derivadas (Tipo B)
+    muscle_groups: muscleGroups,
+    unilateral: isUnilateral,
+    sin_equipamiento_posible: canBeBodyweight,
+    canBeDoneWithoutEquipment: canBeBodyweight,
+
+    // 3. Proyecciones de Compatibilidad (Tipo C)
+    name: rawName,
+    description: desc,
+    descripcion_breve: desc,
+    muscles: {
+      primary: priMuscles,
+      secondary: secMuscles,
+    },
+    executionSteps: steps,
+    equipment: friendlyEq,
+    equipmentVariants: canonical.variantes_equipamiento || canonical.equipmentVariants || [],
+    variantes_equipamiento: canonical.variantes_equipamiento || canonical.equipmentVariants || [],
+    bodyZones: canonical.bodyZones || [canonical.zona === 'inferior' ? 'Tren inferior' : canonical.zona === 'superior' ? 'Tren superior' : canonical.zona === 'core' ? 'Core' : 'Cuerpo completo'],
+    zonas_corporales: canonical.zonas_corporales || [canonical.zona === 'inferior' ? 'Tren inferior' : canonical.zona === 'superior' ? 'Tren superior' : canonical.zona === 'core' ? 'Core' : 'Cuerpo completo'],
+    subzones: canonical.subzones || (canonical.subzona ? [canonical.subzona] : []),
+    subzonas: canonical.subzonas || (canonical.subzona ? [canonical.subzona] : []),
+    category: canonical.category || (canonical.capacidad_fisica ? canonical.capacidad_fisica.charAt(0).toUpperCase() + canonical.capacidad_fisica.slice(1) : 'Fuerza'),
+    categoria: canonical.categoria || (canonical.capacidad_fisica ? canonical.capacidad_fisica.charAt(0).toUpperCase() + canonical.capacidad_fisica.slice(1) : 'Fuerza'),
+    secondaryCategories: canonical.secondaryCategories || canonical.categorias_secundarias || [],
+    categorias_secundarias: canonical.categorias_secundarias || canonical.secondaryCategories || [],
+    movementType: canonical.movementType || canonical.tipo_movimiento || canonical.patron_movimiento || 'General',
+    tipo_movimiento: canonical.tipo_movimiento || canonical.movementType || canonical.patron_movimiento || 'General',
+    movementPattern: canonical.movementPattern || [canonical.patron_movimiento].filter(Boolean),
+    patrones_movimiento: canonical.patrones_movimiento || [canonical.patron_movimiento].filter(Boolean),
+    laterality: canonical.laterality || (isUnilateral ? 'Unilateral' : 'Bilateral'),
+    lado_cuerpo: canonical.lado_cuerpo || (isUnilateral ? 'Unilateral' : 'Bilateral'),
+    position: canonical.position || canonical.posicion_principal || 'De pie',
+    posicion_principal: canonical.posicion_principal || canonical.position || 'De pie',
+    difficulty: canonical.difficulty || canonical.nivel_dificultad || canonical.nivel || 'Intermedio',
+    nivel_dificultad: canonical.nivel_dificultad || canonical.difficulty || canonical.nivel || 'Intermedio',
+    executionDescription: canonical.executionDescription || canonical.descripcion_tecnica || desc,
+    descripcion_tecnica: canonical.descripcion_tecnica || canonical.executionDescription || desc,
+    commonErrors: canonical.commonErrors || canonical.errores_comunes || [],
+    executionTips: canonical.executionTips || canonical.consejos_ejecucion || [],
+    precautions: canonical.precautions || canonical.precauciones || [],
+    videoUrl: canonical.videoUrl || canonical.video_url || '',
+    image: canonical.image || canonical.imagen || '',
+    tags: canonical.tags || [canonical.zona, canonical.patron_movimiento, ...eqList].filter(Boolean),
+    zona_anatomica: canonical.zona,
+    tipo_ejercicio: canonical.tipo,
+    categoria_funcional: canonical.capacidad_fisica
+  };
+};
+
+// =====================================================================
+// 4. API DEL SERVICIO DEL CATÁLOGO
+// =====================================================================
+
+/**
+ * Inicializa y cachea el catálogo completo en memoria
+ */
+export const initializeExerciseCatalog = (): CatalogExercise[] => {
+  const canonicalList = (masterData?.ejercicios || []) as CanonicalExercise[];
+  
+  // 1. Cargar ejercicios personalizados de localStorage si existen
+  let customExercises: any[] = [];
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -265,23 +471,28 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
     console.warn('Error reading custom exercises from localStorage:', e);
   }
 
-  // Merge, prioritizing custom if same id/name
+  // 2. Indexar por clave normalizada y fusionar
   const exerciseMap = new Map<string, CatalogExercise>();
-  
-  baseExercises.forEach(ex => {
-    exerciseMap.set(ex.nombre.toLowerCase().trim(), ex);
-    if (ex.id) exerciseMap.set(ex.id, ex);
+
+  canonicalList.forEach(raw => {
+    const projected = toCatalogExercise(raw);
+    exerciseMap.set(projected.id, projected);
+    exerciseMap.set(projected.nombre.toLowerCase().trim(), projected);
   });
 
-  customExercises.forEach(ex => {
-    exerciseMap.set(ex.nombre.toLowerCase().trim(), ex);
-    if (ex.id) exerciseMap.set(ex.id, ex);
+  customExercises.forEach(raw => {
+    const projected = toCatalogExercise(raw);
+    exerciseMap.set(projected.id, projected);
+    exerciseMap.set(projected.nombre.toLowerCase().trim(), projected);
   });
 
   const merged = Array.from(new Set(Array.from(exerciseMap.values())));
   cachedExercises = merged;
 
-  // Populate dynamic equipment and muscle maps
+  // 3. Poblar mapas dinámicos de acceso rápido
+  dynamicEquipmentMap.clear();
+  dynamicMuscleMap.clear();
+
   merged.forEach(ex => {
     const normalizedEq = normalizeEquipmentTags(ex.equipamiento);
     dynamicEquipmentMap.set(ex.nombre, normalizedEq);
@@ -289,14 +500,10 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
       ex.nombres_alternativos.forEach(alt => dynamicEquipmentMap.set(alt, normalizedEq));
     }
 
-    const muscleGroups = ex.muscle_groups && ex.muscle_groups.length > 0 
-      ? ex.muscle_groups 
-      : extractMuscleGroups(ex.musculos_principales, ex.musculos_secundarios);
-      
-    if (muscleGroups.length > 0) {
-      dynamicMuscleMap.set(ex.nombre, muscleGroups);
+    if (ex.muscle_groups && ex.muscle_groups.length > 0) {
+      dynamicMuscleMap.set(ex.nombre, ex.muscle_groups);
       if (ex.nombres_alternativos) {
-        ex.nombres_alternativos.forEach(alt => dynamicMuscleMap.set(alt, muscleGroups));
+        ex.nombres_alternativos.forEach(alt => dynamicMuscleMap.set(alt, ex.muscle_groups));
       }
     }
   });
@@ -304,7 +511,9 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
   return merged;
 };
 
-// Get all exercises from catalog
+/**
+ * Obtiene la lista completa de ejercicios (canónicos + personalizados)
+ */
 export const getAllCatalogExercises = (): CatalogExercise[] => {
   if (cachedExercises.length === 0) {
     return initializeExerciseCatalog();
@@ -312,20 +521,27 @@ export const getAllCatalogExercises = (): CatalogExercise[] => {
   return cachedExercises;
 };
 
-// Find an exercise by name or alternate names
+/**
+ * Búsqueda insensible a mayúsculas/minúsculas por ID, nombre oficial o nombres alternativos
+ */
 export const findExerciseByName = (name: string): CatalogExercise | undefined => {
+  if (!name) return undefined;
   const normalized = name.toLowerCase().trim();
   const all = getAllCatalogExercises();
+  
   return all.find(e => 
     e.nombre.toLowerCase().trim() === normalized ||
+    e.id.toLowerCase().trim() === normalized ||
     (e.nombres_alternativos && e.nombres_alternativos.some(alt => alt.toLowerCase().trim() === normalized)) ||
-    e.id === normalized
+    (e.name && e.name.toLowerCase().trim() === normalized)
   );
 };
 
 export const findExerciseDetails = findExerciseByName;
 
-// Get dynamic equipment for any exercise
+/**
+ * Obtiene el equipamiento amigable normalizado para un ejercicio
+ */
 export const getDynamicEquipmentForExercise = (exerciseName: string): string[] | undefined => {
   if (dynamicEquipmentMap.size === 0) {
     initializeExerciseCatalog();
@@ -333,7 +549,9 @@ export const getDynamicEquipmentForExercise = (exerciseName: string): string[] |
   return dynamicEquipmentMap.get(exerciseName);
 };
 
-// Get dynamic muscle groups for any exercise
+/**
+ * Obtiene los grupos musculares somáticos de interfaz para un ejercicio
+ */
 export const getDynamicMusclesForExercise = (exerciseName: string): MuscleGroup[] | undefined => {
   if (dynamicMuscleMap.size === 0) {
     initializeExerciseCatalog();
@@ -341,128 +559,71 @@ export const getDynamicMusclesForExercise = (exerciseName: string): MuscleGroup[
   return dynamicMuscleMap.get(exerciseName);
 };
 
-// Save a custom exercise both locally and to server
-export const saveCustomExerciseToCatalog = async (exercise: Partial<CatalogExercise> & { nombre: string }): Promise<CatalogExercise> => {
-  const normalizedEquipment = (exercise.equipment || exercise.equipamiento) && (exercise.equipment || exercise.equipamiento)!.length > 0
-    ? (exercise.equipment || exercise.equipamiento)!
-    : ['Peso corporal'];
+/**
+ * Guarda un ejercicio personalizado en almacenamiento local y en el backend
+ * (sin mutar nunca la fuente canónica de los 109 ejercicios oficiales)
+ */
+export const saveCustomExerciseToCatalog = async (
+  exercise: Partial<CatalogExercise> & { nombre: string }
+): Promise<CatalogExercise> => {
+  const rawName = exercise.nombre || exercise.name || 'Ejercicio Personalizado';
+  const cleanId = exercise.id || rawName
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
-  const primaryMuscles = exercise.muscles?.primary || exercise.musculos_principales || [];
-  const secondaryMuscles = exercise.muscles?.secondary || exercise.musculos_secundarios || [];
-
-  const muscleGroups = exercise.muscle_groups && exercise.muscle_groups.length > 0
-    ? exercise.muscle_groups
-    : extractMuscleGroups(primaryMuscles, secondaryMuscles);
-
-  const rawName = exercise.name || exercise.nombre;
-  const newExercise: CatalogExercise = {
-    id: exercise.id || rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
+  const normalizedExercise = toCatalogExercise({
+    ...exercise,
+    id: cleanId,
     nombre: rawName.trim(),
-    name: rawName.trim(),
-    nombres_alternativos: exercise.nombres_alternativos || [],
-    familia: exercise.familia || exercise.patron_movimiento || 'general',
-    patron_movimiento: exercise.patron_movimiento || (exercise.patrones_movimiento && exercise.patrones_movimiento[0]) || 'general',
-    zona: exercise.zona || (exercise.zonas_corporales && exercise.zonas_corporales[0]?.toLowerCase().includes('inferior') ? 'inferior' : exercise.zonas_corporales && exercise.zonas_corporales[0]?.toLowerCase().includes('core') ? 'core' : 'superior') || 'superior',
-    subzona: exercise.subzona || (exercise.subzonas && exercise.subzonas[0]) || '',
-    musculos_principales: primaryMuscles,
-    musculos_secundarios: secondaryMuscles,
-    muscles: {
-      primary: primaryMuscles,
-      secondary: secondaryMuscles
-    },
-    muscle_groups: muscleGroups,
-    descripcion: exercise.description || exercise.descripcion_tecnica || exercise.descripcion || `Ejercicio enfocado en ${rawName}.`,
-    descripcion_breve: exercise.descripcion_breve || exercise.description || exercise.descripcion || '',
-    description: exercise.description || exercise.descripcion_breve || exercise.descripcion || '',
-    ejecucion_pasos: exercise.executionSteps || exercise.ejecucion_pasos || ['Realiza el movimiento con técnica estricta, control y alineación postural.'],
-    executionSteps: exercise.executionSteps || exercise.ejecucion_pasos || ['Realiza el movimiento con técnica estricta, control y alineación postural.'],
-    equipamiento: normalizedEquipment,
-    equipment: normalizedEquipment,
-    variantes_equipamiento: exercise.equipmentVariants || exercise.variantes_equipamiento || [],
-    equipmentVariants: exercise.equipmentVariants || exercise.variantes_equipamiento || [],
-    sin_equipamiento_posible: exercise.canBeDoneWithoutEquipment !== undefined ? exercise.canBeDoneWithoutEquipment : exercise.sin_equipamiento_posible,
-    canBeDoneWithoutEquipment: exercise.canBeDoneWithoutEquipment !== undefined ? exercise.canBeDoneWithoutEquipment : exercise.sin_equipamiento_posible,
-    zonas_corporales: exercise.bodyZones || exercise.zonas_corporales || [],
-    bodyZones: exercise.bodyZones || exercise.zonas_corporales || [],
-    subzonas: exercise.subzones || exercise.subzonas || [],
-    subzones: exercise.subzones || exercise.subzonas || [],
-    categoria: exercise.category || exercise.categoria || 'Fuerza',
-    category: exercise.category || exercise.categoria || 'Fuerza',
-    categorias_secundarias: exercise.secondaryCategories || exercise.categorias_secundarias || [],
-    secondaryCategories: exercise.secondaryCategories || exercise.categorias_secundarias || [],
-    tipo_movimiento: exercise.movementType || exercise.tipo_movimiento || 'Empuje',
-    movementType: exercise.movementType || exercise.tipo_movimiento || 'Empuje',
-    patrones_movimiento: exercise.movementPattern || exercise.patrones_movimiento || [],
-    movementPattern: exercise.movementPattern || exercise.patrones_movimiento || [],
-    lado_cuerpo: exercise.laterality || exercise.lado_cuerpo || (exercise.unilateral ? 'Unilateral' : 'Bilateral'),
-    laterality: exercise.laterality || exercise.lado_cuerpo || (exercise.unilateral ? 'Unilateral' : 'Bilateral'),
-    posicion_principal: exercise.position || exercise.posicion_principal || 'De pie',
-    position: exercise.position || exercise.posicion_principal || 'De pie',
-    nivel_dificultad: exercise.difficulty || exercise.nivel_dificultad || 'Intermedio',
-    difficulty: exercise.difficulty || exercise.nivel_dificultad || 'Intermedio',
-    descripcion_tecnica: exercise.executionDescription || exercise.descripcion_tecnica || '',
-    executionDescription: exercise.executionDescription || exercise.descripcion_tecnica || '',
-    errores_comunes: exercise.commonErrors || exercise.errores_comunes || [],
-    commonErrors: exercise.commonErrors || exercise.errores_comunes || [],
-    consejos_ejecucion: exercise.executionTips || exercise.consejos_ejecucion || [],
-    executionTips: exercise.executionTips || exercise.consejos_ejecucion || [],
-    precauciones: exercise.precautions || exercise.precauciones || ['Mantener la columna neutra y no bloquear articulaciones bruscamente.'],
-    precautions: exercise.precautions || exercise.precauciones || ['Mantener la columna neutra y no bloquear articulaciones bruscamente.'],
-    video_url: exercise.videoUrl || exercise.video_url || '',
-    videoUrl: exercise.videoUrl || exercise.video_url || '',
-    imagen: exercise.image || exercise.imagen || '',
-    image: exercise.image || exercise.imagen || '',
-    tipo: exercise.tipo || 'multiarticular',
-    nivel: exercise.nivel || 'intermedio',
-    unilateral: exercise.laterality === 'Unilateral' || Boolean(exercise.unilateral),
-    variantes: exercise.variantes || exercise.equipmentVariants || [],
-    tags: exercise.tags || [exercise.category || exercise.categoria, ...(exercise.bodyZones || exercise.zonas_corporales || []), ...normalizedEquipment].filter(Boolean) as string[],
     personalizado: true,
     actualizado_en: new Date().toISOString()
-  };
+  });
 
-  // 1. Update in-memory cache and maps
-  const existingIdx = cachedExercises.findIndex(e => e.nombre.toLowerCase().trim() === newExercise.nombre.toLowerCase().trim());
+  // 1. Actualizar memoria y mapas dinámicos
+  const existingIdx = cachedExercises.findIndex(e => e.id === cleanId || e.nombre.toLowerCase().trim() === rawName.toLowerCase().trim());
   if (existingIdx >= 0) {
-    cachedExercises[existingIdx] = newExercise;
+    cachedExercises[existingIdx] = normalizedExercise;
   } else {
-    cachedExercises.push(newExercise);
+    cachedExercises.push(normalizedExercise);
   }
 
-  const normalizedEqForApp = normalizeEquipmentTags(newExercise.equipamiento);
-  dynamicEquipmentMap.set(newExercise.nombre, normalizedEqForApp);
-  if (newExercise.muscle_groups && newExercise.muscle_groups.length > 0) {
-    dynamicMuscleMap.set(newExercise.nombre, newExercise.muscle_groups);
+  const normalizedEqForApp = normalizeEquipmentTags(normalizedExercise.equipamiento);
+  dynamicEquipmentMap.set(normalizedExercise.nombre, normalizedEqForApp);
+  if (normalizedExercise.muscle_groups && normalizedExercise.muscle_groups.length > 0) {
+    dynamicMuscleMap.set(normalizedExercise.nombre, normalizedExercise.muscle_groups);
   }
 
-  // 2. Save in localStorage
+  // 2. Persistir en localStorage cliente
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     const existingList: CatalogExercise[] = saved ? JSON.parse(saved) : [];
-    const index = existingList.findIndex(e => e.nombre.toLowerCase().trim() === newExercise.nombre.toLowerCase().trim());
+    const index = existingList.findIndex(e => e.id === cleanId || e.nombre.toLowerCase().trim() === rawName.toLowerCase().trim());
     if (index >= 0) {
-      existingList[index] = newExercise;
+      existingList[index] = normalizedExercise;
     } else {
-      existingList.push(newExercise);
+      existingList.push(normalizedExercise);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existingList));
   } catch (e) {
     console.warn('Error saving custom exercise to localStorage:', e);
   }
 
-  // 3. Sync with server backend so it gets persisted to public/ejercicios.json and src/data/ejercicios.json
+  // 3. Sincronizar asíncronamente con el almacén aislado de usuario en servidor
   try {
     await fetch('/api/exercises/save-custom', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newExercise),
+      body: JSON.stringify(normalizedExercise),
     });
   } catch (syncErr) {
     console.warn('Server sync error for custom exercise (saved locally):', syncErr);
   }
 
-  return newExercise;
+  return normalizedExercise;
 };
 
-// Initial auto-load on module load
+// Carga inicial en frío
 initializeExerciseCatalog();

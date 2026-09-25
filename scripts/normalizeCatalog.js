@@ -2281,9 +2281,11 @@ export function runNormalization() {
     }
   });
 
-  // Actualizar metadatos del catálogo a versión 1.2.0 (Punto 3C)
-  catalog.version = '1.2.0';
-  catalog.schema_version = '1.2';
+  // Actualizar metadatos del catálogo conservando la versión activa
+  if (!catalog.version || catalog.version < '1.3.0') {
+    catalog.version = '1.3.0';
+    catalog.schema_version = '1.3';
+  }
   catalog.descripcion = 'Catálogo maestro oficial y fuente canónica normalizada con perfiles biomecánicos de referencia (3A/3B/3C)';
 
   // Guardar archivo canónico

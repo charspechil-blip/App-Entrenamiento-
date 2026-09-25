@@ -474,15 +474,15 @@ export const MUSCLE_NORMALIZATION_MAP = {
   },
   "extension-triceps-tras-nuca-mancuerna": {
     "principales": ["triceps_cabeza_larga"],
-    "secundarios": ["triceps_braquial"],
+    "secundarios": [],
     "estabilizadores": ["recto_abdominal", "manguito_rotador"],
-    "justificacion": "Flexión de hombro a 180° elonga la cabeza larga biarticular, incrementando su contribución contráctil."
+    "justificacion": "Flexión de hombro a 180° elonga la cabeza larga biarticular, incrementando su contribución contráctil como motor primario principal. Se excluye el grupo padre triceps_braquial para evitar doble contabilización jerárquica."
   },
   "extension-triceps-tras-nuca-polea": {
     "principales": ["triceps_cabeza_larga"],
-    "secundarios": ["triceps_braquial"],
+    "secundarios": [],
     "estabilizadores": ["recto_abdominal", "manguito_rotador"],
-    "justificacion": "Sobrecarga de la cabeza larga en posición de estiramiento con curva de resistencia continua en polea."
+    "justificacion": "Sobrecarga de la cabeza larga en posición de estiramiento con curva de resistencia continua en polea. Se excluye el grupo padre triceps_braquial para evitar doble contabilización jerárquica."
   },
   "curl-biceps-barra": {
     "principales": ["biceps_braquial"],
