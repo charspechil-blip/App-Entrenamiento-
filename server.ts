@@ -546,7 +546,8 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
     }
   });
 
-  // Save or update custom exercise into public/ejercicios.json and src/data/ejercicios.json
+  // Save or update custom exercise strictly in isolated user storage (src/data/user_custom_exercises.json)
+  // ARCHITECTURE SSOT: Never writes to or references src/data/ejercicios.json or public/ejercicios.json
   app.post("/api/exercises/save-custom", async (req, res) => {
     try {
       const exercise = req.body;
@@ -554,29 +555,7 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
         return res.status(400).json({ error: "Datos del ejercicio requeridos." });
       }
 
-      const publicPath = path.resolve(process.cwd(), 'public', 'ejercicios.json');
-      const srcPath = path.resolve(process.cwd(), 'src', 'data', 'ejercicios.json');
-
-      let catalog: { version: string; descripcion: string; total_ejercicios: number; ejercicios: any[] } = {
-        version: "1.0.0",
-        descripcion: "Catálogo maestro normalizado de ejercicios físicos para la aplicación de entrenamiento",
-        total_ejercicios: 0,
-        ejercicios: []
-      };
-
-      try {
-        if (fs.existsSync(srcPath)) {
-          const content = fs.readFileSync(srcPath, 'utf-8');
-          catalog = JSON.parse(content);
-        } else if (fs.existsSync(publicPath)) {
-          const content = fs.readFileSync(publicPath, 'utf-8');
-          catalog = JSON.parse(content);
-        }
-      } catch (readErr) {
-        console.warn("Error reading current ejercicios.json:", readErr);
-      }
-
-      // Generate kebab-case id
+      // Generate clean kebab-case id
       const rawName = exercise.name || exercise.nombre || "ejercicio";
       const generatedId = (exercise.id || rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")) || "ejercicio-personalizado";
 
@@ -645,21 +624,27 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
         actualizado_en: new Date().toISOString()
       };
 
-      const existingIndex = catalog.ejercicios.findIndex((e: any) => 
-        e.id === generatedId || e.nombre.toLowerCase() === normalizedExercise.nombre.toLowerCase()
-      );
-
       const customStorePath = path.resolve(process.cwd(), 'src', 'data', 'user_custom_exercises.json');
-      let customCatalog: { ejercicios: any[] } = { ejercicios: [] };
+      let customCatalog: { version?: string; descripcion?: string; ejercicios: any[] } = { 
+        version: "1.0.0",
+        descripcion: "Almacenamiento aislado de ejercicios personalizados creados por el usuario (no oficial)",
+        ejercicios: [] 
+      };
+
       try {
         if (fs.existsSync(customStorePath)) {
           customCatalog = JSON.parse(fs.readFileSync(customStorePath, 'utf-8'));
+          if (!Array.isArray(customCatalog.ejercicios)) {
+            customCatalog.ejercicios = [];
+          }
         }
       } catch (readCustomErr) {
         console.warn("Could not read user_custom_exercises.json:", readCustomErr);
       }
 
-      const customIndex = customCatalog.ejercicios.findIndex(e => e.id === normalizedExercise.id);
+      const customIndex = customCatalog.ejercicios.findIndex(e => 
+        e.id === normalizedExercise.id || (e.nombre && e.nombre.toLowerCase().trim() === normalizedExercise.nombre.toLowerCase().trim())
+      );
       if (customIndex >= 0) {
         customCatalog.ejercicios[customIndex] = normalizedExercise;
       } else {
@@ -675,8 +660,8 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
       return res.json({ 
         success: true, 
         exercise: normalizedExercise, 
-        total: catalog.total_ejercicios,
-        message: "Ejercicio personalizado guardado correctamente sin modificar el catálogo maestro."
+        total_custom: customCatalog.ejercicios.length,
+        message: "Ejercicio personalizado guardado correctamente en almacenamiento aislado de usuario."
       });
     } catch (error: any) {
       console.error("Error in /api/exercises/save-custom:", error);
@@ -684,7 +669,21 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
     }
   });
 
-  // Get master exercises catalog
+  // Get user custom exercises from isolated storage
+  app.get("/api/exercises/custom", (_req, res) => {
+    try {
+      const customStorePath = path.resolve(process.cwd(), 'src', 'data', 'user_custom_exercises.json');
+      if (fs.existsSync(customStorePath)) {
+        const content = fs.readFileSync(customStorePath, 'utf-8');
+        return res.type('application/json').send(content);
+      }
+      return res.json({ version: "1.0.0", ejercicios: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Error al leer ejercicios personalizados de usuario." });
+    }
+  });
+
+  // Get master exercises catalog (official 109 exercises)
   app.get("/api/exercises", (_req, res) => {
     try {
       const srcPath = path.resolve(process.cwd(), 'src', 'data', 'ejercicios.json');
@@ -699,7 +698,7 @@ Sé riguroso y objetivo. No utilices diagnósticos médicos.`;
       }
       return res.json({ total_ejercicios: 0, ejercicios: [] });
     } catch (error) {
-      res.status(500).json({ error: "Error al leer el catálogo de ejercicios." });
+      res.status(500).json({ error: "Error al leer el catálogo oficial de ejercicios." });
     }
   });
 

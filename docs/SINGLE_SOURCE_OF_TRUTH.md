@@ -132,8 +132,8 @@ El servicio `services/exerciseCatalog.ts` actúa como el adaptador entre la fuen
 | `muscle_groups` | **B** | `constants/muscles.ts` (mapa SVG corporal) | Calculado vía `extractMuscleGroups()` | **Derivado en runtime**. Se calcula automáticamente a partir de músculos principales y secundarios; no se persiste duplicado en JSON. |
 | `muscles.primary` | **C** | `CustomExerciseModal.tsx` | Proyección de `musculos_principales` | **Compatibilidad proyectada**. Generar dinámicamente como `{ primary, secondary }`. |
 | `muscles.secondary`| **C** | `CustomExerciseModal.tsx` | Proyección de `musculos_secundarios` | **Compatibilidad proyectada**. Generar dinámicamente. |
-| `ANATOMY_TO_MUSCLE_GROUP`| **B** | `extractMuscleGroups()` en `services/exerciseCatalog.ts` | Diccionario estático de mapeo somático | **Mapeador interno**. Mantiene correspondencia entre tokens de `muscles.json` y las 20 regiones visuales `MuscleGroup`. |
-| `extractMuscleGroups()` | **B** | Inicializador del catálogo y modales | Función pura de transformación | **Utilidad derivada**. Extrae de forma determinista los grupos somáticos. |
+| `ANATOMY_TO_MUSCLE_GROUP`| **B** | `extractMuscleGroups()` en `services/exerciseCatalog.ts` | Diccionario estático de mapeo somático | **Adaptador derivado de presentación (UI)**. NO es una segunda taxonomía. NO reemplaza ni modifica `muscles.json`. Mapea tokens anatómicos a las 20 regiones visuales `MuscleGroup` del mapa corporal SVG. Los `estabilizadores` isométricos se omiten deliberadamente de esta proyección visual para no saturar el mapa de calor corporal. |
+| `extractMuscleGroups()` | **B** | Inicializador del catálogo y modales | Función pura de transformación | **Utilidad derivada de presentación**. Extrae de forma determinista los grupos somáticos dinámicos (principales y secundarios). |
 | `normalizeEquipmentTags()`| **B** | `constants/equipment.ts`, filtros de UI | Función pura de presentación | **Proyector de vista**. Transforma equipamiento técnico a etiquetas de interfaz amigables. |
 | `equipamiento` | **A** | `workoutFlowUtils`, modales de ejercicio | `src/data/ejercicios.json` | **Canónico**. Equipamiento normalizado en singular. |
 | `equipment` | **C** | `CustomExerciseModal`, `workoutFlowUtils` | Proyección de `equipamiento` | **Compatibilidad derivada**. Se asigna a partir de `equipamiento`. |
@@ -159,19 +159,25 @@ El servicio `services/exerciseCatalog.ts` actúa como el adaptador entre la fuen
 
 ---
 
-## 6. ARQUITECTURA DE AISLAMIENTO PARA EJERCICIOS DE USUARIO
+## 6. ARQUITECTURA DE AISLAMIENTO PARA EJERCICIOS DE USUARIO (CORRECCIÓN 7A)
 
-Para cumplir estrictamente con el principio de inmutabilidad del Catálogo Maestro:
+Para garantizar de forma absoluta la inmutabilidad y pureza del Catálogo Maestro:
 
 1. **Catálogo Maestro Inmutable:**  
-   `src/data/ejercicios.json` representa exclusivamente los **109 ejercicios oficiales certificados**. Ningún usuario, sesión o guardado dinámico puede escribir directamente en él durante la ejecución normal de la aplicación.
-2. **Almacenamiento Separado de Personalizados:**  
-   - En el cliente: `localStorage` bajo la clave `user_custom_exercises_catalog`.
-   - En el servidor: `src/data/user_custom_exercises.json`.
-3. **Fusión Determinista en Runtime:**  
-   Al arrancar la aplicación, `initializeExerciseCatalog()` combina:
-   $$\text{Catálogo Maestro (109)} \cup \text{Ejercicios Personalizados (Usuario)}$$
-   priorizando la versión personalizada únicamente si el usuario ha creado una sobreescritura explícita, y manteniendo siempre el flag `personalizado: true` para distinguir los ejercicios de usuario de los oficiales.
+   `src/data/ejercicios.json` representa **exclusivamente los 109 ejercicios oficiales certificados**.  
+   - Ninguna acción de guardado, actualización o borrado de usuario puede escribir en `src/data/ejercicios.json`.
+   - `public/ejercicios.json` permanece estrictamente como copia de build del catálogo maestro oficial.
+2. **Almacenamiento Separado y Aislado de Personalizados:**  
+   - **En el cliente:** `localStorage` bajo la clave `user_custom_exercises_catalog`.
+   - **En el backend (server.ts):** Ruta `POST /api/exercises/save-custom` y `GET /api/exercises/custom` que persisten estrictamente en `src/data/user_custom_exercises.json`.
+   - La implementación de `save-custom` no contiene referencias de escritura ni lectura sobre `src/data/ejercicios.json` o `public/ejercicios.json`.
+3. **Separación Interna en Memoria en `services/exerciseCatalog.ts`:**  
+   - `cachedOfficialExercises`: Almacena exclusivamente los 109 ejercicios oficiales, inmutables. Función de acceso: `getOfficialExercises()`.
+   - `cachedCustomExercises`: Almacena exclusivamente los ejercicios creados por el usuario. Función de acceso: `getCustomExercises()`.
+   - `getAllCatalogExercises()`: Capa de presentación y búsqueda que combina `[...officialExercises, ...customExercises]` para la interfaz de usuario.
+   - **Esta combinación es estrictamente una vista derivada de presentación, NUNCA una nueva fuente de verdad.**
+4. **Taxonomía Muscular Compartida e Inalterable:**  
+   Los ejercicios personalizados utilizan los identificadores musculares canónicos de `src/data/muscles.json`. No se crea una segunda taxonomía muscular.
 
 ---
 

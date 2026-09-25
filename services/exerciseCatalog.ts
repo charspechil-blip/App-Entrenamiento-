@@ -133,17 +133,36 @@ export interface CatalogExercise extends CanonicalExercise {
 }
 
 // =====================================================================
-// 2. CONSTANTES Y MAPEOS DE SERVICIO
+// 2. CONSTANTES Y MAPEOS DE SERVICIO (ADAPTADORES DE PRESENTACIÓN UI)
 // =====================================================================
 
 const STORAGE_KEY = 'user_custom_exercises_catalog';
 
-let cachedExercises: CatalogExercise[] = [];
+/**
+ * Almacenes en memoria estrictamente separados:
+ * - cachedOfficialExercises: Los 109 ejercicios oficiales inmutables.
+ * - cachedCustomExercises: Ejercicios personalizados creados por el usuario.
+ */
+let cachedOfficialExercises: CatalogExercise[] = [];
+let cachedCustomExercises: CatalogExercise[] = [];
+
 const dynamicEquipmentMap = new Map<string, string[]>();
 const dynamicMuscleMap = new Map<string, MuscleGroup[]>();
 
 /**
- * Mapeo de tokens anatómicos canónicos (muscles.json) hacia regiones visuales de interfaz (MuscleGroup)
+ * ADAPTADOR DERIVADO DE PRESENTACIÓN (UI):
+ * Mapea tokens anatómicos canónicos de "src/data/muscles.json" hacia las 20 regiones visuales
+ * de interfaz (MuscleGroup) utilizadas por los componentes de mapa de calor corporal.
+ * 
+ * ESPECIFICACIÓN DE ARQUITECTURA SSOT (Punto 7 / 7A):
+ * - NO es una segunda taxonomía muscular.
+ * - NO sustituye a "src/data/muscles.json" (única fuente canónica de las 84 entidades anatómicas).
+ * - NO modifica la clasificación anatómica oficial ni las decisiones de 6A/6B/6C.
+ * - Es estrictamente una capa de proyección visual para componentes gráficos.
+ * - Los ESTABILIZADORES isométricos se omiten deliberadamente de esta proyección visual:
+ *   en ejercicios compuestos (sentadillas, peso muerto, remos), incluir estabilizadores
+ *   saturaría permanentemente el abdomen y la zona lumbar en el mapa de calor, impidiendo
+ *   distinguir el objetivo motor primario y dinámico del ejercicio.
  */
 export const ANATOMY_TO_MUSCLE_GROUP: Record<string, MuscleGroup> = {
   // Inferior
@@ -451,49 +470,76 @@ export const toCatalogExercise = (canonical: CanonicalExercise | any): CatalogEx
 };
 
 // =====================================================================
-// 4. API DEL SERVICIO DEL CATÁLOGO
+// 4. API DEL SERVICIO DEL CATÁLOGO (ARQUITECTURA SSOT CON AISLAMIENTO)
 // =====================================================================
 
 /**
- * Inicializa y cachea el catálogo completo en memoria
+ * Inicializa y cachea el catálogo oficial y los ejercicios personalizados en memoria
+ * de forma estrictamente separada.
  */
 export const initializeExerciseCatalog = (): CatalogExercise[] => {
+  // 1. Cargar el Catálogo Maestro Oficial (109 ejercicios inmutables de src/data/ejercicios.json)
   const canonicalList = (masterData?.ejercicios || []) as CanonicalExercise[];
-  
-  // 1. Cargar ejercicios personalizados de localStorage si existen
-  let customExercises: any[] = [];
+  cachedOfficialExercises = canonicalList.map(raw => toCatalogExercise(raw));
+
+  // 2. Cargar Ejercicios Personalizados del Usuario (almacenamiento aislado de cliente)
+  let rawCustomList: any[] = [];
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      customExercises = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        rawCustomList = parsed;
+      }
     }
   } catch (e) {
     console.warn('Error reading custom exercises from localStorage:', e);
   }
 
-  // 2. Indexar por clave normalizada y fusionar
-  const exerciseMap = new Map<string, CatalogExercise>();
+  cachedCustomExercises = rawCustomList.map(raw => toCatalogExercise({
+    ...raw,
+    personalizado: true
+  }));
 
-  canonicalList.forEach(raw => {
-    const projected = toCatalogExercise(raw);
-    exerciseMap.set(projected.id, projected);
-    exerciseMap.set(projected.nombre.toLowerCase().trim(), projected);
-  });
+  // Sincronización asíncrona no bloqueante con el almacenamiento del servidor
+  if (typeof fetch !== 'undefined') {
+    fetch('/api/exercises/custom')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data.ejercicios) && data.ejercicios.length > 0) {
+          const serverCustomMap = new Map<string, CatalogExercise>();
+          cachedCustomExercises.forEach(ex => serverCustomMap.set(ex.id, ex));
+          data.ejercicios.forEach((raw: any) => {
+            const projected = toCatalogExercise({ ...raw, personalizado: true });
+            serverCustomMap.set(projected.id, projected);
+          });
+          cachedCustomExercises = Array.from(serverCustomMap.values());
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedCustomExercises));
+          } catch (_) {}
+          rebuildDynamicMaps();
+        }
+      })
+      .catch(() => {
+        // Silencioso si se ejecuta offline o en entorno SSR
+      });
+  }
 
-  customExercises.forEach(raw => {
-    const projected = toCatalogExercise(raw);
-    exerciseMap.set(projected.id, projected);
-    exerciseMap.set(projected.nombre.toLowerCase().trim(), projected);
-  });
+  // 3. Poblar mapas dinámicos de acceso rápido para la presentación
+  rebuildDynamicMaps();
 
-  const merged = Array.from(new Set(Array.from(exerciseMap.values())));
-  cachedExercises = merged;
+  return getAllCatalogExercises();
+};
 
-  // 3. Poblar mapas dinámicos de acceso rápido
+/**
+ * Reconstruye los mapas dinámicos de equipamiento y grupos musculares
+ */
+function rebuildDynamicMaps() {
   dynamicEquipmentMap.clear();
   dynamicMuscleMap.clear();
 
-  merged.forEach(ex => {
+  const all = getAllCatalogExercises();
+  all.forEach(ex => {
     const normalizedEq = normalizeEquipmentTags(ex.equipamiento);
     dynamicEquipmentMap.set(ex.nombre, normalizedEq);
     if (ex.nombres_alternativos) {
@@ -507,18 +553,49 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
       }
     }
   });
+}
 
-  return merged;
+/**
+ * Obtiene estrictamente los 109 ejercicios oficiales certificados del Catálogo Maestro
+ */
+export const getOfficialExercises = (): CatalogExercise[] => {
+  if (cachedOfficialExercises.length === 0) {
+    initializeExerciseCatalog();
+  }
+  return [...cachedOfficialExercises];
 };
 
 /**
- * Obtiene la lista completa de ejercicios (canónicos + personalizados)
+ * Obtiene estrictamente los ejercicios personalizados creados por el usuario
+ */
+export const getCustomExercises = (): CatalogExercise[] => {
+  if (cachedOfficialExercises.length === 0) {
+    initializeExerciseCatalog();
+  }
+  return [...cachedCustomExercises];
+};
+
+/**
+ * Capa de presentación y búsqueda: Retorna la vista combinada
+ * [Oficiales + Personalizados].
+ * Si un ejercicio personalizado sobreescribe por ID a uno oficial,
+ * la versión personalizada prevalece en la vista, pero el catálogo oficial
+ * en cachedOfficialExercises permanece 100% intacto.
  */
 export const getAllCatalogExercises = (): CatalogExercise[] => {
-  if (cachedExercises.length === 0) {
-    return initializeExerciseCatalog();
+  if (cachedOfficialExercises.length === 0) {
+    initializeExerciseCatalog();
   }
-  return cachedExercises;
+
+  const combinedMap = new Map<string, CatalogExercise>();
+  
+  // Primero se registran los oficiales
+  cachedOfficialExercises.forEach(ex => combinedMap.set(ex.id, ex));
+  
+  // Luego se incorporan los personalizados (pueden sobreescribir vista de presentación)
+  cachedCustomExercises.forEach(ex => combinedMap.set(ex.id, ex));
+
+  return Array.from(combinedMap.values());
 };
 
 /**
@@ -560,8 +637,8 @@ export const getDynamicMusclesForExercise = (exerciseName: string): MuscleGroup[
 };
 
 /**
- * Guarda un ejercicio personalizado en almacenamiento local y en el backend
- * (sin mutar nunca la fuente canónica de los 109 ejercicios oficiales)
+ * Guarda o actualiza un ejercicio personalizado en almacenamiento aislado
+ * (sin mutar jamás la fuente canónica de los 109 ejercicios oficiales)
  */
 export const saveCustomExerciseToCatalog = async (
   exercise: Partial<CatalogExercise> & { nombre: string }
@@ -582,36 +659,28 @@ export const saveCustomExerciseToCatalog = async (
     actualizado_en: new Date().toISOString()
   });
 
-  // 1. Actualizar memoria y mapas dinámicos
-  const existingIdx = cachedExercises.findIndex(e => e.id === cleanId || e.nombre.toLowerCase().trim() === rawName.toLowerCase().trim());
-  if (existingIdx >= 0) {
-    cachedExercises[existingIdx] = normalizedExercise;
+  // 1. Actualizar memoria exclusiva de personalizados (cachedOfficialExercises queda intacto)
+  const existingCustomIdx = cachedCustomExercises.findIndex(e => 
+    e.id === cleanId || e.nombre.toLowerCase().trim() === rawName.toLowerCase().trim()
+  );
+
+  if (existingCustomIdx >= 0) {
+    cachedCustomExercises[existingCustomIdx] = normalizedExercise;
   } else {
-    cachedExercises.push(normalizedExercise);
+    cachedCustomExercises.push(normalizedExercise);
   }
 
-  const normalizedEqForApp = normalizeEquipmentTags(normalizedExercise.equipamiento);
-  dynamicEquipmentMap.set(normalizedExercise.nombre, normalizedEqForApp);
-  if (normalizedExercise.muscle_groups && normalizedExercise.muscle_groups.length > 0) {
-    dynamicMuscleMap.set(normalizedExercise.nombre, normalizedExercise.muscle_groups);
-  }
-
-  // 2. Persistir en localStorage cliente
+  // 2. Persistir en localStorage cliente de personalizados
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const existingList: CatalogExercise[] = saved ? JSON.parse(saved) : [];
-    const index = existingList.findIndex(e => e.id === cleanId || e.nombre.toLowerCase().trim() === rawName.toLowerCase().trim());
-    if (index >= 0) {
-      existingList[index] = normalizedExercise;
-    } else {
-      existingList.push(normalizedExercise);
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existingList));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedCustomExercises));
   } catch (e) {
     console.warn('Error saving custom exercise to localStorage:', e);
   }
 
-  // 3. Sincronizar asíncronamente con el almacén aislado de usuario en servidor
+  // 3. Reconstruir mapas de presentación
+  rebuildDynamicMaps();
+
+  // 4. Sincronizar asíncronamente con el almacén aislado de usuario en servidor (user_custom_exercises.json)
   try {
     await fetch('/api/exercises/save-custom', {
       method: 'POST',
@@ -623,6 +692,29 @@ export const saveCustomExerciseToCatalog = async (
   }
 
   return normalizedExercise;
+};
+
+/**
+ * Elimina un ejercicio personalizado del almacén de usuario
+ * (impide terminantemente eliminar ejercicios oficiales)
+ */
+export const deleteCustomExercise = (idOrName: string): boolean => {
+  const normalized = idOrName.toLowerCase().trim();
+  const idx = cachedCustomExercises.findIndex(e => 
+    e.id.toLowerCase() === normalized || e.nombre.toLowerCase().trim() === normalized
+  );
+
+  if (idx === -1) {
+    return false;
+  }
+
+  cachedCustomExercises.splice(idx, 1);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedCustomExercises));
+  } catch (_) {}
+
+  rebuildDynamicMaps();
+  return true;
 };
 
 // Carga inicial en frío
