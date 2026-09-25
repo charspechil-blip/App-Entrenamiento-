@@ -1,9 +1,9 @@
 {
-  "version": "1.2.0",
-  "schema_version": "1.2",
+  "version": "1.3.0",
+  "schema_version": "1.3",
   "fuente_canonica": "src/data/ejercicios.json",
   "publicacion": "public/ejercicios.json",
-  "descripcion": "Catálogo maestro oficial y fuente canónica normalizada con perfiles biomecánicos de referencia (3A/3B/3C)",
+  "descripcion": "Catálogo maestro oficial normalizado biomecánicamente (3A/3B/3C/4/5/6A/6B/6C)",
   "total_ejercicios": 109,
   "ejercicios": [
     {
@@ -22,10 +22,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "isquiotibiales",
-        "erectores_espinales",
         "aductor_mayor",
-        "recto_abdominal"
+        "soleo"
       ],
       "descripcion": "Ejercicio fundamental de fuerza de tren inferior en el que se flexiona la cadera y rodillas descendiendo con una barra apoyada sobre la espalda.",
       "ejecucion_pasos": [
@@ -85,8 +83,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "erectores_espinales",
-        "transverso_abdominal",
-        "recto_abdominal"
+        "recto_abdominal",
+        "transverso_abdominal"
       ]
     },
     {
@@ -101,12 +99,11 @@
       "zona": "inferior",
       "musculos_principales": [
         "cuadriceps",
-        "recto_abdominal"
+        "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "gluteo_mayor",
-        "erectores_espinales",
-        "deltoides_anterior"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Variante de sentadilla con la barra apoyada sobre los hombros por delante del cuello, exigiendo mayor verticalidad del tronco y activación de cuádriceps y core.",
       "ejecucion_pasos": [
@@ -161,9 +158,10 @@
       "demanda_estabilidad": "alta",
       "objetivo": "fuerza",
       "estabilizadores": [
-        "recto_abdominal",
         "erectores_espinales",
-        "deltoides_anterior"
+        "recto_abdominal",
+        "deltoides_anterior",
+        "trapecio_superior"
       ]
     },
     {
@@ -181,9 +179,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "recto_abdominal",
-        "biceps_braquial",
-        "aductor_mayor"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Sentadilla sosteniendo una mancuerna o kettlebell pegada al pecho con ambas manos, ideal para aprender el patrón y mejorar movilidad.",
       "ejecucion_pasos": [
@@ -237,8 +234,9 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "recto_abdominal",
+        "erectores_espinales",
         "biceps_braquial",
-        "erectores_espinales"
+        "deltoides_anterior"
       ]
     },
     {
@@ -253,12 +251,12 @@
       "zona": "inferior",
       "musculos_principales": [
         "gluteo_mayor",
-        "aductor_mayor"
+        "aductor_mayor",
+        "cuadriceps"
       ],
       "musculos_secundarios": [
-        "cuadriceps",
         "isquiotibiales",
-        "erectores_espinales"
+        "soleo"
       ],
       "descripcion": "Variante de sentadilla con una postura amplia de pies y rotación externa de caderas que enfatiza aductores y glúteos.",
       "ejecucion_pasos": [
@@ -313,7 +311,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "erectores_espinales",
-        "transverso_abdominal"
+        "transverso_abdominal",
+        "recto_abdominal"
       ]
     },
     {
@@ -331,9 +330,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "isquiotibiales",
-        "gluteo_medio",
-        "aductor_mayor"
+        "aductor_mayor",
+        "isquiotibiales"
       ],
       "descripcion": "Ejercicio unilateral de sentadilla con el empeine de la pierna trasera apoyado sobre un banco o soporte elevado.",
       "ejecucion_pasos": [
@@ -407,9 +405,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "isquiotibiales",
-        "recto_abdominal",
-        "gemelos"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Sentadilla ejecutada exclusivamente con el peso corporal, ideal para calentamiento, resistencia muscular y acondicionamiento.",
       "ejecucion_pasos": [
@@ -478,10 +475,9 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "gluteo_medio",
-        "isquiotibiales",
-        "recto_abdominal",
-        "gemelos"
+        "iliopsoas",
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Ejercicio avanzado de calistenia donde se realiza una sentadilla completa sobre una sola pierna mientras la otra permanece estirada al frente.",
       "ejecucion_pasos": [
@@ -533,7 +529,8 @@
       "estabilizadores": [
         "gluteo_medio",
         "tibial_anterior",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -551,7 +548,6 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "isquiotibiales",
         "aductor_mayor"
       ],
       "descripcion": "Ejercicio en máquina inclinada donde se empuja una plataforma cargada con los pies manteniendo la espalda protegida y apoyada en el respaldo.",
@@ -620,8 +616,7 @@
       ],
       "musculos_secundarios": [
         "gluteo_mayor",
-        "aductor_mayor",
-        "soleo"
+        "aductor_mayor"
       ],
       "descripcion": "Sentadilla guiada en máquina con respaldo inclinado que aísla los cuádriceps reduciendo el requerimiento de estabilización en la zona lumbar.",
       "ejecucion_pasos": [
@@ -671,7 +666,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal"
+        "transverso_abdominal"
       ]
     },
     {
@@ -688,9 +683,7 @@
         "cuadriceps"
       ],
       "musculos_secundarios": [
-        "gluteo_mayor",
-        "isquiotibiales",
-        "recto_abdominal"
+        "gluteo_mayor"
       ],
       "descripcion": "Mantenimiento estático de la posición de sentadilla apoyando la espalda contra la pared, excelente para resistencia y salud articular.",
       "ejecucion_pasos": [
@@ -738,7 +731,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "resistencia",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "tibial_anterior"
       ]
     },
     {
@@ -754,14 +748,12 @@
       "musculos_principales": [
         "gluteo_mayor",
         "isquiotibiales",
-        "erectores_espinales"
+        "cuadriceps"
       ],
       "musculos_secundarios": [
+        "aductor_mayor",
         "dorsal_ancho",
-        "trapecio",
-        "cuadriceps",
-        "antebrazos",
-        "recto_abdominal"
+        "trapecio"
       ],
       "descripcion": "Levantamiento básico desde el suelo mediante bisagra de cadera donde se levanta una barra hasta la extensión completa de caderas.",
       "ejecucion_pasos": [
@@ -816,9 +808,9 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "erectores_espinales",
-        "trapecio",
-        "dorsal_ancho",
-        "recto_abdominal"
+        "recto_abdominal",
+        "transverso_abdominal",
+        "flexores_muneca"
       ]
     },
     {
@@ -832,14 +824,12 @@
       "zona": "cuerpo_completo",
       "musculos_principales": [
         "gluteo_mayor",
-        "aductor_mayor",
-        "cuadriceps"
+        "cuadriceps",
+        "aductor_mayor"
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "erectores_espinales",
-        "trapecio",
-        "antebrazos"
+        "dorsal_ancho"
       ],
       "descripcion": "Variante de peso muerto con pies muy separados y agarre estrecho por dentro de las piernas, permitiendo un torso más vertical.",
       "ejecucion_pasos": [
@@ -894,8 +884,9 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "erectores_espinales",
-        "trapecio",
-        "transverso_abdominal"
+        "recto_abdominal",
+        "transverso_abdominal",
+        "flexores_muneca"
       ]
     },
     {
@@ -913,9 +904,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "erectores_espinales",
-        "dorsal_ancho",
-        "antebrazos"
+        "aductor_mayor",
+        "dorsal_ancho"
       ],
       "descripcion": "Ejercicio de bisagra de cadera donde se desciende la barra hasta debajo de las rodillas con mínima flexión de rodilla, enfatizando isquios y glúteos.",
       "ejecucion_pasos": [
@@ -969,8 +959,9 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "erectores_espinales",
-        "dorsal_ancho",
-        "recto_abdominal"
+        "recto_abdominal",
+        "flexores_muneca",
+        "trapecio_medio"
       ]
     },
     {
@@ -988,9 +979,7 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "erectores_espinales",
-        "gluteo_medio",
-        "antebrazos"
+        "aductor_mayor"
       ],
       "descripcion": "Variante del peso muerto rumano que utiliza mancuernas, permitiendo un recorrido más natural y cómodo para los brazos.",
       "ejecucion_pasos": [
@@ -1040,8 +1029,9 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "erectores_espinales",
-        "dorsal_ancho",
-        "recto_abdominal"
+        "recto_abdominal",
+        "flexores_muneca",
+        "romboides"
       ]
     },
     {
@@ -1056,13 +1046,10 @@
       "zona": "inferior",
       "musculos_principales": [
         "isquiotibiales",
-        "gluteo_mayor",
-        "gluteo_medio"
+        "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "erectores_espinales",
-        "recto_abdominal",
-        "gemelos"
+        "aductor_mayor"
       ],
       "descripcion": "Bisagra de cadera realizada sobre una pierna mientras la otra se extiende hacia atrás, desarrollando equilibrio, fuerza y estabilidad de cadera.",
       "ejecucion_pasos": [
@@ -1114,6 +1101,7 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
+        "cuadrado_lumbar",
         "erectores_espinales",
         "recto_abdominal"
       ]
@@ -1133,8 +1121,8 @@
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "cuadriceps",
-        "erectores_espinales"
+        "aductor_mayor",
+        "cuadriceps"
       ],
       "descripcion": "Ejercicio de máxima activación y sobrecarga del glúteo mayor mediante extensión horizontal de cadera con apoyo escapular en banco.",
       "ejecucion_pasos": [
@@ -1200,13 +1188,11 @@
       "patron_movimiento": "extension_de_cadera",
       "zona": "inferior",
       "musculos_principales": [
-        "gluteo_mayor",
-        "gluteo_medio"
+        "gluteo_mayor"
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "cuadriceps",
-        "recto_abdominal"
+        "aductor_mayor"
       ],
       "descripcion": "Variante unilateral del hip thrust que corrige asimetrías de fuerza en los glúteos y mejora la estabilidad lumbopélvica.",
       "ejecucion_pasos": [
@@ -1255,6 +1241,7 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
+        "cuadrado_lumbar",
         "recto_abdominal"
       ]
     },
@@ -1272,7 +1259,7 @@
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "erectores_espinales"
+        "aductor_mayor"
       ],
       "descripcion": "Ejercicio en el suelo para activación y fortalecimiento de glúteos mediante elevación de pelvis.",
       "ejecucion_pasos": [
@@ -1320,7 +1307,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal",
+        "transverso_abdominal",
         "erectores_espinales"
       ]
     },
@@ -1335,11 +1322,10 @@
       "zona": "inferior",
       "musculos_principales": [
         "isquiotibiales",
-        "erectores_espinales"
+        "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "gluteo_mayor",
-        "dorsal_ancho"
+        "aductor_mayor"
       ],
       "descripcion": "Movimiento de bisagra de cadera con la barra cargada en la espalda alta, enfocado en isquiosurales y fortalecimiento lumbar.",
       "ejecucion_pasos": [
@@ -1388,7 +1374,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "erectores_espinales",
-        "transverso_abdominal"
+        "transverso_abdominal",
+        "recto_abdominal"
       ]
     },
     {
@@ -1406,10 +1393,8 @@
         "isquiotibiales"
       ],
       "musculos_secundarios": [
-        "erectores_espinales",
-        "recto_abdominal",
-        "deltoides_anterior",
-        "antebrazos"
+        "cuadriceps",
+        "deltoides_anterior"
       ],
       "descripcion": "Ejercicio balístico y dinámico de bisagra de cadera donde se propulsa una pesa rusa a la altura del pecho usando la potencia de glúteos e isquios.",
       "ejecucion_pasos": [
@@ -1459,8 +1444,9 @@
       "objetivo": "potencia",
       "estabilizadores": [
         "erectores_espinales",
+        "recto_abdominal",
         "dorsal_ancho",
-        "recto_abdominal"
+        "flexores_muneca"
       ]
     },
     {
@@ -1479,8 +1465,8 @@
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "gluteo_medio",
-        "gemelos"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Zancadas continuas avanzando hacia adelante que desafían la fuerza unilateral, la estabilidad y la resistencia de piernas y glúteos.",
       "ejecucion_pasos": [
@@ -1536,7 +1522,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -1554,8 +1541,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "isquiotibiales",
-        "gluteo_medio"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Zancada fija en el lugar donde se sube y baja verticalmente sin desplazar los pies.",
       "ejecucion_pasos": [
@@ -1607,7 +1594,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -1626,7 +1614,8 @@
       ],
       "musculos_secundarios": [
         "isquiotibiales",
-        "gluteo_medio"
+        "aductor_mayor",
+        "soleo"
       ],
       "descripcion": "Zancada dando el paso hacia atrás, variante más amigable con la articulación de la rodilla y con mayor estímulo en glúteos.",
       "ejecucion_pasos": [
@@ -1677,7 +1666,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -1695,9 +1685,9 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "gluteo_medio",
-        "gemelos",
-        "isquiotibiales"
+        "isquiotibiales",
+        "aductor_mayor",
+        "gastrocnemio"
       ],
       "descripcion": "Ascenso a un banco o cajón apoyando un pie e impulsando el cuerpo únicamente con la pierna de arriba.",
       "ejecucion_pasos": [
@@ -1748,7 +1738,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "gluteo_medio",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -1807,7 +1798,9 @@
       "tipo_resistencia": "maquina_guiada",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "recto_abdominal"
+      ]
     },
     {
       "id": "curl-femoral-tumbado",
@@ -1823,7 +1816,7 @@
         "isquiotibiales"
       ],
       "musculos_secundarios": [
-        "gemelos"
+        "gastrocnemio"
       ],
       "descripcion": "Ejercicio de aislamiento boca abajo en máquina que trabaja la flexión de rodilla focalizando en los isquiosurales.",
       "ejecucion_pasos": [
@@ -1869,7 +1862,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "gemelos"
+        "erectores_espinales"
       ]
     },
     {
@@ -1885,7 +1878,7 @@
         "isquiotibiales"
       ],
       "musculos_secundarios": [
-        "gemelos"
+        "gastrocnemio"
       ],
       "descripcion": "Aislamiento de isquiosurales en posición sentada, lo que coloca la cadera en flexión y genera mayor elongación y tensión muscular.",
       "ejecucion_pasos": [
@@ -1930,7 +1923,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "gemelos"
+        "recto_abdominal"
       ]
     },
     {
@@ -1947,9 +1940,7 @@
         "isquiotibiales"
       ],
       "musculos_secundarios": [
-        "gluteo_mayor",
-        "erectores_espinales",
-        "gemelos"
+        "gastrocnemio"
       ],
       "descripcion": "Exigente ejercicio excéntrico para isquiosurales donde de rodillas se desciende el torso hacia adelante controlando con la fuerza de la parte posterior del muslo.",
       "ejecucion_pasos": [
@@ -2013,10 +2004,11 @@
       "patron_movimiento": "extension_de_tobillo",
       "zona": "inferior",
       "musculos_principales": [
-        "gemelos"
+        "gastrocnemio",
+        "soleo"
       ],
       "musculos_secundarios": [
-        "soleo"
+        "tibial_posterior"
       ],
       "descripcion": "Ejercicio para el desarrollo de los gemelos (gastrocnemios) elevando los talones sobre un escalón o máquina con rodillas extendidas.",
       "ejecucion_pasos": [
@@ -2063,7 +2055,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "tibial_anterior"
+        "tibial_anterior",
+        "cuadriceps"
       ]
     },
     {
@@ -2079,7 +2072,8 @@
         "soleo"
       ],
       "musculos_secundarios": [
-        "gemelos"
+        "gastrocnemio",
+        "tibial_posterior"
       ],
       "descripcion": "Elevación de talones con las rodillas a 90 grados, lo que desactiva en gran parte los gastrocnemios para aislar el sóleo.",
       "ejecucion_pasos": [
@@ -2122,7 +2116,9 @@
       "tipo_resistencia": "maquina_guiada",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "tibial_anterior"
+      ]
     },
     {
       "id": "press-banca-plano-barra",
@@ -2202,7 +2198,7 @@
       "estabilizadores": [
         "manguito_rotador",
         "serrato_anterior",
-        "romboides"
+        "dorsal_ancho"
       ]
     },
     {
@@ -2215,11 +2211,12 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor",
+        "pectoral_mayor_clavicular",
         "deltoides_anterior"
       ],
       "musculos_secundarios": [
-        "triceps_braquial"
+        "triceps_braquial",
+        "pectoral_mayor_esternal"
       ],
       "descripcion": "Press de banca en banco inclinado a 30-45 grados que pone mayor énfasis en el haz clavicular (pecho superior) y deltoides anterior.",
       "ejecucion_pasos": [
@@ -2272,7 +2269,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "manguito_rotador",
-        "serrato_anterior"
+        "serrato_anterior",
+        "trapecio_medio"
       ]
     },
     {
@@ -2285,7 +2283,7 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor"
+        "pectoral_mayor_esternal"
       ],
       "musculos_secundarios": [
         "triceps_braquial",
@@ -2423,11 +2421,12 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor",
+        "pectoral_mayor_clavicular",
         "deltoides_anterior"
       ],
       "musculos_secundarios": [
-        "triceps_braquial"
+        "triceps_braquial",
+        "pectoral_mayor_esternal"
       ],
       "descripcion": "Empuje en banco inclinado con mancuernas para estimular el haz clavicular con libertad articular para muñecas y hombros.",
       "ejecucion_pasos": [
@@ -2557,13 +2556,11 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor",
-        "triceps_braquial"
+        "pectoral_mayor"
       ],
       "musculos_secundarios": [
         "deltoides_anterior",
-        "recto_abdominal",
-        "serrato_anterior"
+        "triceps_braquial"
       ],
       "descripcion": "Clásico ejercicio de calistenia donde se eleva el peso corporal desde el suelo mediante empuje de brazos manteniendo el cuerpo en línea recta.",
       "ejecucion_pasos": [
@@ -2620,8 +2617,9 @@
       "objetivo": "resistencia",
       "estabilizadores": [
         "recto_abdominal",
+        "transverso_abdominal",
         "serrato_anterior",
-        "erectores_espinales"
+        "cuadriceps"
       ]
     },
     {
@@ -2639,8 +2637,7 @@
         "pectoral_mayor"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "recto_abdominal"
+        "deltoides_anterior"
       ],
       "descripcion": "Variante de flexiones con las manos juntas formando un rombo o diamante con los dedos, aumentando significativamente la demanda sobre los tríceps.",
       "ejecucion_pasos": [
@@ -2690,7 +2687,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "recto_abdominal",
-        "serrato_anterior"
+        "serrato_anterior",
+        "transverso_abdominal"
       ]
     },
     {
@@ -2704,12 +2702,11 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor",
+        "pectoral_mayor_clavicular",
         "deltoides_anterior"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
-        "recto_abdominal"
+        "triceps_braquial"
       ],
       "descripcion": "Flexiones con los pies elevados sobre un banco o soporte, aumentando la carga corporal y el estímulo en el pectoral superior y deltoides.",
       "ejecucion_pasos": [
@@ -2760,7 +2757,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "recto_abdominal",
-        "serrato_anterior"
+        "serrato_anterior",
+        "transverso_abdominal"
       ]
     },
     {
@@ -2777,8 +2775,7 @@
         "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "recto_abdominal"
+        "deltoides_anterior"
       ],
       "descripcion": "Ejercicio avanzado de calistenia donde se desciende hacia un lado mientras el brazo opuesto se extiende completamente como un arquero.",
       "ejecucion_pasos": [
@@ -2825,8 +2822,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "recto_abdominal",
-        "serrato_anterior",
-        "gluteo_mayor"
+        "oblicuo_externo",
+        "serrato_anterior"
       ]
     },
     {
@@ -2840,8 +2837,8 @@
       "patron_movimiento": "empuje_vertical",
       "zona": "superior",
       "musculos_principales": [
-        "triceps_braquial",
-        "pectoral_mayor"
+        "pectoral_mayor",
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
         "deltoides_anterior"
@@ -2897,8 +2894,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "fuerza",
       "estabilizadores": [
+        "manguito_rotador",
         "romboides",
-        "serrato_anterior",
         "recto_abdominal"
       ]
     },
@@ -2966,6 +2963,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "manguito_rotador",
         "romboides"
       ]
     },
@@ -2983,9 +2981,7 @@
         "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "serrato_anterior",
-        "recto_abdominal"
+        "deltoides_anterior"
       ],
       "descripcion": "Fondos realizados en anillas de gimnasia, añadiendo una gran demanda de estabilización para pectorales y hombros.",
       "ejecucion_pasos": [
@@ -3037,7 +3033,8 @@
       "estabilizadores": [
         "manguito_rotador",
         "serrato_anterior",
-        "recto_abdominal"
+        "recto_abdominal",
+        "romboides"
       ]
     },
     {
@@ -3053,13 +3050,12 @@
       "zona": "superior",
       "musculos_principales": [
         "deltoides_anterior",
-        "deltoides_lateral"
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
-        "trapecio",
-        "recto_abdominal",
-        "gluteo_mayor"
+        "deltoides_lateral",
+        "pectoral_mayor_clavicular",
+        "trapecio_superior"
       ],
       "descripcion": "Empuje vertical estricto de pie con barra apoyada sobre las clavículas hasta el bloqueo por encima de la cabeza.",
       "ejecucion_pasos": [
@@ -3115,9 +3111,10 @@
       "demanda_estabilidad": "media",
       "objetivo": "fuerza",
       "estabilizadores": [
+        "erectores_espinales",
         "recto_abdominal",
         "gluteo_mayor",
-        "erectores_espinales"
+        "manguito_rotador"
       ]
     },
     {
@@ -3132,11 +3129,11 @@
       "zona": "superior",
       "musculos_principales": [
         "deltoides_anterior",
-        "deltoides_lateral"
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
-        "trapecio"
+        "deltoides_lateral",
+        "trapecio_superior"
       ],
       "descripcion": "Empuje vertical sentado en banco con respaldo casi vertical, aislando el trabajo en hombros y tríceps.",
       "ejecucion_pasos": [
@@ -3185,7 +3182,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "manguito_rotador",
-        "trapecio"
+        "serrato_anterior",
+        "erectores_espinales"
       ]
     },
     {
@@ -3199,11 +3197,11 @@
       "zona": "superior",
       "musculos_principales": [
         "deltoides_anterior",
-        "deltoides_lateral"
+        "deltoides_lateral",
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
-        "trapecio"
+        "trapecio_superior"
       ],
       "descripcion": "Variante de press con mancuernas que incorpora una rotación de muñecas y hombros durante la subida, estimulando todos los haces del deltoides.",
       "ejecucion_pasos": [
@@ -3252,7 +3250,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "manguito_rotador",
-        "trapecio"
+        "erectores_espinales",
+        "recto_abdominal"
       ]
     },
     {
@@ -3266,12 +3265,13 @@
       "zona": "cuerpo_completo",
       "musculos_principales": [
         "deltoides_anterior",
-        "cuadriceps"
+        "cuadriceps",
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
         "gluteo_mayor",
-        "erectores_espinales"
+        "soleo",
+        "trapecio_superior"
       ],
       "descripcion": "Empuje vertical dinámico donde se utiliza una ligera flexión y extensión de rodillas (dip and drive) para propulsar la barra por encima de la cabeza.",
       "ejecucion_pasos": [
@@ -3324,7 +3324,8 @@
       "objetivo": "potencia",
       "estabilizadores": [
         "erectores_espinales",
-        "recto_abdominal"
+        "recto_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -3344,8 +3345,7 @@
       ],
       "musculos_secundarios": [
         "deltoides_lateral",
-        "trapecio",
-        "recto_abdominal"
+        "trapecio_superior"
       ],
       "descripcion": "Avanzado ejercicio de calistenia donde se realiza una flexión vertical en posición invertida apoyado contra la pared o en equilibrio libre.",
       "ejecucion_pasos": [
@@ -3397,7 +3397,8 @@
       "estabilizadores": [
         "recto_abdominal",
         "erectores_espinales",
-        "serrato_anterior"
+        "serrato_anterior",
+        "manguito_rotador"
       ]
     },
     {
@@ -3414,7 +3415,7 @@
         "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "trapecio",
+        "trapecio_superior",
         "serrato_anterior"
       ],
       "descripcion": "Flexión con las caderas elevadas en V invertida, simulando el ángulo de un press de hombros con peso corporal.",
@@ -3465,7 +3466,7 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "recto_abdominal",
-        "serrato_anterior"
+        "erectores_espinales"
       ]
     },
     {
@@ -3530,8 +3531,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "manguito_rotador",
         "biceps_braquial",
-        "manguito_rotador"
+        "serrato_anterior"
       ]
     },
     {
@@ -3545,10 +3547,11 @@
       "patron_movimiento": "empuje_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor"
+        "pectoral_mayor_esternal"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "pectoral_menor"
       ],
       "descripcion": "Aislamiento en poleas donde se juntan los brazos frente al cuerpo con tensión continua en todo el rango.",
       "ejecucion_pasos": [
@@ -3594,6 +3597,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "manguito_rotador",
         "recto_abdominal"
       ]
     },
@@ -3654,7 +3658,9 @@
       "tipo_resistencia": "maquina_guiada",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "manguito_rotador"
+      ]
     },
     {
       "id": "elevaciones-laterales-mancuernas",
@@ -3670,8 +3676,8 @@
         "deltoides_lateral"
       ],
       "musculos_secundarios": [
-        "trapecio",
-        "deltoides_anterior"
+        "supraespinoso",
+        "trapecio_superior"
       ],
       "descripcion": "Ejercicio de aislamiento por excelencia para la cabeza lateral del hombro, otorgando amplitud y redondez.",
       "ejecucion_pasos": [
@@ -3718,7 +3724,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "trapecio",
+        "erectores_espinales",
         "recto_abdominal"
       ]
     },
@@ -3735,7 +3741,8 @@
         "deltoides_lateral"
       ],
       "musculos_secundarios": [
-        "trapecio"
+        "supraespinoso",
+        "trapecio_superior"
       ],
       "descripcion": "Elevación lateral utilizando polea, manteniendo tensión mecánica desde el inicio del movimiento en contraste con las mancuernas.",
       "ejecucion_pasos": [
@@ -3780,6 +3787,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "recto_abdominal",
         "oblicuo_externo"
       ]
     },
@@ -3798,7 +3806,8 @@
       ],
       "musculos_secundarios": [
         "romboides",
-        "trapecio"
+        "trapecio_medio",
+        "infraespinoso"
       ],
       "descripcion": "Ejercicio con el torso inclinado hacia adelante para aislar el haz posterior del deltoides y la musculatura escapular media.",
       "ejecucion_pasos": [
@@ -3843,7 +3852,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "erectores_espinales"
+        "erectores_espinales",
+        "isquiotibiales"
       ]
     },
     {
@@ -3857,12 +3867,12 @@
       "zona": "superior",
       "musculos_principales": [
         "deltoides_posterior",
-        "manguito_rotador"
+        "infraespinoso"
       ],
       "musculos_secundarios": [
-        "trapecio",
+        "trapecio_medio",
         "romboides",
-        "biceps_braquial"
+        "redondo_menor"
       ],
       "descripcion": "Tracción horizontal a la altura de la cara con rotación externa, esencial para la salud articular de los hombros y corrección postural.",
       "ejecucion_pasos": [
@@ -3910,7 +3920,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -3926,9 +3937,7 @@
       "musculos_principales": [
         "triceps_braquial"
       ],
-      "musculos_secundarios": [
-        "antebrazos"
-      ],
+      "musculos_secundarios": [],
       "descripcion": "Extensión de codos acostado en banco plano donde se desciende una barra Z hacia la frente o detrás de la coronilla.",
       "ejecucion_pasos": [
         "Túmbate en el banco sujetando la barra Z con agarre estrecho y brazos verticales.",
@@ -3977,6 +3986,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "deltoides_anterior",
+        "flexores_muneca",
         "manguito_rotador"
       ]
     },
@@ -3994,7 +4005,7 @@
         "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "antebrazos"
+        "anconeo"
       ],
       "descripcion": "Ejercicio clásico de aislamiento para tríceps empujando hacia abajo una cuerda o barra recta desde una polea alta.",
       "ejecucion_pasos": [
@@ -4041,6 +4052,7 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "deltoides_anterior",
         "recto_abdominal"
       ]
     },
@@ -4055,9 +4067,11 @@
       "patron_movimiento": "extension_de_codo",
       "zona": "superior",
       "musculos_principales": [
+        "triceps_cabeza_larga"
+      ],
+      "musculos_secundarios": [
         "triceps_braquial"
       ],
-      "musculos_secundarios": [],
       "descripcion": "Extensión por encima de la cabeza que estira al máximo la cabeza larga del tríceps braquial.",
       "ejecucion_pasos": [
         "Siéntate o ponte de pie sosteniendo una mancuerna con ambas manos sobre la cabeza.",
@@ -4102,7 +4116,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -4115,9 +4130,11 @@
       "patron_movimiento": "extension_de_codo",
       "zona": "superior",
       "musculos_principales": [
+        "triceps_cabeza_larga"
+      ],
+      "musculos_secundarios": [
         "triceps_braquial"
       ],
-      "musculos_secundarios": [],
       "descripcion": "Extensión sobre la cabeza con polea que asegura tensión constante en la cabeza larga del tríceps.",
       "ejecucion_pasos": [
         "Ajusta la polea a media altura o alta y toma la cuerda dándole la espalda a la torre.",
@@ -4162,7 +4179,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -4179,12 +4197,12 @@
       "musculos_principales": [
         "dorsal_ancho",
         "romboides",
-        "trapecio"
+        "trapecio_medio"
       ],
       "musculos_secundarios": [
-        "biceps_braquial",
         "deltoides_posterior",
-        "erectores_espinales"
+        "biceps_braquial",
+        "braquial"
       ],
       "descripcion": "Ejercicio básico de tracción horizontal donde se tracciona una barra hacia el abdomen en posición de bisagra de cadera.",
       "ejecucion_pasos": [
@@ -4242,6 +4260,7 @@
       "estabilizadores": [
         "erectores_espinales",
         "isquiotibiales",
+        "gluteo_mayor",
         "recto_abdominal"
       ]
     },
@@ -4258,12 +4277,12 @@
       "musculos_principales": [
         "dorsal_ancho",
         "romboides",
-        "trapecio"
+        "trapecio_medio"
       ],
       "musculos_secundarios": [
+        "deltoides_posterior",
         "biceps_braquial",
-        "erectores_espinales",
-        "deltoides_posterior"
+        "braquial"
       ],
       "descripcion": "Variante estricta y explosiva de remo donde cada repetición se inicia desde el suelo con el torso completamente horizontal.",
       "ejecucion_pasos": [
@@ -4330,13 +4349,13 @@
       "patron_movimiento": "traccion_horizontal",
       "zona": "superior",
       "musculos_principales": [
-        "dorsal_ancho",
-        "romboides"
+        "dorsal_ancho"
       ],
       "musculos_secundarios": [
-        "biceps_braquial",
+        "romboides",
         "deltoides_posterior",
-        "trapecio"
+        "biceps_braquial",
+        "braquial"
       ],
       "descripcion": "Tracción unilateral apoyando una rodilla y mano sobre un banco, permitiendo un gran rango de movimiento y desarrollo equilibrado.",
       "ejecucion_pasos": [
@@ -4389,6 +4408,7 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "oblicuo_externo",
+        "recto_abdominal",
         "erectores_espinales"
       ]
     },
@@ -4404,13 +4424,12 @@
       "zona": "superior",
       "musculos_principales": [
         "dorsal_ancho",
-        "romboides",
-        "trapecio"
+        "romboides"
       ],
       "musculos_secundarios": [
+        "trapecio_medio",
         "biceps_braquial",
-        "deltoides_posterior",
-        "erectores_espinales"
+        "deltoides_posterior"
       ],
       "descripcion": "Remo sentado tirando de un maneral conectado a una polea baja con apoyo para los pies, garantizando tensión continua.",
       "ejecucion_pasos": [
@@ -4459,7 +4478,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "erectores_espinales"
+        "erectores_espinales",
+        "recto_abdominal"
       ]
     },
     {
@@ -4473,13 +4493,14 @@
       "patron_movimiento": "traccion_horizontal",
       "zona": "superior",
       "musculos_principales": [
+        "dorsal_ancho",
         "romboides",
-        "trapecio",
-        "dorsal_ancho"
+        "trapecio_medio"
       ],
       "musculos_secundarios": [
+        "deltoides_posterior",
         "biceps_braquial",
-        "deltoides_posterior"
+        "braquial"
       ],
       "descripcion": "Remo en barra T con almohadilla en el pecho que descarga completamente la zona lumbar, permitiendo aislar la espalda alta.",
       "ejecucion_pasos": [
@@ -4528,7 +4549,9 @@
       "tipo_resistencia": "maquina_guiada",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "manguito_rotador"
+      ]
     },
     {
       "id": "remo-invertido",
@@ -4543,11 +4566,10 @@
       "musculos_principales": [
         "dorsal_ancho",
         "romboides",
-        "trapecio"
+        "trapecio_medio"
       ],
       "musculos_secundarios": [
         "biceps_braquial",
-        "recto_abdominal",
         "deltoides_posterior"
       ],
       "descripcion": "Ejercicio de calistenia suspendido debajo de una barra o anillas tirando del pecho hacia la barra.",
@@ -4599,9 +4621,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "recto_abdominal",
         "gluteo_mayor",
-        "erectores_espinales",
-        "recto_abdominal"
+        "erectores_espinales"
       ]
     },
     {
@@ -4616,11 +4638,11 @@
       "zona": "superior",
       "musculos_principales": [
         "dorsal_ancho",
-        "romboides"
+        "romboides",
+        "trapecio_medio"
       ],
       "musculos_secundarios": [
         "biceps_braquial",
-        "recto_abdominal",
         "deltoides_posterior"
       ],
       "descripcion": "Remo con correas o anillas de suspensión que permite rotar las muñecas naturalmente durante el trayecto.",
@@ -4669,9 +4691,9 @@
       "demanda_estabilidad": "alta",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "manguito_rotador",
+        "recto_abdominal",
         "gluteo_mayor",
-        "recto_abdominal"
+        "manguito_rotador"
       ]
     },
     {
@@ -4688,11 +4710,11 @@
         "dorsal_ancho"
       ],
       "musculos_secundarios": [
-        "biceps_braquial",
         "braquial",
+        "braquiorradial",
+        "biceps_braquial",
         "romboides",
-        "trapecio",
-        "recto_abdominal"
+        "trapecio_inferior"
       ],
       "descripcion": "Rey de los ejercicios de tracción vertical con peso corporal, colgándose de una barra con palmas hacia adelante y elevando el cuerpo hasta pasar la barbilla.",
       "ejecucion_pasos": [
@@ -4746,8 +4768,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "recto_abdominal",
-        "romboides",
-        "trapecio"
+        "transverso_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -4765,8 +4787,9 @@
         "biceps_braquial"
       ],
       "musculos_secundarios": [
-        "romboides",
-        "pectoral_mayor"
+        "braquial",
+        "pectoral_mayor",
+        "romboides"
       ],
       "descripcion": "Dominadas con las palmas mirando hacia ti a la anchura de hombros, otorgando mayor ventaja mecánica y estímulo directo a los bíceps.",
       "ejecucion_pasos": [
@@ -4815,7 +4838,7 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "recto_abdominal",
-        "romboides"
+        "manguito_rotador"
       ]
     },
     {
@@ -4829,12 +4852,12 @@
       "zona": "superior",
       "musculos_principales": [
         "dorsal_ancho",
-        "braquial",
-        "biceps_braquial"
+        "braquial"
       ],
       "musculos_secundarios": [
-        "romboides",
-        "trapecio"
+        "biceps_braquial",
+        "braquiorradial",
+        "romboides"
       ],
       "descripcion": "Dominadas con las palmas enfrentadas, la variante más ergonómica y cómoda para hombros, muñecas y codos.",
       "ejecucion_pasos": [
@@ -4883,7 +4906,7 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "recto_abdominal",
-        "romboides"
+        "manguito_rotador"
       ]
     },
     {
@@ -4901,8 +4924,9 @@
       ],
       "musculos_secundarios": [
         "biceps_braquial",
+        "braquial",
         "romboides",
-        "deltoides_posterior"
+        "trapecio_inferior"
       ],
       "descripcion": "Tracción vertical sentado en máquina llevando una barra ancha hacia la parte alta del pecho, ideal para regular la carga de trabajo.",
       "ejecucion_pasos": [
@@ -4952,7 +4976,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -4970,8 +4995,8 @@
       ],
       "musculos_secundarios": [
         "biceps_braquial",
-        "braquiorradial",
-        "romboides"
+        "braquial",
+        "pectoral_mayor"
       ],
       "descripcion": "Jalón vertical utilizando un maneral cerrado en V, aumentando la aducción de codos y el estiramiento dorsal.",
       "ejecucion_pasos": [
@@ -5017,7 +5042,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -5034,9 +5060,9 @@
         "dorsal_ancho"
       ],
       "musculos_secundarios": [
-        "triceps_braquial",
-        "pectoral_mayor",
-        "recto_abdominal"
+        "redondo_mayor",
+        "triceps_cabeza_larga",
+        "pectoral_menor"
       ],
       "descripcion": "Ejercicio de aislamiento para el dorsal ancho que imita el movimiento de extensión de hombro sin participación de los flexores de codo.",
       "ejecucion_pasos": [
@@ -5083,7 +5109,7 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "recto_abdominal",
-        "triceps_braquial"
+        "erectores_espinales"
       ]
     },
     {
@@ -5098,13 +5124,13 @@
       "zona": "superior",
       "musculos_principales": [
         "dorsal_ancho",
-        "triceps_braquial",
-        "pectoral_mayor"
+        "pectoral_mayor",
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
         "biceps_braquial",
         "deltoides_anterior",
-        "recto_abdominal"
+        "braquiorradial"
       ],
       "descripcion": "Movimiento avanzado de calistenia que combina una dominada explosiva alta con una rápida transición hacia un fondo sobre la barra.",
       "ejecucion_pasos": [
@@ -5155,7 +5181,8 @@
       "objetivo": "potencia",
       "estabilizadores": [
         "recto_abdominal",
-        "erectores_espinales"
+        "manguito_rotador",
+        "flexores_muneca"
       ]
     },
     {
@@ -5173,8 +5200,7 @@
       ],
       "musculos_secundarios": [
         "braquial",
-        "braquiorradial",
-        "antebrazos"
+        "braquiorradial"
       ],
       "descripcion": "El clásico ejercicio de sobrecarga para flexores del codo de pie con barra recta o Z.",
       "ejecucion_pasos": [
@@ -5225,7 +5251,8 @@
       "objetivo": "hipertrofia",
       "estabilizadores": [
         "deltoides_anterior",
-        "recto_abdominal"
+        "flexores_muneca",
+        "erectores_espinales"
       ]
     },
     {
@@ -5289,6 +5316,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
+        "deltoides_anterior",
+        "recto_abdominal",
         "oblicuo_externo"
       ]
     },
@@ -5303,12 +5332,11 @@
       "patron_movimiento": "flexion_de_codo",
       "zona": "superior",
       "musculos_principales": [
-        "braquial",
-        "braquiorradial"
+        "braquiorradial",
+        "braquial"
       ],
       "musculos_secundarios": [
-        "biceps_braquial",
-        "antebrazos"
+        "biceps_braquial"
       ],
       "descripcion": "Flexión de codos manteniendo las palmas enfrentadas (agarre neutro), desarrollando el músculo braquial anterior y los antebrazos.",
       "ejecucion_pasos": [
@@ -5354,7 +5382,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "flexores_muneca"
       ]
     },
     {
@@ -5368,10 +5397,11 @@
       "patron_movimiento": "flexion_de_codo",
       "zona": "superior",
       "musculos_principales": [
+        "braquial",
         "biceps_braquial"
       ],
       "musculos_secundarios": [
-        "braquial"
+        "braquiorradial"
       ],
       "descripcion": "Curl apoyando los brazos sobre un plano inclinado acolchado que impide cualquier tipo de trampa o inercia corporal.",
       "ejecucion_pasos": [
@@ -5417,7 +5447,9 @@
       "tipo_resistencia": "peso_libre",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "flexores_muneca"
+      ]
     },
     {
       "id": "curl-spider-en-banco",
@@ -5477,7 +5509,9 @@
       "tipo_resistencia": "peso_libre",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "deltoides_anterior"
+      ]
     },
     {
       "id": "curl-de-muneca-antebrazo",
@@ -5490,9 +5524,11 @@
       "patron_movimiento": "flexion_de_muneca",
       "zona": "superior",
       "musculos_principales": [
-        "antebrazos"
+        "flexores_muneca"
       ],
-      "musculos_secundarios": [],
+      "musculos_secundarios": [
+        "braquiorradial"
+      ],
       "descripcion": "Ejercicio de aislamiento para los flexores de muñeca y antebrazos apoyando los brazos sobre un banco.",
       "ejecucion_pasos": [
         "Arrodíllate frente a un banco y apoya los antebrazos sobre él dejando las muñecas colgando por el borde con palmas hacia arriba.",
@@ -5534,7 +5570,9 @@
       "tipo_resistencia": "peso_libre",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "biceps_braquial"
+      ]
     },
     {
       "id": "plancha-abdominal-frontal",
@@ -5553,8 +5591,7 @@
       ],
       "musculos_secundarios": [
         "oblicuo_externo",
-        "gluteo_mayor",
-        "deltoides_anterior"
+        "cuadriceps"
       ],
       "descripcion": "Mantenimiento isométrico del cuerpo en línea recta apoyado sobre los antebrazos y las puntas de los pies para resistir la extensión lumbar.",
       "ejecucion_pasos": [
@@ -5606,8 +5643,8 @@
       "objetivo": "resistencia",
       "estabilizadores": [
         "serrato_anterior",
-        "gluteo_mayor",
-        "cuadriceps"
+        "deltoides_anterior",
+        "gluteo_mayor"
       ]
     },
     {
@@ -5621,13 +5658,11 @@
       "zona": "core",
       "musculos_principales": [
         "oblicuo_externo",
-        "oblicuo_interno",
-        "gluteo_medio"
+        "cuadrado_lumbar"
       ],
       "musculos_secundarios": [
-        "recto_abdominal",
-        "transverso_abdominal",
-        "deltoides_lateral"
+        "oblicuo_interno",
+        "gluteo_medio"
       ],
       "descripcion": "Sostén isométrico apoyado de costado sobre un antebrazo para fortalecer los oblicuos y estabilizadores laterales de la cadera.",
       "ejecucion_pasos": [
@@ -5676,8 +5711,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "resistencia",
       "estabilizadores": [
-        "gluteo_medio",
-        "serrato_anterior"
+        "deltoides_anterior",
+        "serrato_anterior",
+        "tensor_fascia_lata"
       ]
     },
     {
@@ -5696,8 +5732,7 @@
       ],
       "musculos_secundarios": [
         "dorsal_ancho",
-        "deltoides_anterior",
-        "triceps_braquial"
+        "pectoral_mayor"
       ],
       "descripcion": "Intenso ejercicio de anti-extensión de columna rodando una rueda hacia adelante sobre las rodillas y retrayendo con la fuerza del core.",
       "ejecucion_pasos": [
@@ -5747,8 +5782,8 @@
       "demanda_estabilidad": "alta",
       "objetivo": "fuerza",
       "estabilizadores": [
-        "dorsal_ancho",
         "serrato_anterior",
+        "triceps_braquial",
         "gluteo_mayor"
       ]
     },
@@ -5768,7 +5803,7 @@
       ],
       "musculos_secundarios": [
         "iliopsoas",
-        "cuadriceps"
+        "oblicuo_externo"
       ],
       "descripcion": "Postura gimnástica fundamental donde se comprime la espalda baja contra el suelo manteniendo brazos y piernas suspendidos en el aire.",
       "ejecucion_pasos": [
@@ -5816,8 +5851,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "resistencia",
       "estabilizadores": [
-        "iliopsoas",
-        "cuadriceps"
+        "cuadriceps",
+        "aductor_mayor"
       ]
     },
     {
@@ -5831,13 +5866,12 @@
       "patron_movimiento": "flexion_de_cadera",
       "zona": "core",
       "musculos_principales": [
-        "recto_abdominal",
-        "iliopsoas"
+        "iliopsoas",
+        "recto_abdominal"
       ],
       "musculos_secundarios": [
         "oblicuo_externo",
-        "antebrazos",
-        "dorsal_ancho"
+        "tensor_fascia_lata"
       ],
       "descripcion": "Elevación de piernas suspendido de una barra de dominadas flexionando la cadera y enrollando la pelvis hacia el pecho.",
       "ejecucion_pasos": [
@@ -5886,7 +5920,8 @@
       "objetivo": "fuerza",
       "estabilizadores": [
         "dorsal_ancho",
-        "antebrazos"
+        "flexores_muneca",
+        "serrato_anterior"
       ]
     },
     {
@@ -5903,7 +5938,8 @@
         "recto_abdominal"
       ],
       "musculos_secundarios": [
-        "oblicuo_externo"
+        "oblicuo_externo",
+        "oblicuo_interno"
       ],
       "descripcion": "Flexión aislada de la columna torácica acercando las costillas hacia la pelvis despegando únicamente las escápulas del suelo.",
       "ejecucion_pasos": [
@@ -5949,7 +5985,9 @@
       "tipo_resistencia": "peso_corporal",
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
-      "estabilizadores": []
+      "estabilizadores": [
+        "transverso_abdominal"
+      ]
     },
     {
       "id": "crunch-en-polea-alta",
@@ -5965,7 +6003,8 @@
         "recto_abdominal"
       ],
       "musculos_secundarios": [
-        "oblicuo_externo"
+        "oblicuo_externo",
+        "oblicuo_interno"
       ],
       "descripcion": "Encogimiento de tronco de rodillas sujetando una cuerda conectada a la polea alta para permitir sobrecarga progresiva en los abdominales.",
       "ejecucion_pasos": [
@@ -6010,7 +6049,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "hipertrofia",
       "estabilizadores": [
-        "serrato_anterior"
+        "dorsal_ancho",
+        "flexores_muneca"
       ]
     },
     {
@@ -6027,7 +6067,7 @@
         "recto_abdominal"
       ],
       "musculos_secundarios": [
-        "oblicuo_interno",
+        "oblicuo_externo",
         "iliopsoas"
       ],
       "descripcion": "Ejercicio de control motor y disociación lumbo-pélvica extendiendo alternadamente brazo y pierna opuesta sin despegar la zona lumbar.",
@@ -6076,8 +6116,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "transverso_abdominal",
-        "oblicuo_interno"
+        "multifidos",
+        "suelo_pelvico"
       ]
     },
     {
@@ -6091,12 +6131,12 @@
       "patron_movimiento": "anti_rotacion",
       "zona": "core",
       "musculos_principales": [
-        "erectores_espinales",
-        "gluteo_mayor"
+        "gluteo_mayor",
+        "erectores_espinales"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "transverso_abdominal"
+        "deltoides_posterior",
+        "isquiotibiales"
       ],
       "descripcion": "Ejercicio en cuatro puntos de apoyo extendiendo un brazo y la pierna contralateral para entrenar la estabilidad de la columna y cadena posterior.",
       "ejecucion_pasos": [
@@ -6144,9 +6184,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "erectores_espinales",
-        "gluteo_medio",
-        "transverso_abdominal"
+        "recto_abdominal",
+        "oblicuo_externo",
+        "serrato_anterior"
       ]
     },
     {
@@ -6160,13 +6200,11 @@
       "zona": "core",
       "musculos_principales": [
         "oblicuo_externo",
-        "oblicuo_interno",
         "transverso_abdominal"
       ],
       "musculos_secundarios": [
-        "recto_abdominal",
-        "deltoides_anterior",
-        "gluteo_medio"
+        "oblicuo_interno",
+        "recto_abdominal"
       ],
       "descripcion": "Ejercicio de anti-rotación donde se extiende los brazos al frente resistiendo la fuerza lateral que ejerce una polea o banda elástica.",
       "ejecucion_pasos": [
@@ -6216,7 +6254,8 @@
       "objetivo": "salud_articular",
       "estabilizadores": [
         "gluteo_medio",
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "cuadrado_lumbar"
       ]
     },
     {
@@ -6282,8 +6321,8 @@
       "demanda_estabilidad": "media",
       "objetivo": "resistencia",
       "estabilizadores": [
-        "iliopsoas",
-        "recto_abdominal"
+        "transverso_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -6299,13 +6338,14 @@
       "musculos_principales": [
         "gluteo_mayor",
         "isquiotibiales",
-        "trapecio"
+        "cuadriceps",
+        "trapecio_superior"
       ],
       "musculos_secundarios": [
-        "cuadriceps",
-        "deltoides_lateral",
-        "erectores_espinales",
-        "gemelos"
+        "soleo",
+        "gastrocnemio",
+        "deltoides_anterior",
+        "braquial"
       ],
       "descripcion": "Levantamiento explosivo donde se acelera una barra desde el suelo recibiéndola sobre los hombros en posición de sentadilla parcial.",
       "ejecucion_pasos": [
@@ -6363,8 +6403,9 @@
       "objetivo": "potencia",
       "estabilizadores": [
         "erectores_espinales",
-        "trapecio",
-        "recto_abdominal"
+        "recto_abdominal",
+        "transverso_abdominal",
+        "flexores_muneca"
       ]
     },
     {
@@ -6379,13 +6420,13 @@
       "musculos_principales": [
         "gluteo_mayor",
         "cuadriceps",
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "triceps_braquial"
       ],
       "musculos_secundarios": [
-        "recto_abdominal",
-        "erectores_espinales",
         "isquiotibiales",
-        "antebrazos"
+        "trapecio_superior",
+        "soleo"
       ],
       "descripcion": "Levantamiento clásico olímpico compuesto por una cargada al pecho seguida de un envión sobre la cabeza en tijera o flexión.",
       "ejecucion_pasos": [
@@ -6442,8 +6483,8 @@
       "estabilizadores": [
         "erectores_espinales",
         "recto_abdominal",
-        "trapecio",
-        "gluteo_medio"
+        "transverso_abdominal",
+        "manguito_rotador"
       ]
     },
     {
@@ -6458,13 +6499,14 @@
       "zona": "cuerpo_completo",
       "musculos_principales": [
         "gluteo_mayor",
+        "cuadriceps",
         "isquiotibiales",
-        "trapecio"
+        "trapecio_superior"
       ],
       "musculos_secundarios": [
         "deltoides_anterior",
-        "cuadriceps",
-        "erectores_espinales"
+        "soleo",
+        "triceps_braquial"
       ],
       "descripcion": "El levantamiento más rápido y dinámico del atletismo de fuerza, elevando la barra desde el suelo hasta encima de la cabeza en un solo movimiento continuo.",
       "ejecucion_pasos": [
@@ -6520,8 +6562,8 @@
       "estabilizadores": [
         "erectores_espinales",
         "recto_abdominal",
-        "trapecio",
-        "manguito_rotador"
+        "manguito_rotador",
+        "serrato_anterior"
       ]
     },
     {
@@ -6539,7 +6581,8 @@
         "gluteo_mayor"
       ],
       "musculos_secundarios": [
-        "gemelos",
+        "gastrocnemio",
+        "soleo",
         "isquiotibiales"
       ],
       "descripcion": "Salto vertical explosivo con despegue bipodal aterrizando suavemente sobre una caja o plataforma elevada.",
@@ -6590,7 +6633,8 @@
       "objetivo": "potencia",
       "estabilizadores": [
         "recto_abdominal",
-        "erectores_espinales"
+        "erectores_espinales",
+        "tibial_anterior"
       ]
     },
     {
@@ -6604,13 +6648,12 @@
       "patron_movimiento": "potencia",
       "zona": "cuerpo_completo",
       "musculos_principales": [
-        "dorsal_ancho",
-        "recto_abdominal"
+        "recto_abdominal",
+        "dorsal_ancho"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "gluteo_mayor",
-        "triceps_braquial"
+        "triceps_braquial",
+        "pectoral_mayor"
       ],
       "descripcion": "Lanzamiento potente de un balón medicinal sin rebote contra el piso desde una extensión completa sobre la cabeza.",
       "ejecucion_pasos": [
@@ -6658,8 +6701,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "potencia",
       "estabilizadores": [
-        "recto_abdominal",
-        "dorsal_ancho"
+        "cuadriceps",
+        "gluteo_mayor",
+        "erectores_espinales"
       ]
     },
     {
@@ -6673,14 +6717,13 @@
       "patron_movimiento": "locomocion",
       "zona": "cuerpo_completo",
       "musculos_principales": [
-        "trapecio",
-        "antebrazos"
+        "trapecio_superior",
+        "flexores_muneca"
       ],
       "musculos_secundarios": [
-        "recto_abdominal",
-        "oblicuo_externo",
-        "gluteo_medio",
-        "cuadriceps"
+        "cuadriceps",
+        "gluteo_mayor",
+        "gastrocnemio"
       ],
       "descripcion": "Transporte de cargas pesadas caminando erguido con una mancuerna, pesa rusa o barra en cada mano.",
       "ejecucion_pasos": [
@@ -6732,9 +6775,9 @@
       "demanda_estabilidad": "alta",
       "objetivo": "fuerza",
       "estabilizadores": [
-        "trapecio",
+        "cuadrado_lumbar",
+        "gluteo_medio",
         "recto_abdominal",
-        "oblicuo_externo",
         "erectores_espinales"
       ]
     },
@@ -6751,12 +6794,12 @@
       "musculos_principales": [
         "cuadriceps",
         "gluteo_mayor",
-        "gemelos"
+        "gastrocnemio"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
-        "recto_abdominal",
-        "triceps_braquial"
+        "soleo",
+        "isquiotibiales",
+        "pectoral_mayor"
       ],
       "descripcion": "Empuje hacia adelante de un trineo cargado con discos sobre césped artificial o pista, generando alta demanda metabólica sin impacto excéntrico.",
       "ejecucion_pasos": [
@@ -6807,8 +6850,8 @@
       "objetivo": "acondicionamiento",
       "estabilizadores": [
         "recto_abdominal",
-        "pantorrillas",
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "erectores_espinales"
       ]
     },
     {
@@ -6822,14 +6865,14 @@
       "patron_movimiento": "locomocion",
       "zona": "cuerpo_completo",
       "musculos_principales": [
-        "pectoral_mayor",
-        "cuadriceps"
+        "cuadriceps",
+        "gluteo_mayor",
+        "pectoral_mayor"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
         "triceps_braquial",
-        "gluteo_mayor",
-        "gemelos"
+        "deltoides_anterior",
+        "gastrocnemio"
       ],
       "descripcion": "Ejercicio cardiovascular integral combinando sentadilla, apoyo de manos, flexión al suelo, recogida de piernas y salto vertical.",
       "ejecucion_pasos": [
@@ -6895,13 +6938,12 @@
       "patron_movimiento": "flexion_de_cadera",
       "zona": "core",
       "musculos_principales": [
-        "recto_abdominal",
-        "iliopsoas"
+        "iliopsoas",
+        "recto_abdominal"
       ],
       "musculos_secundarios": [
-        "deltoides_anterior",
         "cuadriceps",
-        "gemelos"
+        "oblicuo_externo"
       ],
       "descripcion": "Desde posición de plancha alta, se llevan alternadamente las rodillas al pecho en un ritmo rápido y continuo.",
       "ejecucion_pasos": [
@@ -6949,9 +6991,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "acondicionamiento",
       "estabilizadores": [
-        "recto_abdominal",
         "deltoides_anterior",
-        "serrato_anterior"
+        "serrato_anterior",
+        "transverso_abdominal"
       ]
     },
     {
@@ -6966,13 +7008,13 @@
       "zona": "cuerpo_completo",
       "musculos_principales": [
         "deltoides_anterior",
-        "recto_abdominal",
-        "gluteo_mayor"
+        "gluteo_mayor",
+        "recto_abdominal"
       ],
       "musculos_secundarios": [
-        "manguito_rotador",
-        "triceps_braquial",
-        "oblicuo_externo"
+        "cuadriceps",
+        "oblicuo_externo",
+        "triceps_braquial"
       ],
       "descripcion": "Secuencia fluida de movimientos para levantarse desde el suelo hasta quedar de pie sosteniendo una pesa fija sobre la cabeza en todo momento.",
       "ejecucion_pasos": [
@@ -7027,9 +7069,9 @@
       "objetivo": "salud_articular",
       "estabilizadores": [
         "manguito_rotador",
-        "recto_abdominal",
-        "oblicuo_externo",
-        "gluteo_medio"
+        "gluteo_medio",
+        "serrato_anterior",
+        "cuadrado_lumbar"
       ]
     },
     {
@@ -7043,13 +7085,12 @@
       "patron_movimiento": "locomocion",
       "zona": "inferior",
       "musculos_principales": [
-        "gemelos",
+        "gastrocnemio",
         "soleo"
       ],
       "musculos_secundarios": [
         "cuadriceps",
-        "deltoides_lateral",
-        "antebrazos"
+        "tibial_anterior"
       ],
       "descripcion": "Salto continuo sobre una cuerda giratoria impulsada por las muñecas, excelente para coordinación, acondicionamiento y reactividad de tobillos.",
       "ejecucion_pasos": [
@@ -7097,8 +7138,7 @@
       "objetivo": "acondicionamiento",
       "estabilizadores": [
         "recto_abdominal",
-        "soleo",
-        "gemelos"
+        "flexores_muneca"
       ]
     },
     {
@@ -7112,12 +7152,13 @@
       "patron_movimiento": "locomocion",
       "zona": "cuerpo_completo",
       "musculos_principales": [
-        "gemelos",
+        "gastrocnemio",
         "deltoides_lateral"
       ],
       "musculos_secundarios": [
+        "gluteo_medio",
         "cuadriceps",
-        "gluteo_medio"
+        "soleo"
       ],
       "descripcion": "Salto rítmico abriendo simultáneamente piernas y brazos por encima de la cabeza y volviendo a la posición cerrada.",
       "ejecucion_pasos": [
@@ -7165,7 +7206,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "acondicionamiento",
       "estabilizadores": [
-        "recto_abdominal"
+        "recto_abdominal",
+        "tibial_anterior"
       ]
     },
     {
@@ -7184,10 +7226,9 @@
         "dorsal_ancho"
       ],
       "musculos_secundarios": [
-        "biceps_braquial",
         "isquiotibiales",
-        "erectores_espinales",
-        "deltoides_posterior"
+        "biceps_braquial",
+        "romboides"
       ],
       "descripcion": "Acondicionamiento cardiovascular integral sentado que reproduce la mecánica del remo en agua integrando empuje de piernas y tracción de brazos.",
       "ejecucion_pasos": [
@@ -7239,7 +7280,8 @@
       "objetivo": "acondicionamiento",
       "estabilizadores": [
         "erectores_espinales",
-        "recto_abdominal"
+        "recto_abdominal",
+        "flexores_muneca"
       ]
     },
     {
@@ -7253,14 +7295,14 @@
       "patron_movimiento": "locomocion",
       "zona": "inferior",
       "musculos_principales": [
+        "gluteo_mayor",
         "cuadriceps",
-        "gemelos",
-        "gluteo_mayor"
+        "gastrocnemio"
       ],
       "musculos_secundarios": [
         "isquiotibiales",
         "soleo",
-        "recto_abdominal"
+        "iliopsoas"
       ],
       "descripcion": "Locomoción cardiovascular continua corriendo sobre una cinta rodante motorizada con velocidad e inclinación regulable.",
       "ejecucion_pasos": [
@@ -7308,8 +7350,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "acondicionamiento",
       "estabilizadores": [
+        "gluteo_medio",
         "recto_abdominal",
-        "gluteo_medio"
+        "erectores_espinales"
       ]
     },
     {
@@ -7323,11 +7366,12 @@
       "patron_movimiento": "movilidad",
       "zona": "core",
       "musculos_principales": [
-        "erectores_espinales",
-        "recto_abdominal"
+        "recto_abdominal",
+        "erectores_espinales"
       ],
       "musculos_secundarios": [
-        "trapecio"
+        "multifidos",
+        "oblicuo_externo"
       ],
       "descripcion": "Ejercicio suave de movilidad de columna alternando flexión y extensión vertebral en posición de cuatro apoyos.",
       "ejecucion_pasos": [
@@ -7375,7 +7419,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "transverso_abdominal"
+        "serrato_anterior",
+        "deltoides_anterior"
       ]
     },
     {
@@ -7389,11 +7434,12 @@
       "patron_movimiento": "movilidad",
       "zona": "inferior",
       "musculos_principales": [
-        "gluteo_medio",
-        "aductor_mayor"
+        "rotadores_cadera_profundos",
+        "gluteo_medio"
       ],
       "musculos_secundarios": [
         "gluteo_mayor",
+        "tensor_fascia_lata",
         "iliopsoas"
       ],
       "descripcion": "Ejercicio sentado para mejorar simultáneamente la rotación interna y externa de la cadera.",
@@ -7440,8 +7486,8 @@
       "demanda_estabilidad": "baja",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "gluteo_medio",
-        "oblicuo_interno"
+        "recto_abdominal",
+        "erectores_espinales"
       ]
     },
     {
@@ -7455,13 +7501,12 @@
       "patron_movimiento": "movilidad",
       "zona": "cuerpo_completo",
       "musculos_principales": [
-        "isquiotibiales",
-        "gemelos"
+        "serrato_anterior",
+        "deltoides_anterior"
       ],
       "musculos_secundarios": [
-        "dorsal_ancho",
-        "deltoides_anterior",
-        "soleo"
+        "trapecio_superior",
+        "triceps_braquial"
       ],
       "descripcion": "Postura clásica de estiramiento y movilidad donde el cuerpo forma una V invertida elongando la cadena posterior y hombros.",
       "ejecucion_pasos": [
@@ -7511,8 +7556,9 @@
       "demanda_estabilidad": "media",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "serrato_anterior",
-        "recto_abdominal"
+        "recto_abdominal",
+        "tibial_anterior",
+        "cuadriceps"
       ]
     },
     {
@@ -7526,12 +7572,12 @@
       "patron_movimiento": "movilidad",
       "zona": "superior",
       "musculos_principales": [
-        "pectoral_mayor",
-        "deltoides_anterior"
+        "deltoides_anterior",
+        "pectoral_mayor"
       ],
       "musculos_secundarios": [
-        "manguito_rotador",
-        "trapecio"
+        "deltoides_posterior",
+        "trapecio_superior"
       ],
       "descripcion": "Rotación completa de hombros pasando una banda elástica o pica desde delante de las caderas hasta detrás de la espalda con brazos extendidos.",
       "ejecucion_pasos": [
@@ -7577,9 +7623,11 @@
       "demanda_estabilidad": "baja",
       "objetivo": "salud_articular",
       "estabilizadores": [
-        "trapecio",
-        "romboides"
+        "manguito_rotador",
+        "romboides",
+        "recto_abdominal"
       ]
     }
-  ]
+  ],
+  "ultima_actualizacion": "2026-09-23"
 }

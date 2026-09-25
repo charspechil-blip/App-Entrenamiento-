@@ -15,6 +15,18 @@ import path from 'path';
 
 const CANONICAL_SRC_PATH = path.resolve('src', 'data', 'ejercicios.json');
 const DERIVED_PUBLIC_PATH = path.resolve('public', 'ejercicios.json');
+const MUSCLES_SRC_PATH = path.resolve('src', 'data', 'muscles.json');
+
+// Cargar catálogo de músculos canónicos si existe
+let canonicalMuscleIds = new Set();
+if (fs.existsSync(MUSCLES_SRC_PATH)) {
+  try {
+    const musclesDoc = JSON.parse(fs.readFileSync(MUSCLES_SRC_PATH, 'utf-8'));
+    canonicalMuscleIds = new Set((musclesDoc.musculos || []).map(m => m.id));
+  } catch (e) {
+    // Ignorar si falla parseo preliminar
+  }
+}
 
 const REQUIRED_FIELDS = [
   'id',
@@ -61,8 +73,8 @@ export function validateCatalog() {
   }
 
   // 2. Metadatos del catálogo
-  const VALID_VERSIONS = ['1.1.0', '1.2.0'];
-  const VALID_SCHEMAS = ['1.1', '1.2'];
+  const VALID_VERSIONS = ['1.1.0', '1.2.0', '1.3.0'];
+  const VALID_SCHEMAS = ['1.1', '1.2', '1.3'];
   if (!VALID_VERSIONS.includes(catalog.version)) {
     warnings.push(`Versión del catálogo es "${catalog.version}", se esperaba una de: ${VALID_VERSIONS.join(', ')}`);
   }
@@ -206,10 +218,61 @@ export function validateCatalog() {
       errors.push(`${pos}: "tipo_resistencia" inválida "${ex.tipo_resistencia}".`);
     }
 
-    // Verificar que no haya "core" genérico como músculo en secundarios
-    if (ex.musculos_secundarios && ex.musculos_secundarios.includes('core')) {
-      warnings.push(`${pos}: "core" no debe usarse como músculo anatómico en musculos_secundarios.`);
+    // 5B. Validación de Taxonomía Muscular (6A/6B/6C)
+    const PROHIBITED_TOKENS = ['core', 'gemelos', 'pantorrillas', 'antebrazos', 'pecho', 'abdominales', 'lumbares'];
+
+    const validateMuscleList = (list, fieldName, minCount, maxCount) => {
+      if (!Array.isArray(list)) {
+        errors.push(`${pos}: "${fieldName}" debe ser un array.`);
+        return;
+      }
+      if (list.length < minCount) {
+        errors.push(`${pos}: "${fieldName}" debe contener al menos ${minCount} músculo(s).`);
+      }
+      if (list.length > maxCount) {
+        errors.push(`${pos}: "${fieldName}" excede el máximo permitido de ${maxCount} (tiene ${list.length}).`);
+      }
+      list.forEach(mId => {
+        if (typeof mId !== 'string') {
+          errors.push(`${pos}: Token no string en "${fieldName}".`);
+          return;
+        }
+        if (PROHIBITED_TOKENS.includes(mId)) {
+          errors.push(`${pos}: Token prohibido "${mId}" en "${fieldName}". Use identificadores canónicos anatómicos.`);
+        }
+        if (mId.endsWith('_derecho') || mId.endsWith('_izquierdo')) {
+          errors.push(`${pos}: Token con lateralidad indebida "${mId}" en "${fieldName}". La lateralidad no pertenece al catálogo.`);
+        }
+        if (canonicalMuscleIds.size > 0 && !canonicalMuscleIds.has(mId)) {
+          errors.push(`${pos}: Músculo desconocido "${mId}" en "${fieldName}" (no existe en muscles.json).`);
+        }
+      });
+    };
+
+    validateMuscleList(ex.musculos_principales, 'musculos_principales', 1, 4);
+    validateMuscleList(ex.musculos_secundarios, 'musculos_secundarios', 0, 6);
+    if (ex.estabilizadores) {
+      validateMuscleList(ex.estabilizadores, 'estabilizadores', 1, 5);
     }
+
+    // Verificar que no haya duplicados entre principales, secundarios y estabilizadores
+    const pSet = new Set(ex.musculos_principales || []);
+    const sSet = new Set(ex.musculos_secundarios || []);
+    const eSet = new Set(ex.estabilizadores || []);
+
+    (ex.musculos_secundarios || []).forEach(m => {
+      if (pSet.has(m)) {
+        errors.push(`${pos}: Músculo "${m}" duplicado en principales y secundarios.`);
+      }
+    });
+    (ex.estabilizadores || []).forEach(m => {
+      if (pSet.has(m)) {
+        errors.push(`${pos}: Músculo "${m}" duplicado en principales y estabilizadores.`);
+      }
+      if (sSet.has(m)) {
+        errors.push(`${pos}: Músculo "${m}" duplicado en secundarios y estabilizadores.`);
+      }
+    });
 
     // 6. Relaciones: Variantes, Ejercicios Relacionados y Sustitutos
     if (ex.variantes) {
