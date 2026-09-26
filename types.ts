@@ -1,3 +1,18 @@
+/**
+ * Identificador canónico único del ejercicio en el catálogo maestro o en ejercicios personalizados.
+ * Formato estándar: kebab-case (ej. 'sentadilla', 'press-banca-plano-barra', 'curl-biceps-barra').
+ * Single Source of Truth para la identidad en toda la aplicación.
+ */
+export type ExerciseId = string;
+
+/**
+ * Referencia canónica dual: identidad (id) y representación visible (nombre).
+ */
+export interface ExerciseRef {
+  id: ExerciseId;
+  nombre: string;
+}
+
 export type ExerciseName = 
   // Calistenia
   'Flexión / Inver' | 'Dominadas' | 'Fondos en paralelas' | 'Pike Push-ups' | 'Remo invertido' | 'Muscle-ups (si aplica)' | 'Flexiones diamante' | 'Flexiones arqueras' | 'Face pull con anillas' | 'L-Sit' |
@@ -24,7 +39,8 @@ export interface UserRoutine {
   type: RoutineType;
   focus: RoutineFocus;
   zones?: string[];
-  exercises: ExerciseName[];
+  exercises: (ExerciseId | ExerciseName)[];
+  exerciseIds?: ExerciseId[];
   equipment?: string[];
 }
 
@@ -38,6 +54,7 @@ export interface Cluster {
 export interface ExerciseLog {
   id: string;
   timestamp: string;
+  exerciseId?: ExerciseId;
   exerciseName: ExerciseName;
   clusters: Cluster[];
   heartRate?: number;
@@ -71,7 +88,7 @@ export interface ExerciseGoal {
   };
 }
 
-export type Goals = Partial<Record<ExerciseName, ExerciseGoal>>;
+export type Goals = Partial<Record<ExerciseId | ExerciseName, ExerciseGoal>>;
 
 export interface UserProfile {
   id: string;
@@ -80,7 +97,7 @@ export interface UserProfile {
   weight: number;
   height: number;
   restingHeartRate?: number;
-  favoriteExercises?: ExerciseName[];
+  favoriteExercises?: (ExerciseId | ExerciseName)[];
   availableEquipment?: string[];
 }
 
@@ -103,7 +120,8 @@ export interface SavedRoutine {
     id: string;
     profileId: string;
     name: string;
-    exercises: ExerciseName[];
+    exercises: (ExerciseId | ExerciseName)[];
+    exerciseIds?: ExerciseId[];
     goals: Goals;
     restSettings: RestSettings;
     trainingType: TrainingType;

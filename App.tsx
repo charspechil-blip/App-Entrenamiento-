@@ -10,6 +10,7 @@ import { PREDEFINED_EXERCISES } from './constants/exercises';
 import { SaveRoutineModal } from './components/SaveRoutineModal';
 import { generateUUID } from './utils/uuid';
 import { safeStorage } from './utils/storage';
+import { resolveExerciseId } from './services/exerciseCatalog';
 
 // Custom hook declared at module level for stable React hook rules
 const useDebouncedSave = (key: string, value: any, profileId: string | null, enabled: boolean) => {
@@ -421,7 +422,8 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             name: routineName,
             type: routine, 
             focus, 
-            exercises: finalExercises, 
+            exercises: finalExercises,
+            exerciseIds: finalExercises.map(ex => resolveExerciseId(ex)),
             equipment 
         };
 
@@ -551,6 +553,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                 const updated = [...prev];
                 updated[existingIdx] = {
                     ...updated[existingIdx],
+                    exerciseId: updated[existingIdx].exerciseId || resolveExerciseId(exerciseName),
                     clusters,
                     notes: notes !== undefined ? notes : updated[existingIdx].notes,
                     heartRate: heartRate !== undefined ? heartRate : updated[existingIdx].heartRate,
@@ -563,6 +566,7 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             } else {
                 const newLog: ExerciseLog = {
                     id: generateUUID(),
+                    exerciseId: resolveExerciseId(exerciseName),
                     exerciseName,
                     timestamp: new Date().toISOString(),
                     clusters,

@@ -1,31 +1,176 @@
-import type { ExerciseName, RoutineFocus, RoutineType } from '../types';
+import type { ExerciseName, RoutineFocus, RoutineType, ExerciseId } from '../types';
+import { 
+  getOfficialExercises, 
+  getAllCatalogExercises, 
+  findExerciseById, 
+  findExerciseByName,
+  resolveExerciseName 
+} from '../services/exerciseCatalog';
 
-export const PREDEFINED_EXERCISES: Record<RoutineType, Partial<Record<RoutineFocus, ExerciseName[]>>> = {
-    Calistenia: {
-        'Tren Superior': ['Flexión / Inver', 'Dominadas', 'Fondos en paralelas', 'Pike Push-ups', 'Remo invertido', 'Muscle-ups (si aplica)', 'Flexiones diamante', 'Flexiones arqueras', 'Face pull con anillas', 'Fondos en banco'],
-        'Tren Inferior': ['Sentadilla', 'Zancadas', 'Sentadilla búlgara', 'Elevación de talones', 'Puente de glúteos', 'Sentadilla pistola (si aplica)', 'Nordic curls (si aplica)', 'Saltos al cajón', 'Sentadilla isométrica (wall sit)'],
-        'Core': ['Plancha', 'Elevación de piernas colgado', 'Dragon Flag (si aplica)', 'Abdominales en V (V-ups)', 'Plancha lateral', 'Hollow body hold', 'Giros rusos', 'Mountain climbers', 'Toes-to-bar', 'L-Sit'],
-        'Mixto': ['Burpees', 'Flexión / Inver', 'Sentadilla', 'Plancha', 'Dominadas', 'Zancadas'],
-    },
-    Gym: {
-        'Tren Superior': ['Press de banca', 'Remo / Inclina', 'Press militar', 'Elev / Lat', 'Curl / Biceps', 'Press francés', 'Jalón al pecho (pulldown)', 'Aperturas con mancuernas', 'Face pull con polea', 'Encogimientos de hombros', 'Extensiones de tríceps en polea'],
-        'Tren Inferior': ['Sentadilla', 'Peso muerto', 'Prensa de piernas', 'Extensiones de cuádriceps', 'Curl femoral', 'Zancadas con mancuernas', 'Hip thrust', 'Elevación de talones', 'Abductores en máquina', 'Aductores en máquina'],
-        'Core': ['Elevación de piernas en silla romana', 'Crunch en polea alta', 'Giros rusos con disco', 'Leñador (woodchopper) en polea', 'Ab wheel', 'Hiperextensiones', 'Plancha con peso'],
-        'Mixto': ['Clean and Jerk', 'Snatch', 'Thrusters', 'Paseo del granjero', 'Press de banca', 'Peso muerto'],
-    },
-    Personalizado: {
-        'Tren Superior': [],
-        'Tren Inferior': [],
-        'Core': [],
-        'Mixto': [],
-    }
+// Re-exportar utilidades canónicas del SSOT para centralización
+export { 
+  getOfficialExercises, 
+  getAllCatalogExercises, 
+  findExerciseById, 
+  findExerciseByName 
 };
 
-export const BODYWEIGHT_EXERCISES: ExerciseName[] = [
-  'Flexión / Inver', 'Dominadas', 'Fondos en paralelas', 'Pike Push-ups', 'Remo invertido', 'Muscle-ups (si aplica)', 'Flexiones diamante', 'Flexiones arqueras', 'Face pull con anillas', 'L-Sit',
-  'Sentadilla', 'Zancadas', 'Sentadilla búlgara', 'Elevación de talones', 'Puente de glúteos', 'Sentadilla pistola (si aplica)', 'Nordic curls (si aplica)', 'Saltos al cajón', 'Sentadilla isométrica (wall sit)',
-  'Plancha', 'Elevación de piernas colgado', 'Dragon Flag (si aplica)', 'Abdominales en V (V-ups)', 'Plancha lateral', 'Hollow body hold', 'Giros rusos', 'Mountain climbers', 'Toes-to-bar',
-  'Burpees', 'Elevación de rodillas', 'Saltos de tijera', 'Fondos en banco',
+/**
+ * Plantillas predefinidas canónicas por rutina y enfoque,
+ * referenciadas exclusivamente por su ExerciseId canónico del SSOT (src/data/ejercicios.json).
+ */
+export const PREDEFINED_ROUTINE_EXERCISE_IDS: Record<RoutineType, Partial<Record<RoutineFocus, ExerciseId[]>>> = {
+  Calistenia: {
+    'Tren Superior': [
+      'flexiones-de-brazos',
+      'dominadas-pronadas',
+      'fondos-en-paralelas',
+      'pike-push-ups',
+      'remo-invertido',
+      'muscle-up',
+      'flexiones-diamante',
+      'flexiones-arqueras',
+      'remo-en-anillas',
+      'fondos-en-banco'
+    ],
+    'Tren Inferior': [
+      'sentadilla-aerea',
+      'zancadas-estaticas',
+      'sentadilla-bulgara',
+      'elevacion-talones-de-pie',
+      'puente-de-gluteos',
+      'sentadilla-pistola',
+      'curl-nordico',
+      'salto-al-cajon',
+      'sentadilla-isometrica-pared'
+    ],
+    'Core': [
+      'plancha-abdominal-frontal',
+      'elevacion-piernas-colgado',
+      'hollow-body-hold',
+      'crunch-abdominal-suelo',
+      'plancha-lateral',
+      'giros-rusos',
+      'mountain-climbers'
+    ],
+    'Mixto': [
+      'burpees',
+      'flexiones-de-brazos',
+      'sentadilla-aerea',
+      'plancha-abdominal-frontal',
+      'dominadas-pronadas',
+      'zancadas-estaticas'
+    ],
+  },
+  Gym: {
+    'Tren Superior': [
+      'press-banca-plano-barra',
+      'remo-con-barra-inclinado',
+      'press-militar-barra',
+      'elevaciones-laterales-mancuernas',
+      'curl-biceps-barra',
+      'press-frances-barra-z',
+      'jalon-al-pecho-polea',
+      'aperturas-mancuernas-plano',
+      'face-pull-polea',
+      'extension-triceps-polea-alta'
+    ],
+    'Tren Inferior': [
+      'sentadilla',
+      'peso-muerto-convencional',
+      'prensa-de-piernas',
+      'extension-cuadriceps-maquina',
+      'curl-femoral-tumbado',
+      'zancadas-caminando',
+      'hip-thrust-barra',
+      'elevacion-talones-de-pie'
+    ],
+    'Core': [
+      'elevacion-piernas-colgado',
+      'crunch-en-polea-alta',
+      'giros-rusos',
+      'press-pallof',
+      'rueda-abdominal',
+      'buenos-dias',
+      'plancha-abdominal-frontal'
+    ],
+    'Mixto': [
+      'dos-tiempos-clean-and-jerk',
+      'arrancada-snatch',
+      'push-press',
+      'paseo-del-granjero',
+      'press-banca-plano-barra',
+      'peso-muerto-convencional'
+    ],
+  },
+  Personalizado: {
+    'Tren Superior': [],
+    'Tren Inferior': [],
+    'Core': [],
+    'Mixto': [],
+  }
+};
+
+/**
+ * Genera dinámicamente el diccionario de nombres de ejercicios predefinidos
+ * proyectando los identificadores canónicos de PREDEFINED_ROUTINE_EXERCISE_IDS
+ * a través de resolveExerciseName(id) del catálogo maestro.
+ */
+export function getPredefinedExercises(): Record<RoutineType, Partial<Record<RoutineFocus, ExerciseName[]>>> {
+  const result: any = {
+    Calistenia: {},
+    Gym: {},
+    Personalizado: {
+      'Tren Superior': [],
+      'Tren Inferior': [],
+      'Core': [],
+      'Mixto': [],
+    }
+  };
+
+  for (const [rType, focuses] of Object.entries(PREDEFINED_ROUTINE_EXERCISE_IDS)) {
+    result[rType] = {};
+    for (const [focus, idList] of Object.entries(focuses)) {
+      result[rType][focus] = (idList as string[]).map(id => resolveExerciseName(id) as ExerciseName);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Estructura de compatibilidad para componentes existentes.
+ * Se deriva dinámicamente del catálogo oficial y no contiene datos hardcodeados independientes.
+ */
+export const PREDEFINED_EXERCISES: Record<RoutineType, Partial<Record<RoutineFocus, ExerciseName[]>>> = getPredefinedExercises();
+
+/**
+ * Lista dinámica de ejercicios de peso corporal / calistenia derivados del catálogo maestro
+ */
+export function getBodyweightExercises(): ExerciseName[] {
+  const official = getAllCatalogExercises();
+  const names = new Set<string>();
+  
+  official.forEach(ex => {
+    if (ex.sin_equipamiento_posible || (ex.equipamiento && ex.equipamiento.includes('peso_corporal'))) {
+      names.add(ex.nombre);
+    }
+  });
+
+  return Array.from(names) as ExerciseName[];
+}
+
+export const BODYWEIGHT_EXERCISES: ExerciseName[] = getBodyweightExercises();
+
+/**
+ * Constante pura de comportamiento/UI: Ejercicios medidos por tiempo en lugar de repeticiones
+ */
+export const TIME_BASED_EXERCISES: ExerciseName[] = [
+  'Plancha',
+  'Plancha abdominal frontal',
+  'Plancha lateral',
+  'Sentadilla isométrica en pared',
+  'Sentadilla isométrica (wall sit)',
+  'Hollow body hold'
 ];
 
-export const TIME_BASED_EXERCISES: ExerciseName[] = ['Plancha'];

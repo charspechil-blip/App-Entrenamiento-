@@ -1,17 +1,30 @@
 import type { ExerciseName, ExerciseGoal, TrainingType } from '../types';
 import { TIME_BASED_EXERCISES, BODYWEIGHT_EXERCISES } from '../constants/exercises';
+import { findExerciseById, findExerciseByName } from '../services/exerciseCatalog';
 
 /**
  * Checks if an exercise is time-based (e.g., Plank).
  */
 export const isTimeBased = (exerciseName: ExerciseName): boolean => {
-    return TIME_BASED_EXERCISES.includes(exerciseName);
+    if (!exerciseName) return false;
+    if (TIME_BASED_EXERCISES.includes(exerciseName)) return true;
+    const normalized = exerciseName.toLowerCase();
+    return normalized.includes('plancha') || 
+           normalized.includes('isométrica') || 
+           normalized.includes('isometrica') || 
+           normalized.includes('hollow body');
 };
 
 /**
  * Checks if an exercise is typically performed with bodyweight.
+ * Queries canonical catalog metadata directly.
  */
 export const isBodyweight = (exerciseName: ExerciseName): boolean => {
+    if (!exerciseName) return false;
+    const ex = findExerciseById(exerciseName) || findExerciseByName(exerciseName);
+    if (ex) {
+        return Boolean(ex.sin_equipamiento_posible || (ex.equipamiento && ex.equipamiento.includes('peso_corporal')));
+    }
     return BODYWEIGHT_EXERCISES.includes(exerciseName);
 };
 

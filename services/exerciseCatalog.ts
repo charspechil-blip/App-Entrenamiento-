@@ -33,6 +33,7 @@
 
 import masterData from '../src/data/ejercicios.json';
 import type { MuscleGroup } from '../constants/muscles';
+import type { ExerciseId, ExerciseRef } from '../types';
 
 // =====================================================================
 // 1. ESQUEMA DE DATOS
@@ -485,11 +486,13 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
   // 2. Cargar Ejercicios Personalizados del Usuario (almacenamiento aislado de cliente)
   let rawCustomList: any[] = [];
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        rawCustomList = parsed;
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          rawCustomList = parsed;
+        }
       }
     }
   } catch (e) {
@@ -532,6 +535,92 @@ export const initializeExerciseCatalog = (): CatalogExercise[] => {
 };
 
 /**
+ * MAPA DE COMPATIBILIDAD HISTÓRICA / LEGACY
+ * Relaciona nombres cortos o desactualizados utilizados en versiones previas de la aplicación
+ * con el identificador canónico ExerciseId oficial de src/data/ejercicios.json.
+ */
+export const LEGACY_NAME_TO_CANONICAL_ID: Record<string, string> = {
+  // Calistenia - Tren Superior
+  'Flexión / Inver': 'flexiones-de-brazos',
+  'Dominadas': 'dominadas-pronadas',
+  'Fondos en paralelas': 'fondos-en-paralelas',
+  'Pike Push-ups': 'pike-push-ups',
+  'Remo invertido': 'remo-invertido',
+  'Muscle-ups (si aplica)': 'muscle-up',
+  'Flexiones diamante': 'flexiones-diamante',
+  'Flexiones arqueras': 'flexiones-arqueras',
+  'Face pull con anillas': 'remo-en-anillas',
+  'Fondos en banco': 'fondos-en-banco',
+
+  // Calistenia - Tren Inferior
+  'Sentadilla': 'sentadilla-aerea',
+  'Zancadas': 'zancadas-estaticas',
+  'Sentadilla búlgara': 'sentadilla-bulgara',
+  'Elevación de talones': 'elevacion-talones-de-pie',
+  'Puente de glúteos': 'puente-de-gluteos',
+  'Sentadilla pistola (si aplica)': 'sentadilla-pistola',
+  'Nordic curls (si aplica)': 'curl-nordico',
+  'Saltos al cajón': 'salto-al-cajon',
+  'Sentadilla isométrica (wall sit)': 'sentadilla-isometrica-pared',
+
+  // Calistenia - Core
+  'Plancha': 'plancha-abdominal-frontal',
+  'Elevación de piernas colgado': 'elevacion-piernas-colgado',
+  'Dragon Flag (si aplica)': 'hollow-body-hold',
+  'Abdominales en V (V-ups)': 'crunch-abdominal-suelo',
+  'Plancha lateral': 'plancha-lateral',
+  'Hollow body hold': 'hollow-body-hold',
+  'Giros rusos': 'giros-rusos',
+  'Mountain climbers': 'mountain-climbers',
+  'Toes-to-bar': 'elevacion-piernas-colgado',
+  'L-Sit': 'hollow-body-hold',
+
+  // Calistenia - Mixto
+  'Burpees': 'burpees',
+  'Elevación de rodillas': 'saltos-en-tijera',
+  'Saltos de tijera': 'saltos-en-tijera',
+
+  // Gym - Tren Superior
+  'Press de banca': 'press-banca-plano-barra',
+  'Remo / Inclina': 'remo-con-barra-inclinado',
+  'Press militar': 'press-militar-barra',
+  'Elev / Lat': 'elevaciones-laterales-mancuernas',
+  'Curl / Biceps': 'curl-biceps-barra',
+  'Press francés': 'press-frances-barra-z',
+  'Jalón al pecho (pulldown)': 'jalon-al-pecho-polea',
+  'Aperturas con mancuernas': 'aperturas-mancuernas-plano',
+  'Face pull con polea': 'face-pull-polea',
+  'Encogimientos de hombros': 'remo-con-barra-inclinado',
+  'Extensiones de tríceps en polea': 'extension-triceps-polea-alta',
+
+  // Gym - Tren Inferior
+  'Peso muerto': 'peso-muerto-convencional',
+  'Prensa de piernas': 'prensa-de-piernas',
+  'Extensiones de cuádriceps': 'extension-cuadriceps-maquina',
+  'Curl femoral': 'curl-femoral-tumbado',
+  'Zancadas con mancuernas': 'zancadas-caminando',
+  'Hip thrust': 'hip-thrust-barra',
+  'Abductores en máquina': 'prensa-de-piernas',
+  'Aductores en máquina': 'sentadilla-sumo',
+
+  // Gym - Core
+  'Elevación de piernas en silla romana': 'elevacion-piernas-colgado',
+  'Crunch en polea alta': 'crunch-en-polea-alta',
+  'Giros rusos con disco': 'giros-rusos',
+  'Leñador (woodchopper) en polea': 'press-pallof',
+  'Ab wheel': 'rueda-abdominal',
+  'Hiperextensiones': 'buenos-dias',
+  'Plancha con peso': 'plancha-abdominal-frontal',
+
+  // Gym - Mixto
+  'Clean and Jerk': 'dos-tiempos-clean-and-jerk',
+  'Snatch': 'arrancada-snatch',
+  'Dominadas con lastre': 'dominadas-pronadas',
+  'Thrusters': 'push-press',
+  'Paseo del granjero': 'paseo-del-granjero',
+};
+
+/**
  * Reconstruye los mapas dinámicos de equipamiento y grupos musculares
  */
 function rebuildDynamicMaps() {
@@ -541,18 +630,37 @@ function rebuildDynamicMaps() {
   const all = getAllCatalogExercises();
   all.forEach(ex => {
     const normalizedEq = normalizeEquipmentTags(ex.equipamiento);
+    // Indexar por ID canónico
+    dynamicEquipmentMap.set(ex.id, normalizedEq);
+    // Indexar por nombre visible oficial
     dynamicEquipmentMap.set(ex.nombre, normalizedEq);
     if (ex.nombres_alternativos) {
       ex.nombres_alternativos.forEach(alt => dynamicEquipmentMap.set(alt, normalizedEq));
     }
 
     if (ex.muscle_groups && ex.muscle_groups.length > 0) {
+      // Indexar por ID canónico
+      dynamicMuscleMap.set(ex.id, ex.muscle_groups);
+      // Indexar por nombre visible oficial
       dynamicMuscleMap.set(ex.nombre, ex.muscle_groups);
       if (ex.nombres_alternativos) {
         ex.nombres_alternativos.forEach(alt => dynamicMuscleMap.set(alt, ex.muscle_groups));
       }
     }
   });
+
+  // Mapear nombres legacy a sus datos canónicos
+  for (const [legacyName, canonicalId] of Object.entries(LEGACY_NAME_TO_CANONICAL_ID)) {
+    const canonical = all.find(e => e.id === canonicalId);
+    if (canonical) {
+      if (!dynamicEquipmentMap.has(legacyName)) {
+        dynamicEquipmentMap.set(legacyName, normalizeEquipmentTags(canonical.equipamiento));
+      }
+      if (!dynamicMuscleMap.has(legacyName) && canonical.muscle_groups) {
+        dynamicMuscleMap.set(legacyName, canonical.muscle_groups);
+      }
+    }
+  }
 }
 
 /**
@@ -599,22 +707,84 @@ export const getAllCatalogExercises = (): CatalogExercise[] => {
 };
 
 /**
- * Búsqueda insensible a mayúsculas/minúsculas por ID, nombre oficial o nombres alternativos
+ * Búsqueda canónica por ExerciseId (identidad primaria oficial)
+ */
+export const findExerciseById = (id: ExerciseId): CatalogExercise | undefined => {
+  if (!id) return undefined;
+  const normalized = id.toLowerCase().trim();
+  const all = getAllCatalogExercises();
+  return all.find(e => e.id.toLowerCase().trim() === normalized);
+};
+
+/**
+ * Búsqueda insensible a mayúsculas/minúsculas por ID, nombre oficial, nombres alternativos o alias legacy
  */
 export const findExerciseByName = (name: string): CatalogExercise | undefined => {
   if (!name) return undefined;
   const normalized = name.toLowerCase().trim();
   const all = getAllCatalogExercises();
   
-  return all.find(e => 
-    e.nombre.toLowerCase().trim() === normalized ||
+  // 1. Coincidencia directa por id, nombre, nombres alternativos o name
+  let found = all.find(e => 
     e.id.toLowerCase().trim() === normalized ||
+    e.nombre.toLowerCase().trim() === normalized ||
     (e.nombres_alternativos && e.nombres_alternativos.some(alt => alt.toLowerCase().trim() === normalized)) ||
     (e.name && e.name.toLowerCase().trim() === normalized)
   );
+
+  // 2. Coincidencia por alias histórico legacy
+  if (!found && LEGACY_NAME_TO_CANONICAL_ID[name]) {
+    const targetId = LEGACY_NAME_TO_CANONICAL_ID[name];
+    found = all.find(e => e.id === targetId);
+  }
+
+  return found;
 };
 
 export const findExerciseDetails = findExerciseByName;
+
+/**
+ * Resuelve el identificador canónico ExerciseId a partir de un ID o nombre visible.
+ * Si no se encuentra en el catálogo, genera un ID normalizado o devuelve el valor original.
+ */
+export const resolveExerciseId = (idOrName: string): ExerciseId => {
+  if (!idOrName) return '';
+  if (LEGACY_NAME_TO_CANONICAL_ID[idOrName]) {
+    return LEGACY_NAME_TO_CANONICAL_ID[idOrName];
+  }
+  const ex = findExerciseById(idOrName) || findExerciseByName(idOrName);
+  if (ex) return ex.id;
+  return idOrName
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+/**
+ * Resuelve el nombre visible en español para presentación en UI a partir de un ExerciseId o nombre.
+ */
+export const resolveExerciseName = (idOrName: string): string => {
+  if (!idOrName) return '';
+  const ex = findExerciseById(idOrName) || findExerciseByName(idOrName);
+  if (ex) return ex.nombre;
+  return idOrName;
+};
+
+/**
+ * Resuelve la referencia dual canónica { id, nombre }
+ */
+export const resolveExerciseRef = (idOrName: string): ExerciseRef => {
+  const ex = findExerciseById(idOrName) || findExerciseByName(idOrName);
+  if (ex) {
+    return { id: ex.id, nombre: ex.nombre };
+  }
+  return {
+    id: resolveExerciseId(idOrName),
+    nombre: idOrName
+  };
+};
 
 /**
  * Obtiene el equipamiento amigable normalizado para un ejercicio

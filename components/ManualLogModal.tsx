@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { ExerciseLog, UserRoutine, ExerciseName, Cluster, TrainingType } from '../types';
 import { PREDEFINED_EXERCISES } from '../constants/exercises';
-import { getAllCatalogExercises } from '../services/exerciseCatalog';
+import { getAllCatalogExercises, resolveExerciseId } from '../services/exerciseCatalog';
 import { isTimeBased as isTimeBasedUtil, isBodyweight as isBodyweightUtil } from '../utils/exerciseUtils';
 import { generateUUID } from '../utils/uuid';
 
@@ -176,6 +176,7 @@ export const ManualLogModal: React.FC<ManualLogModalProps> = ({ isOpen, onClose,
             return {
                 id: generateUUID(),
                 timestamp: logTimestamp,
+                exerciseId: resolveExerciseId(logData.exerciseName),
                 exerciseName: logData.exerciseName,
                 clusters: logData.clusters,
             };
