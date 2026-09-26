@@ -128,9 +128,15 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             });
         }
 
+        const rawExerciseName = log?.exerciseName || 'Ejercicio';
+        const exerciseId = log?.exerciseId 
+            ? String(log.exerciseId) 
+            : (log?.exerciseName ? resolveExerciseId(String(log.exerciseName)) : undefined);
+
         return {
             id: log?.id || generateUUID(),
-            exerciseName: log?.exerciseName || 'Ejercicio',
+            exerciseId,
+            exerciseName: rawExerciseName,
             timestamp: log?.timestamp || new Date().toISOString(),
             clusters,
             heartRate: log?.heartRate ? Number(log.heartRate) : undefined,
@@ -176,10 +182,16 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
                         try {
                             const parsed = JSON.parse(routineStr);
                             if (parsed && typeof parsed === 'object' && parsed.type) {
+                                const parsedExercises = Array.isArray(parsed.exercises) ? parsed.exercises : [];
                                 setUserRoutine({
+                                    id: parsed.id,
+                                    name: parsed.name,
                                     type: parsed.type || 'Calistenia',
                                     focus: parsed.focus || 'Mixto',
-                                    exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
+                                    exercises: parsedExercises,
+                                    exerciseIds: Array.isArray(parsed.exerciseIds)
+                                        ? parsed.exerciseIds
+                                        : parsedExercises.map((ex: any) => resolveExerciseId(String(ex))),
                                     equipment: Array.isArray(parsed.equipment) ? parsed.equipment : activeProfile.availableEquipment
                                 });
                             } else {
@@ -234,12 +246,16 @@ const sanitizeLogs = (rawLogs: any[]): ExerciseLog[] => {
             if (routineStr) {
                 const parsed = JSON.parse(routineStr);
                 if (parsed && typeof parsed === 'object') {
+                    const parsedExercises = Array.isArray(parsed.exercises) ? parsed.exercises : [];
                     loadedRoutine = {
                         id: parsed.id,
                         name: parsed.name,
                         type: parsed.type || 'Calistenia',
                         focus: parsed.focus || 'Mixto',
-                        exercises: Array.isArray(parsed.exercises) ? parsed.exercises : [],
+                        exercises: parsedExercises,
+                        exerciseIds: Array.isArray(parsed.exerciseIds)
+                            ? parsed.exerciseIds
+                            : parsedExercises.map((ex: any) => resolveExerciseId(String(ex))),
                         equipment: Array.isArray(parsed.equipment) ? parsed.equipment : profile.availableEquipment
                     };
                 }
