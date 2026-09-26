@@ -145,3 +145,6 @@ export interface SessionAnalysisMetrics {
     loadDensityDiffPercent: number | null;
     hasPreviousSession: boolean;
 }
+
+// Exportación del contrato de datos del Motor Determinista (Etapa 8A)
+export * from './types/deterministicEngine';
