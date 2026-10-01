@@ -16,6 +16,7 @@
  */
 
 import type { ExerciseId, ExerciseName } from '../types';
+export type { ExerciseId, ExerciseName };
 
 // ============================================================================
 // 1. NIVELES DE DATOS (DATA ARCHITECTURE LAYERS)
@@ -303,3 +304,90 @@ export interface DeterministicEngineInputContract {
   exerciseExecutions: ObservedExerciseExecution[];
   historyReferences: Record<ExerciseId, HistoryReferenceSet>;
 }
+
+// ============================================================================
+// 11. ETAPA 8B — TIPOS Y CONTRATOS DE INTERPRETACIÓN DETERMINISTA
+// ============================================================================
+
+/**
+ * Nivel de completitud de los datos fácticos disponibles para formular una interpretación.
+ */
+export type DataCompletenessStatus =
+  | 'DATA_SUFFICIENT'   // Carga, reps, RIR y descansos disponibles con identidad canónica confirmada
+  | 'DATA_PARTIAL'      // Faltan variables secundarias (ej. RIR ausente o descansos no medidos)
+  | 'DATA_INSUFFICIENT';// Datos mínimos ausentes para realizar cualquier comparación metodológica
+
+/**
+ * Estado descriptivo del rendimiento externo observado respecto a la referencia.
+ */
+export type PerformanceStatus =
+  | 'PERFORMANCE_IMPROVED'  // Mayor carga a igualdad de reps/RIR, o más reps a igualdad de carga/RIR
+  | 'PERFORMANCE_STABLE'    // Carga, reps y estímulo externo equivalente
+  | 'PERFORMANCE_DECLINED'  // Menos carga o reps a igualdad o mayor esfuerzo
+  | 'PERFORMANCE_MIXED'     // Variables en direcciones opuestas (ej. más carga pero muchas menos reps)
+  | 'PERFORMANCE_UNEVALUATED'; // No comparable o sin referencia
+
+/**
+ * Estado descriptivo del esfuerzo interno (RIR / RPE / fatiga mecánica).
+ */
+export type EffortStatus =
+  | 'EFFORT_LOWER'          // Mayor RIR con el mismo trabajo externo (menor esfuerzo)
+  | 'EFFORT_EQUIVALENT'     // RIR o RPE idéntico dentro de márgenes de tolerancia
+  | 'EFFORT_INCREASED'      // Menor RIR con el mismo trabajo externo (mayor coste interno)
+  | 'EFFORT_MAXIMAL'        // RIR 0 / fallo técnico alcanzado
+  | 'EFFORT_UNKNOWN';       // RIR o RPE no reportados
+
+/**
+ * Calificación de confianza sobre la validez de la interpretación emitida.
+ * Diferenciada de la confiabilidad de los datos fácticos individuales.
+ */
+export type InterpretationConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+/**
+ * Etiquetas normalizadas de interpretación del Motor Determinista (Etapa 8B).
+ */
+export type InterpretationTag =
+  | 'PERFORMANCE_IMPROVED'
+  | 'PERFORMANCE_STABLE'
+  | 'PERFORMANCE_DECLINED'
+  | 'PERFORMANCE_MIXED'
+  | 'PERFORMANCE_STABLE_WITH_HIGHER_EFFORT'
+  | 'PERFORMANCE_DECLINE_WITH_REDUCED_REST'
+  | 'ISOLATED_PERFORMANCE_ANOMALY'
+  | 'PLATEAU_CANDIDATE'
+  | 'PROGRESSION_OBSERVED'
+  | 'POSSIBLE_LOCAL_FATIGUE'
+  | 'POSSIBLE_SYSTEMIC_FATIGUE'
+  | 'POSSIBLE_ACCUMULATED_FATIGUE'
+  | 'PAIN_CONTEXT_PRESENT'
+  | 'NO_DIRECT_PRESCRIPTION_REFERENCE'
+  | 'CONFLICTING_EVIDENCE'
+  | 'REDUCED_REST_PRESENT'
+  | 'POSSIBLE_CONTEXT_EFFECT'
+  | 'TECHNICAL_EXECUTION_STABLE'
+  | 'NON_COMPARABLE';
+
+/**
+ * Resultado estructurado y totalmente trazable de una interpretación determinista.
+ */
+export interface InterpretationResult {
+  category: 'PERFORMANCE' | 'EFFORT' | 'CONTEXT' | 'FATIGUE' | 'LONGITUDINAL' | 'INTEGRATED';
+  primaryStatus: InterpretationTag;
+  performanceStatus: PerformanceStatus;
+  effortStatus: EffortStatus;
+  secondaryTags: InterpretationTag[];
+  
+  // Trazabilidad estricta
+  evidence: string[];                 // Qué datos fácticos soportan la conclusión
+  references: string[];               // Qué puntos de referencia se usaron (baseline, previous, etc.)
+  contributingFactors: string[];      // Variables que explican o atenúan la observación
+  contradictoryFactors: string[];     // Variables que apuntan en dirección opuesta
+  missingData: string[];              // Variables que habrían aportado mayor certeza
+  
+  confidence: InterpretationConfidence;// Confianza metodológica de la interpretación
+  dataCompleteness: DataCompletenessStatus;
+  
+  // Delimitación explícita de frontera con 8C:
+  decision: 'NOT_IMPLEMENTED_IN_8B';
+}
+
